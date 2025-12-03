@@ -9,7 +9,8 @@ import {
   RefreshCw,
   FileText,
   Copy,
-  Check
+  Check,
+  FileDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -119,6 +120,31 @@ Generer en strukturert brief i JSON-format med følgende felter:
     toast.success('Briefen er godkjent!');
   };
 
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportWord = async () => {
+    setExporting(true);
+    try {
+      const response = await base44.functions.invoke('exportBriefToWord', { briefId: brief.id });
+      const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${brief.title.replace(/[^a-zA-Z0-9æøåÆØÅ\s-]/g, '').replace(/\s+/g, '_')}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      toast.success('Word-dokument lastet ned');
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast.error('Kunne ikke eksportere til Word');
+    }
+    setExporting(false);
+  };
+
   const handleCopyAll = () => {
     if (!finalBrief) return;
 
@@ -205,6 +231,10 @@ Generert: ${new Date(finalBrief.generatedAt).toLocaleDateString('nb-NO')}
             <CardDescription>Tema: {brief.themeName}</CardDescription>
           </div>
           <div className="flex space-x-2">
+            <Button variant="outline" size="sm" onClick={handleExportWord} disabled={exporting}>
+              {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
+              Last ned Word
+            </Button>
             <Button variant="outline" size="sm" onClick={handleCopyAll}>
               {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
               {copied ? 'Kopiert' : 'Kopier alt'}
