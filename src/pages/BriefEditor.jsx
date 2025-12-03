@@ -3,20 +3,28 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   ArrowLeft,
   Loader2,
-  FileText
+  FileText,
+  Pencil,
+  Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import BriefStepper from '@/components/brief/BriefStepper';
+import SourceMaterialUpload from '@/components/brief/SourceMaterialUpload';
+import RammerForm from '@/components/brief/RammerForm';
 
 function BriefEditorContent() {
   const urlParams = new URLSearchParams(window.location.search);
   const briefId = urlParams.get('id');
+  const queryClient = useQueryClient();
+  const [editingTitle, setEditingTitle] = React.useState(false);
+  const [titleInput, setTitleInput] = React.useState('');
 
-  const { data: brief, isLoading, error } = useQuery({
+  const { data: brief, isLoading, error, refetch: refetchBrief } = useQuery({
     queryKey: ['brief', briefId],
     queryFn: async () => {
       if (!briefId) return null;
@@ -25,6 +33,33 @@ function BriefEditorContent() {
     },
     enabled: !!briefId
   });
+
+  const { data: sources = [], refetch: refetchSources } = useQuery({
+    queryKey: ['briefSources', briefId],
+    queryFn: async () => {
+      if (!briefId) return [];
+      return await base44.entities.BriefSourceMaterial.filter({ briefId });
+    },
+    enabled: !!briefId
+  });
+
+  const handleUpdateStep = async (newStep) => {
+    await base44.entities.Brief.update(briefId, { currentStep: newStep });
+    refetchBrief();
+  };
+
+  const handleSaveTitle = async () => {
+    if (titleInput.trim() && titleInput !== brief.title) {
+      await base44.entities.Brief.update(briefId, { title: titleInput.trim() });
+      refetchBrief();
+    }
+    setEditingTitle(false);
+  };
+
+  const startEditingTitle = () => {
+    setTitleInput(brief.title);
+    setEditingTitle(true);
+  };
 
   if (!briefId) {
     return (
@@ -60,9 +95,10 @@ function BriefEditorContent() {
     );
   }
 
-  // Placeholder - will be expanded in Phase 4
+  const currentStep = brief.currentStep || 'source_material';
+
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link to={createPageUrl('BriefList')}>
@@ -70,29 +106,83 @@ function BriefEditorContent() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{brief.title}</h1>
+        <div className="flex-1">
+          {editingTitle ? (
+            <div className="flex items-center space-x-2">
+              <Input
+                value={titleInput}
+                onChange={(e) => setTitleInput(e.target.value)}
+                className="text-xl font-bold"
+                autoFocus
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveTitle()}
+              />
+              <Button size="icon" variant="ghost" onClick={handleSaveTitle}>
+                <Check className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <h1 className="text-2xl font-bold text-gray-900">{brief.title}</h1>
+              <Button size="icon" variant="ghost" onClick={startEditingTitle}>
+                <Pencil className="h-4 w-4 text-gray-400" />
+              </Button>
+            </div>
+          )}
           <p className="text-gray-500">{brief.themeName} • {brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}</p>
         </div>
       </div>
 
-      {/* Placeholder content */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Brief-editor</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-500">
-            Brief-editoren vil bli implementert i fase 4. Her vil du kunne:
-          </p>
-          <ul className="list-disc list-inside mt-4 space-y-2 text-gray-600">
-            <li>Laste opp kildemateriale (dokumenter og URL-er)</li>
-            <li>Fylle ut rammer (målgruppe, mål, kanaler, etc.)</li>
-            <li>Ha en AI-drevet dialog for å utdype briefen</li>
-            <li>Generere den endelige briefen</li>
-          </ul>
-        </CardContent>
-      </Card>
+      {/* Stepper */}
+      <BriefStepper currentStep={currentStep} />
+
+      {/* Step Content */}
+      {currentStep === 'source_material' && (
+        <SourceMaterialUpload
+          briefId={briefId}
+          sources={sources}
+          onSourcesChange={refetchSources}
+          onContinue={() => handleUpdateStep('rammer')}
+        />
+      )}
+
+      {currentStep === 'rammer' && (
+        <RammerForm
+          brief={brief}
+          onBack={() => handleUpdateStep('source_material')}
+          onContinue={() => {
+            refetchBrief();
+          }}
+        />
+      )}
+
+      {currentStep === 'dialog' && (
+        <div className="text-center py-16 bg-white rounded-lg border">
+          <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+          <h2 className="text-xl font-medium text-gray-900 mb-2">AI-dialog</h2>
+          <p className="text-gray-500">AI-dialogen kommer i neste fase.</p>
+          <div className="flex justify-center space-x-3 mt-6">
+            <Button variant="outline" onClick={() => handleUpdateStep('rammer')}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Tilbake til rammer
+            </Button>
+            <Button onClick={() => handleUpdateStep('final')} className="bg-blue-600 hover:bg-blue-700">
+              Hopp til ferdig brief
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {currentStep === 'final' && (
+        <div className="text-center py-16 bg-white rounded-lg border">
+          <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+          <h2 className="text-xl font-medium text-gray-900 mb-2">Ferdig brief</h2>
+          <p className="text-gray-500">Generering av ferdig brief kommer i neste fase.</p>
+          <Button variant="outline" onClick={() => handleUpdateStep('dialog')} className="mt-6">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tilbake til AI-dialog
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
