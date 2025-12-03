@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import BriefStepper from '@/components/brief/BriefStepper';
 import SourceMaterialUpload from '@/components/brief/SourceMaterialUpload';
 import RammerForm from '@/components/brief/RammerForm';
+import AIDialog from '@/components/brief/AIDialog';
 
 function BriefEditorContent() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -156,20 +157,12 @@ function BriefEditorContent() {
       )}
 
       {currentStep === 'dialog' && (
-        <div className="text-center py-16 bg-white rounded-lg border">
-          <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-          <h2 className="text-xl font-medium text-gray-900 mb-2">AI-dialog</h2>
-          <p className="text-gray-500">AI-dialogen kommer i neste fase.</p>
-          <div className="flex justify-center space-x-3 mt-6">
-            <Button variant="outline" onClick={() => handleUpdateStep('rammer')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Tilbake til rammer
-            </Button>
-            <Button onClick={() => handleUpdateStep('final')} className="bg-blue-600 hover:bg-blue-700">
-              Hopp til ferdig brief
-            </Button>
-          </div>
-        </div>
+        <AIDialog
+          brief={brief}
+          sources={sources}
+          onBack={() => handleUpdateStep('rammer')}
+          onContinue={() => handleUpdateStep('final')}
+        />
       )}
 
       {currentStep === 'final' && (
