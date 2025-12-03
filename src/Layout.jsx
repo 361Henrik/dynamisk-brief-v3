@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
 
-function NavigationContent({ currentPageName }) {
+function NavigationContent({ currentPageName, children }) {
   const { user, isAdmin, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
