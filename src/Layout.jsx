@@ -15,7 +15,8 @@ import {
   X,
   ChevronDown,
   Sun,
-  Moon
+  Moon,
+  FileCode
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -56,6 +57,7 @@ function NavigationContent({ currentPageName, children }) {
     { name: 'Brukere', page: 'AdminUsers', icon: Users },
     { name: 'Temaer', page: 'AdminThemes', icon: Tags },
     { name: 'Kunnskapsbase', page: 'AdminKnowledgeBase', icon: BookOpen },
+    { name: 'Systeminstruksjon', page: 'AdminSystemInstructions', icon: FileCode },
   ];
 
   const isCurrentPage = (pageName) => currentPageName === pageName;
