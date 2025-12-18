@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import CreateThemeModal from '@/components/theme/CreateThemeModal';
 
 function NewBriefContent() {
   const navigate = useNavigate();
@@ -64,13 +65,16 @@ function NewBriefContent() {
           <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
         </div>
       ) : themes.length === 0 ? (
-        <Card>
-          <CardContent className="py-16 text-center">
-            <Tags className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-medium text-gray-900 mb-1">Ingen temaer tilgjengelig</h3>
-            <p className="text-gray-500">Kontakt en administrator for å legge til temaer.</p>
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Tags className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-lg font-medium text-gray-900 mb-1">Ingen temaer ennå</h3>
+              <p className="text-gray-500 mb-4">Opprett ditt første tema for å komme i gang.</p>
+            </CardContent>
+          </Card>
+          <CreateThemeModal />
+        </div>
       ) : (
         <div className="grid gap-4">
           {themes.map((theme) => (
@@ -107,6 +111,7 @@ function NewBriefContent() {
               </CardContent>
             </Card>
           ))}
+          <CreateThemeModal />
         </div>
       )}
     </div>
