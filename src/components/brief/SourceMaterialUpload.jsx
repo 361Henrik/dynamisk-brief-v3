@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -9,12 +9,14 @@ import {
   X, 
   CheckCircle2,
   AlertCircle,
-  Plus
+  Plus,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 const MAX_URLS = 5;
 
@@ -26,6 +28,20 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
 
   const urlCount = sources.filter(s => s.sourceType === 'url').length;
   const hasAtLeastOneSource = sources.length > 0;
+  const hasPendingSources = sources.some(s => s.extractionStatus === 'pending');
+  const allSourcesReady = hasAtLeastOneSource && sources.every(s => s.extractionStatus === 'success');
+
+  // Auto-refresh when there are pending sources
+  useEffect(() => {
+    if (!hasPendingSources) return;
+    
+    const interval = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['briefSources', briefId] });
+      if (onSourcesChange) onSourcesChange();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [hasPendingSources, briefId, queryClient, onSourcesChange]);
 
   const createSourceMutation = useMutation({
     mutationFn: async (sourceData) => {
@@ -70,6 +86,7 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
         });
       } catch (error) {
         console.error('File upload failed:', error);
+        toast.error(`Klarte ikke å laste opp: ${file.name}`);
       }
     }
 
@@ -90,22 +107,49 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
       setUrlInput('');
     } catch (error) {
       console.error('Failed to add URL:', error);
+      toast.error('Klarte ikke å legge til URL');
     }
     setAddingUrl(false);
+  };
+
+  const retryExtraction = async (sourceId) => {
+    try {
+      await base44.entities.BriefSourceMaterial.update(sourceId, { extractionStatus: 'pending', extractionError: null });
+      queryClient.invalidateQueries({ queryKey: ['briefSources', briefId] });
+      if (onSourcesChange) onSourcesChange();
+      toast.success('Prøver på nytt...');
+    } catch (error) {
+      toast.error('Klarte ikke å starte ny behandling');
+    }
   };
 
   const handleDeleteSource = (sourceId) => {
     deleteSourceMutation.mutate(sourceId);
   };
 
-  const getStatusBadge = (status) => {
-    switch (status) {
+  const getStatusBadge = (source) => {
+    switch (source.extractionStatus) {
       case 'success':
         return <Badge className="bg-green-100 text-green-700"><CheckCircle2 className="h-3 w-3 mr-1" />Klar</Badge>;
       case 'failed':
-        return <Badge className="bg-red-100 text-red-700"><AlertCircle className="h-3 w-3 mr-1" />Feilet</Badge>;
+        return (
+          <div className="flex items-center gap-1">
+            <Badge className="bg-red-100 text-red-700" title={source.extractionError || 'Ukjent feil'}>
+              <AlertCircle className="h-3 w-3 mr-1" />Feilet
+            </Badge>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => retryExtraction(source.id)}
+              title="Prøv igjen"
+            >
+              <RefreshCw className="h-3 w-3 text-gray-500" />
+            </Button>
+          </div>
+        );
       default:
-        return <Badge className="bg-yellow-100 text-yellow-700"><Loader2 className="h-3 w-3 mr-1 animate-spin" />Behandles</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-700"><Loader2 className="h-3 w-3 mr-1 animate-spin" />Behandles...</Badge>;
     }
   };
 
@@ -199,7 +243,7 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
                       </span>
                     </div>
                     <div className="flex items-center space-x-2 flex-shrink-0">
-                      {getStatusBadge(source.extractionStatus)}
+                      {getStatusBadge(source)}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -221,16 +265,28 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
       <div className="flex justify-end">
         <Button
           onClick={onContinue}
-          disabled={!hasAtLeastOneSource}
+          disabled={!allSourcesReady}
           className="bg-blue-600 hover:bg-blue-700"
         >
-          Fortsett til rammer
+          {hasPendingSources ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Venter på behandling...
+            </>
+          ) : (
+            'Fortsett til rammer'
+          )}
         </Button>
       </div>
 
       {!hasAtLeastOneSource && (
         <p className="text-center text-sm text-gray-500">
           Legg til minst én kilde for å fortsette
+        </p>
+      )}
+      {hasAtLeastOneSource && !allSourcesReady && !hasPendingSources && (
+        <p className="text-center text-sm text-orange-600">
+          Noen kilder feilet under behandling. Prøv igjen eller fjern dem.
         </p>
       )}
     </div>
