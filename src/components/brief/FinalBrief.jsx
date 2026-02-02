@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { 
   Loader2, 
   ArrowLeft,
@@ -10,7 +10,8 @@ import {
   FileText,
   Copy,
   Check,
-  FileDown
+  FileDown,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,9 +23,22 @@ export default function FinalBrief({ brief, sources = [], dialogEntries = [], on
   const queryClient = useQueryClient();
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [templateError, setTemplateError] = useState(null);
 
   const finalBrief = brief.finalBrief;
   const confirmedPoints = brief.confirmedPoints || [];
+
+  // Fetch active brief template
+  const { data: briefTemplate } = useQuery({
+    queryKey: ['briefTemplate'],
+    queryFn: async () => {
+      const templates = await base44.entities.KnowledgeBaseDoc.filter({ 
+        docType: 'brief_template', 
+        isActive: true 
+      });
+      return templates[0] || null;
+    }
+  });
 
   useEffect(() => {
     if (!finalBrief && !isGenerating) {
@@ -43,6 +57,20 @@ export default function FinalBrief({ brief, sources = [], dialogEntries = [], on
 
   const generateBrief = async () => {
     setIsGenerating(true);
+    setTemplateError(null);
+
+    // Check for active brief template
+    const templateText = briefTemplate?.extractedText;
+    if (!templateText && briefTemplate?.extractionStatus === 'pending') {
+      setTemplateError('Briefmalen behandles fortsatt. Vennligst vent og prøv igjen.');
+      setIsGenerating(false);
+      return;
+    }
+    if (!templateText && briefTemplate?.extractionStatus === 'failed') {
+      setTemplateError('Tekstuttrekk fra briefmalen feilet. Kontakt administrator.');
+      setIsGenerating(false);
+      return;
+    }
 
     const sourceContext = sources.map(s => 
       s.extractedText || `[${s.sourceType}: ${s.fileName || s.fileUrl}]`
@@ -56,7 +84,22 @@ export default function FinalBrief({ brief, sources = [], dialogEntries = [], on
       `- ${p.topic}: ${p.summary}`
     ).join('\n');
 
-    const prompt = `Du er en kommunikasjonsekspert for GS1 Norway. Generer en komplett kommunikasjonsbrief basert på følgende informasjon.
+    // Build prompt with template as highest priority
+    const templateSection = templateText 
+      ? `BRIEFMAL (HØYESTE PRIORITET - FØLG DENNE STRUKTUREN):
+${templateText}
+
+---
+
+` 
+      : '';
+
+    const prompt = `Du er en kommunikasjonsekspert for GS1 Norway. Generer en komplett kommunikasjonsbrief.
+
+${templateSection}VIKTIG: 
+- Følg strukturen og overskriftene fra briefmalen nøyaktig.
+- Hvis informasjon mangler for å fylle ut en seksjon i malen, skriv "[Mangler informasjon om X]" i den seksjonen.
+- Bruk bekreftede punkter fra dialogen som grunnlag for innholdet.
 
 TEMA: ${brief.themeName}
 
@@ -173,6 +216,30 @@ Generert: ${new Date(finalBrief.generatedAt).toLocaleDateString('nb-NO')}
     toast.success('Kopiert til utklippstavlen');
   };
 
+  if (templateError) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="py-16 text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-medium text-gray-900 mb-2">Kan ikke generere brief</h2>
+            <p className="text-gray-500 mb-4">{templateError}</p>
+            <div className="flex justify-center space-x-3">
+              <Button variant="outline" onClick={onBack}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Tilbake til dialog
+              </Button>
+              <Button onClick={() => { setTemplateError(null); generateBrief(); }}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Prøv igjen
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (isGenerating || !finalBrief) {
     return (
       <div className="space-y-6">
@@ -183,6 +250,11 @@ Generert: ${new Date(finalBrief.generatedAt).toLocaleDateString('nb-NO')}
             <p className="text-gray-500">
               AI-en analyserer all informasjon og lager en komplett brief.
             </p>
+            {!briefTemplate && (
+              <p className="text-xs text-orange-500 mt-2">
+                Merk: Ingen briefmal er lastet opp. Genererer med standardstruktur.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
