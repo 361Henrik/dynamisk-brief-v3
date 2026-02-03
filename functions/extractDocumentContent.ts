@@ -6,12 +6,62 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
  * V1 Strategy:
  * - PDF: Full text extraction using ExtractDataFromUploadedFile
  * - URL: Content extraction using InvokeLLM with internet context
+ * - Text: Already has extractedText, just generate summary
  * - DOCX/other formats: Immediately marked as failed (not supported in V1)
  * 
  * Guarantees:
  * - Every document will end in either 'success' or 'failed' state
  * - No document can remain stuck in 'pending'
  */
+
+// Helper to extract domain from URL
+function extractDomain(url) {
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname.replace('www.', '');
+  } catch {
+    return null;
+  }
+}
+
+// Helper to generate summary from text
+async function generateSummary(base44, text) {
+  if (!text || text.length < 100) return null;
+  
+  try {
+    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: `Analyser følgende tekst og gi en strukturert oppsummering på norsk.
+
+TEKST:
+${text.substring(0, 8000)}
+
+Returner en JSON med:
+- bullets: 2-4 korte setninger som oppsummerer hovedinnholdet
+- keyPoints: 5-8 nøkkelord eller korte fraser som fanger essensen`,
+      response_json_schema: {
+        type: 'object',
+        properties: {
+          bullets: {
+            type: 'array',
+            items: { type: 'string' },
+            description: '2-4 bullet points summarizing the content'
+          },
+          keyPoints: {
+            type: 'array',
+            items: { type: 'string' },
+            description: '5-8 key topics or phrases'
+          }
+        },
+        required: ['bullets', 'keyPoints']
+      }
+    });
+    
+    return result;
+  } catch (err) {
+    console.error('Failed to generate summary:', err);
+    return null;
+  }
+}
 
 Deno.serve(async (req) => {
   let base44;
@@ -35,17 +85,15 @@ Deno.serve(async (req) => {
 
     // Get the document entity
     const doc = await base44.asServiceRole.entities[entityName].get(entityId);
-    console.log('Fetched doc:', { id: doc?.id, status: doc?.extractionStatus, fileUrl: doc?.fileUrl?.substring(0, 80) });
+    console.log('Fetched doc:', { id: doc?.id, status: doc?.extractionStatus, sourceType: doc?.sourceType });
 
     if (!doc) {
       return Response.json({ error: 'Document not found' }, { status: 404 });
     }
 
     // Only process if status is pending - this is a safety check
-    // The automation should already filter for pending, but we double-check here
     if (doc.extractionStatus !== 'pending') {
       console.log('Skipping - extraction not pending, current status:', doc.extractionStatus);
-      // Return success without changing anything - document already processed
       return Response.json({ 
         message: 'Extraction not pending, skipping',
         entityName,
@@ -57,12 +105,24 @@ Deno.serve(async (req) => {
     let extractedText = null;
     let extractionStatus = 'failed';
     let extractionError = null;
+    let urlMetadata = null;
+    let extractionSummary = null;
 
     try {
       const fileUrl = doc.fileUrl;
       const sourceType = doc.sourceType; // Only for BriefSourceMaterial
       
-      if (!fileUrl) {
+      // Handle "text" sourceType - already has extractedText, just needs summary
+      if (sourceType === 'text') {
+        extractedText = doc.extractedText;
+        if (extractedText) {
+          extractionStatus = 'success';
+          console.log('Text source already has content, generating summary...');
+          extractionSummary = await generateSummary(base44, extractedText);
+        } else {
+          extractionError = 'Ingen tekst funnet';
+        }
+      } else if (!fileUrl) {
         extractionError = 'Manglende fil-URL';
         console.log('No file URL provided');
       } else if (sourceType === 'url') {
@@ -72,7 +132,7 @@ Deno.serve(async (req) => {
         const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
           prompt: `Hent og oppsummer innholdet fra denne URL-en: ${fileUrl}
           
-Returner alt relevant tekstinnhold fra siden.`,
+Returner alt relevant tekstinnhold fra siden, samt sidetittelen hvis tilgjengelig.`,
           add_context_from_internet: true,
           response_json_schema: {
             type: 'object',
@@ -80,6 +140,10 @@ Returner alt relevant tekstinnhold fra siden.`,
               full_text: {
                 type: 'string',
                 description: 'The complete extracted text content from the URL'
+              },
+              page_title: {
+                type: 'string',
+                description: 'The title of the web page'
               }
             },
             required: ['full_text']
@@ -89,6 +153,17 @@ Returner alt relevant tekstinnhold fra siden.`,
         if (result?.full_text) {
           extractedText = result.full_text;
           extractionStatus = 'success';
+          
+          // Capture URL metadata
+          urlMetadata = {
+            domain: extractDomain(fileUrl),
+            pageTitle: result.page_title || null,
+            fetchedAt: new Date().toISOString()
+          };
+          
+          // Generate summary
+          extractionSummary = await generateSummary(base44, extractedText);
+          
           console.log('URL extraction successful, text length:', extractedText.length);
         } else {
           extractionError = 'Kunne ikke hente innhold fra URL-en';
@@ -124,6 +199,10 @@ Returner alt relevant tekstinnhold fra siden.`,
           if (result?.status === 'success' && result?.output?.full_text) {
             extractedText = result.output.full_text;
             extractionStatus = 'success';
+            
+            // Generate summary
+            extractionSummary = await generateSummary(base44, extractedText);
+            
             console.log('PDF extraction successful, text length:', extractedText.length);
           } else {
             extractionError = result?.details || 'Kunne ikke trekke ut tekst fra PDF-filen';
@@ -147,13 +226,22 @@ Returner alt relevant tekstinnhold fra siden.`,
       extractionStatus = 'failed';
     }
 
-    // ALWAYS update the entity - this is critical to prevent stuck states
-    console.log('Updating entity with status:', extractionStatus);
-    await base44.asServiceRole.entities[entityName].update(entityId, {
+    // Build update payload
+    const updatePayload = {
       extractedText,
       extractionStatus,
       extractionError,
-    });
+    };
+    
+    // Only add these fields for BriefSourceMaterial
+    if (entityName === 'BriefSourceMaterial') {
+      if (urlMetadata) updatePayload.urlMetadata = urlMetadata;
+      if (extractionSummary) updatePayload.extractionSummary = extractionSummary;
+    }
+
+    // ALWAYS update the entity - this is critical to prevent stuck states
+    console.log('Updating entity with status:', extractionStatus);
+    await base44.asServiceRole.entities[entityName].update(entityId, updatePayload);
     console.log('Entity updated successfully');
 
     return Response.json({ 
@@ -162,7 +250,8 @@ Returner alt relevant tekstinnhold fra siden.`,
       entityId,
       extractionStatus, 
       extractedTextLength: extractedText?.length || 0,
-      extractionError 
+      extractionError,
+      hasSummary: !!extractionSummary
     });
 
   } catch (error) {
