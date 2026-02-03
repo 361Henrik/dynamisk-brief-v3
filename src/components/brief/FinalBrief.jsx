@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { 
   Loader2, 
   ArrowLeft,
   CheckCircle2,
-  RefreshCw,
   FileText,
   Copy,
   Check,
   FileDown,
-  AlertCircle,
+  AlertTriangle,
   Calendar,
   Users,
   Target,
@@ -21,8 +20,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import ExpandableText from './ExpandableText';
-import FeedbackPanel from './FeedbackPanel';
 
 const SECTION_CONFIG = [
   { key: 'prosjektinformasjon', label: 'Prosjektinformasjon', number: 1 },
@@ -36,19 +33,29 @@ const SECTION_CONFIG = [
   { key: 'kildemateriale', label: 'Kildemateriale', number: 9 }
 ];
 
-export default function FinalBrief({ brief, sources = [], dialogEntries = [], onBack }) {
+function formatDate(isoString) {
+  if (!isoString) return '';
+  return new Date(isoString).toLocaleDateString('nb-NO', { 
+    day: 'numeric', 
+    month: 'long',
+    year: 'numeric'
+  });
+}
+
+export default function FinalBrief({ brief, onBack }) {
   const queryClient = useQueryClient();
   const { isAdmin } = useAuth();
-  const [isUpdating, setIsUpdating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   // CRITICAL: Step 5 reads ONLY from approved Step 4 snapshot
   const proposedBrief = brief?.proposedBrief;
   const isStep4Approved = proposedBrief?.status === 'approved' && !proposedBrief?.editedAfterApproval;
-  const approvedSections = proposedBrief?.approvedSnapshot || proposedBrief?.sections || {};
+  
+  // Use approved snapshot if available, otherwise fall back to current sections
+  const sections = proposedBrief?.approvedSnapshot || proposedBrief?.sections || {};
   const approvedAt = proposedBrief?.approvedAt;
-
-  const confirmedPoints = brief.confirmedPoints || [];
+  const hasSections = Object.keys(sections).length > 0;
 
   const updateBriefMutation = useMutation({
     mutationFn: async (data) => {
@@ -59,61 +66,6 @@ export default function FinalBrief({ brief, sources = [], dialogEntries = [], on
     }
   });
 
-  const handleFeedbackSubmit = async ({ feedback, constraints }) => {
-    setIsUpdating(true);
-
-    const currentBrief = finalBrief;
-    const constraintText = constraints ? `\n\nMÅ INKLUDERES (krav fra admin):\n${constraints}` : '';
-
-    const prompt = `Du er en kommunikasjonsekspert. Oppdater følgende brief basert på tilbakemeldingen.
-
-NÅVÆRENDE BRIEF:
-Bakgrunn: ${currentBrief.background}
-Nøkkelpunkter: ${currentBrief.keyPoints}
-Hovedbudskap: ${currentBrief.message}
-Eksempler: ${currentBrief.examples || 'Ingen'}
-
-TILBAKEMELDING FRA BRUKER:
-${feedback}${constraintText}
-
-INSTRUKSJONER:
-- Gjør KUN de endringene som tilbakemeldingen ber om.
-- Behold resten av innholdet uendret.
-- Hvis admin har spesifisert "må inkluderes"-krav, sørg for at disse er med.
-
-Returner den oppdaterte briefen i JSON-format med feltene: background, keyPoints, message, examples`;
-
-    try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            background: { type: 'string' },
-            keyPoints: { type: 'string' },
-            message: { type: 'string' },
-            examples: { type: 'string' }
-          },
-          required: ['background', 'keyPoints', 'message']
-        }
-      });
-
-      await updateBriefMutation.mutateAsync({
-        finalBrief: {
-          ...response,
-          generatedAt: new Date().toISOString(),
-          lastFeedback: feedback
-        }
-      });
-      toast.success('Briefen er oppdatert');
-    } catch (error) {
-      console.error('Failed to update brief:', error);
-      toast.error('Kunne ikke oppdatere briefen');
-    }
-
-    setIsUpdating(false);
-  };
-
   const handleApprove = async () => {
     await updateBriefMutation.mutateAsync({
       status: 'godkjent',
@@ -121,8 +73,6 @@ Returner den oppdaterte briefen i JSON-format med feltene: background, keyPoints
     });
     toast.success('Briefen er godkjent!');
   };
-
-  const [exporting, setExporting] = useState(false);
 
   const handleExportWord = async () => {
     setExporting(true);
@@ -155,9 +105,9 @@ Returner den oppdaterte briefen i JSON-format med feltene: background, keyPoints
   };
 
   const handleCopyAll = () => {
-    if (!finalBrief) return;
+    if (!hasSections) return;
 
-    const metadata = `═══════════════════════════════════════
+    let fullText = `═══════════════════════════════════════
 KOMMUNIKASJONSBRIEF
 ═══════════════════════════════════════
 
@@ -166,74 +116,141 @@ Tema: ${brief.themeName}
 Målgruppe: ${brief.rammer?.targetAudience || 'Ikke spesifisert'}
 Kanaler: ${brief.rammer?.channels?.join(', ') || 'Ikke spesifisert'}
 Frist: ${brief.rammer?.deadline || 'Ikke spesifisert'}
-Generert: ${new Date(finalBrief.generatedAt).toLocaleDateString('nb-NO')}
+${approvedAt ? `Godkjent: ${formatDate(approvedAt)}` : ''}
 
 ═══════════════════════════════════════
+
 `;
 
-    const content = `
-BAKGRUNN
-${finalBrief.background}
+    SECTION_CONFIG.forEach(section => {
+      const content = sections[section.key]?.content;
+      if (content) {
+        fullText += `${section.number}. ${section.label.toUpperCase()}
+${content}
 
-NØKKELPUNKTER
-${finalBrief.keyPoints}
+`;
+      }
+    });
 
-HOVEDBUDSKAP
-${finalBrief.message}
-${finalBrief.examples ? `
-EKSEMPLER
-${finalBrief.examples}` : ''}
-`.trim();
-
-    const fullText = metadata + content;
-    navigator.clipboard.writeText(fullText);
+    navigator.clipboard.writeText(fullText.trim());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     toast.success('Kopiert til utklippstavlen');
   };
 
-  if (templateError) {
+  // Show warning if Step 4 is not approved
+  if (!isStep4Approved && hasSections) {
     return (
       <div className="space-y-6">
-        <Card>
-          <CardContent className="py-16 text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Kan ikke generere brief</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-4">{templateError}</p>
-            <div className="flex justify-center space-x-3">
-              <Button variant="outline" onClick={onBack}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Tilbake til intervju
-              </Button>
-              <Button onClick={() => { setTemplateError(null); generateBrief(); }}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Prøv igjen
-              </Button>
-            </div>
+        {/* Warning Banner */}
+        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 flex items-start space-x-3">
+          <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-medium text-amber-800 dark:text-amber-200">
+              Foreslått brief er ikke godkjent
+            </p>
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+              Gå tilbake til Steg 4 og godkjenn den foreslåtte briefen for å oppdatere denne visningen.
+            </p>
+          </div>
+        </div>
+
+        {/* Show based on last approved version or current draft */}
+        <Card className="bg-gray-50 dark:bg-gray-800/50 border-dashed">
+          <CardContent className="py-8 text-center">
+            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              {proposedBrief?.approvedSnapshot 
+                ? "Viser sist godkjente versjon. Godkjenn endringene i Steg 4 for å oppdatere."
+                : "Ingen godkjent brief tilgjengelig ennå."
+              }
+            </p>
+            <Button variant="outline" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Tilbake til foreslått brief
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Still show content if there's an approved snapshot */}
+        {proposedBrief?.approvedSnapshot && (
+          <div className="opacity-75">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 text-center">
+              Basert på sist godkjente foreslåtte brief ({formatDate(approvedAt)})
+            </p>
+            {renderBriefContent()}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // No sections at all
+  if (!hasSections) {
+    return (
+      <div className="space-y-6">
+        <Card className="border-dashed">
+          <CardContent className="py-12 text-center">
+            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              Ingen brief tilgjengelig
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">
+              Fullfør og godkjenn den foreslåtte briefen i Steg 4 først.
+            </p>
+            <Button variant="outline" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Tilbake til foreslått brief
+            </Button>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  if (isGenerating || !finalBrief) {
+  function renderBriefContent() {
     return (
-      <div className="space-y-6">
-        <Card>
-          <CardContent className="py-16 text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-            <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Genererer brief...</h2>
-            <p className="text-gray-500 dark:text-gray-400">
-              AI-en analyserer all informasjon og lager en komplett brief.
-            </p>
-            {!briefTemplate && (
-              <p className="text-xs text-orange-500 mt-2">
-                Merk: Ingen briefmal er lastet opp. Genererer med standardstruktur.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle className="text-xl">{brief.title}</CardTitle>
+            <CardDescription className="flex items-center gap-2 mt-1">
+              <Calendar className="h-3 w-3" />
+              Godkjent {formatDate(approvedAt)}
+            </CardDescription>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportWord} disabled={exporting}>
+              {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
+              Word
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleCopyAll}>
+              {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
+              {copied ? 'Kopiert' : 'Kopier alt'}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {SECTION_CONFIG.map(section => {
+            const sectionContent = sections[section.key]?.content;
+            if (!sectionContent) return null;
+            
+            return (
+              <section key={section.key}>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-xs font-semibold text-blue-700 dark:text-blue-300">
+                    {section.number}
+                  </span>
+                  {section.label}
+                </h3>
+                <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap pl-8">
+                  {sectionContent}
+                </div>
+              </section>
+            );
+          })}
+        </CardContent>
+      </Card>
     );
   }
 
@@ -253,12 +270,12 @@ ${finalBrief.examples}` : ''}
           )}
           <div>
             <p className="font-medium text-gray-900 dark:text-white">
-              {brief.status === 'godkjent' ? 'Godkjent brief' : 'Utkast til brief'}
+              {brief.status === 'godkjent' ? 'Godkjent brief' : 'Ferdig brief'}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {brief.status === 'godkjent' 
-                ? `Godkjent ${new Date(brief.approvedAt).toLocaleDateString('nb-NO')}`
-                : 'Gå gjennom og godkjenn når du er fornøyd'
+                ? `Endelig godkjent ${formatDate(brief.approvedAt)}`
+                : `Basert på godkjent foreslått brief fra ${formatDate(approvedAt)}`
               }
             </p>
           </div>
@@ -313,98 +330,14 @@ ${finalBrief.examples}` : ''}
         </CardContent>
       </Card>
 
-      {/* Brief Content */}
-      <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4">
-          <div>
-            <CardTitle className="text-xl">{brief.title}</CardTitle>
-            <CardDescription className="flex items-center gap-2 mt-1">
-              <Calendar className="h-3 w-3" />
-              Generert {new Date(finalBrief.generatedAt).toLocaleDateString('nb-NO')}
-            </CardDescription>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={handleExportWord} disabled={exporting}>
-              {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
-              Word
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleCopyAll}>
-              {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
-              {copied ? 'Kopiert' : 'Kopier alt'}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-8">
-          {/* Background */}
-          <section>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
-              Bakgrunn
-            </h3>
-            <ExpandableText content={finalBrief.background} maxLines={8} />
-          </section>
-
-          {/* Key Points */}
-          <section>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
-              Nøkkelpunkter
-            </h3>
-            <ExpandableText content={finalBrief.keyPoints} maxLines={10} />
-          </section>
-
-          {/* Main Message */}
-          <section className="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-xl border border-blue-200 dark:border-blue-800">
-            <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">
-              Hovedbudskap
-            </h3>
-            <p className="text-blue-800 dark:text-blue-200 text-lg leading-relaxed">{finalBrief.message}</p>
-          </section>
-
-          {/* Examples */}
-          {finalBrief.examples && (
-            <section>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
-                Eksempler
-              </h3>
-              <ExpandableText content={finalBrief.examples} maxLines={6} />
-            </section>
-          )}
-
-          {/* Confirmed Points */}
-          {confirmedPoints.length > 0 && (
-            <section className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
-                Bekreftede punkter fra intervjuet
-              </h3>
-              <div className="grid gap-2">
-                {confirmedPoints.map((point, idx) => (
-                  <div key={idx} className="flex items-start space-x-2 text-sm bg-gray-50 dark:bg-gray-800/50 p-2 rounded">
-                    <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <span className="font-medium text-gray-900 dark:text-white">{point.topic}:</span>{' '}
-                      <span className="text-gray-600 dark:text-gray-300">{point.summary}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Feedback Panel */}
-      {brief.status !== 'godkjent' && (
-        <FeedbackPanel 
-          onSubmit={handleFeedbackSubmit} 
-          isProcessing={isUpdating}
-          isAdmin={isAdmin}
-        />
-      )}
+      {/* Brief Content - from approved Step 4 */}
+      {renderBriefContent()}
 
       {/* Navigation */}
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Tilbake til intervju
+          Tilbake til foreslått brief
         </Button>
       </div>
     </div>
