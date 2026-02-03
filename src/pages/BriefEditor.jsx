@@ -17,6 +17,7 @@ import BriefStepper from '@/components/brief/BriefStepper';
 import SourceMaterialUpload from '@/components/brief/SourceMaterialUpload';
 import RammerForm from '@/components/brief/RammerForm';
 import AIDialog from '@/components/brief/AIDialog';
+import ProposedBrief from '@/components/brief/ProposedBrief';
 import FinalBrief from '@/components/brief/FinalBrief';
 
 function BriefEditorContent() {
@@ -171,6 +172,16 @@ function BriefEditorContent() {
           brief={brief}
           sources={sources}
           onBack={() => handleUpdateStep('rammer')}
+          onContinue={() => handleUpdateStep('proposed')}
+        />
+      )}
+
+      {currentStep === 'proposed' && (
+        <ProposedBrief
+          brief={brief}
+          sources={sources}
+          dialogEntries={dialogEntries}
+          onBack={() => handleUpdateStep('dialog')}
           onContinue={() => handleUpdateStep('final')}
         />
       )}
@@ -180,7 +191,7 @@ function BriefEditorContent() {
           brief={brief}
           sources={sources}
           dialogEntries={dialogEntries}
-          onBack={() => handleUpdateStep('dialog')}
+          onBack={() => handleUpdateStep('proposed')}
         />
       )}
     </div>
