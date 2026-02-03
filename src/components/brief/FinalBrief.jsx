@@ -48,12 +48,12 @@ export default function FinalBrief({ brief, onBack }) {
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  // CRITICAL: Step 5 reads ONLY from approved Step 4 snapshot
+  // CRITICAL: Step 4 reads ONLY from approved Step 3 snapshot - NEVER from other sources
   const proposedBrief = brief?.proposedBrief;
-  const isStep4Approved = proposedBrief?.status === 'approved' && !proposedBrief?.editedAfterApproval;
+  const isStep3Approved = proposedBrief?.status === 'approved' && !proposedBrief?.editedAfterApproval;
   
-  // Use approved snapshot if available, otherwise fall back to current sections
-  const sections = proposedBrief?.approvedSnapshot || proposedBrief?.sections || {};
+  // ONLY use approved snapshot - do NOT fall back to draft sections, interview data, or sources
+  const sections = proposedBrief?.approvedSnapshot || {};
   const approvedAt = proposedBrief?.approvedAt;
   const hasSections = Object.keys(sections).length > 0;
 
@@ -113,10 +113,13 @@ KOMMUNIKASJONSBRIEF
 
 Tittel: ${brief.title}
 Tema: ${brief.themeName}
+Dato: ${formatDate(new Date().toISOString())}
+Status: Godkjent
+Basert på: Foreslått brief${approvedAt ? ` (godkjent ${formatDate(approvedAt)})` : ''}
+
 Målgruppe: ${brief.rammer?.targetAudience || 'Ikke spesifisert'}
 Kanaler: ${brief.rammer?.channels?.join(', ') || 'Ikke spesifisert'}
 Frist: ${brief.rammer?.deadline || 'Ikke spesifisert'}
-${approvedAt ? `Godkjent: ${formatDate(approvedAt)}` : ''}
 
 ═══════════════════════════════════════
 
@@ -138,8 +141,8 @@ ${content}
     toast.success('Kopiert til utklippstavlen');
   };
 
-  // Show warning if Step 4 is not approved
-  if (!isStep4Approved && hasSections) {
+  // Show warning if Step 3 is not approved
+  if (!isStep3Approved && hasSections) {
     return (
       <div className="space-y-6">
         {/* Warning Banner */}
@@ -150,7 +153,7 @@ ${content}
               Foreslått brief er ikke godkjent
             </p>
             <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-              Gå tilbake til Steg 4 og godkjenn den foreslåtte briefen for å oppdatere denne visningen.
+              Gå tilbake til Foreslått brief og godkjenn for å oppdatere denne visningen.
             </p>
           </div>
         </div>
@@ -161,8 +164,8 @@ ${content}
             <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               {proposedBrief?.approvedSnapshot 
-                ? "Viser sist godkjente versjon. Godkjenn endringene i Steg 4 for å oppdatere."
-                : "Ingen godkjent brief tilgjengelig ennå."
+                ? "Denne visningen er basert på sist godkjente foreslåtte brief. Godkjenn endringene i Foreslått brief for å oppdatere."
+                : "Ingen godkjent brief tilgjengelig ennå. Gå til Foreslått brief og godkjenn innholdet."
               }
             </p>
             <Button variant="outline" onClick={onBack}>
@@ -196,7 +199,7 @@ ${content}
               Ingen brief tilgjengelig
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-6">
-              Fullfør og godkjenn den foreslåtte briefen i Steg 4 først.
+              Fullfør og godkjenn den foreslåtte briefen først.
             </p>
             <Button variant="outline" onClick={onBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -332,6 +335,13 @@ ${content}
 
       {/* Brief Content - from approved Step 4 */}
       {renderBriefContent()}
+
+      {/* Helper text for editing */}
+      <div className="text-center py-2">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          For å gjøre endringer, gå tilbake til Foreslått brief.
+        </p>
+      </div>
 
       {/* Navigation */}
       <div className="flex justify-between">
