@@ -8,7 +8,9 @@ import {
   HelpCircle,
   CheckCircle2,
   XCircle,
-  Info
+  Info,
+  ArrowRight,
+  Type
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +25,59 @@ function HelpInstructionsContent() {
           Alt du trenger å vite om hvordan Dynamisk Brief fungerer
         </p>
       </div>
+
+      {/* How the Flow Works */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ArrowRight className="h-5 w-5 text-blue-600" />
+            Slik fungerer flyten
+          </CardTitle>
+          <CardDescription>
+            Fra kildemateriale til ferdig brief i fire steg
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium flex-shrink-0">1</div>
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">Kildemateriale</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Last opp PDF, legg til URL-er, eller lim inn tekst som grunnlag for briefen.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium flex-shrink-0">2</div>
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">Rammer</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Definer målgruppe, mål, kanaler og tone for kommunikasjonen.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium flex-shrink-0">3</div>
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">Dynamisk intervju</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  AI-en stiller deg spørsmål for å forstå kommunikasjonsbehovet. Bekreft eller korriger punktene underveis.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium flex-shrink-0">4</div>
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">Ferdig brief</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  AI-en genererer briefen basert på alt du har lagt inn. Eksporter til Word når du er fornøyd.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* How Source Material Works */}
       <Card>
