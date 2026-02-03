@@ -52,6 +52,14 @@ function AdminBriefmalContent() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // V1: Only allow PDF files
+    const fileName = file.name.toLowerCase();
+    if (!fileName.endsWith('.pdf')) {
+      toast.error('Kun PDF-filer støttes i V1. Lagre dokumentet som PDF og prøv igjen.');
+      e.target.value = '';
+      return;
+    }
+
     setUploading(true);
     try {
       // Upload file
@@ -64,7 +72,7 @@ function AdminBriefmalContent() {
 
       // Create new template
       await base44.entities.KnowledgeBaseDoc.create({
-        title: file.name.replace(/\.(pdf|docx)$/i, ''),
+        title: file.name.replace(/\.pdf$/i, ''),
         description: 'Aktiv briefmal for generering av kommunikasjonsbriefs',
         docType: 'brief_template',
         fileUrl: file_url,
@@ -217,10 +225,13 @@ function AdminBriefmalContent() {
           <CardDescription>
             {briefTemplate 
               ? 'Last opp en ny mal for å erstatte den eksisterende. Den gamle malen deaktiveres automatisk.' 
-              : 'Last opp en PDF eller Word-fil som definerer malstrukturen for briefs.'}
+              : 'Last opp en PDF-fil som definerer malstrukturen for briefs.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-800 dark:text-amber-200">
+            <strong>V1:</strong> Kun PDF støttes. Har du et Word-dokument? Lagre det som PDF først (Fil → Lagre som → PDF).
+          </div>
           <label className="block cursor-pointer">
             <div className="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-300 dark:hover:border-blue-500 transition-colors">
               {uploading ? (
@@ -232,17 +243,17 @@ function AdminBriefmalContent() {
                 <div className="flex flex-col items-center">
                   <Upload className="h-10 w-10 text-gray-400" />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">
-                    Klikk for å laste opp briefmal
+                    Klikk for å laste opp briefmal (PDF)
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    PDF eller DOCX (maks 10 MB)
+                    Kun PDF-filer støttes (maks 10 MB)
                   </span>
                 </div>
               )}
               <input
                 type="file"
                 className="hidden"
-                accept=".pdf,.docx"
+                accept=".pdf"
                 onChange={handleFileUpload}
                 disabled={uploading}
               />
