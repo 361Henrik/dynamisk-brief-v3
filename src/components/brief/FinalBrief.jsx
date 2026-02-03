@@ -223,8 +223,26 @@ Returner den oppdaterte briefen i JSON-format med feltene: background, keyPoints
   const handleExportWord = async () => {
     setExporting(true);
     try {
-      const response = await base44.functions.invoke('exportBriefToWord', { briefId: brief.id }, { responseType: 'arraybuffer' });
-      const blob = new Blob([response.data], { 
+      // Use direct fetch with arraybuffer to ensure binary data is preserved
+      const functionUrl = base44.functions.getUrl('exportBriefToWord');
+      const token = await base44.auth.getToken();
+      
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ briefId: brief.id })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Export failed');
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const blob = new Blob([arrayBuffer], { 
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
       });
       const url = window.URL.createObjectURL(blob);
