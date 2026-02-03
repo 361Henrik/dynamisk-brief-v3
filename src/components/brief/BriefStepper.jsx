@@ -5,6 +5,7 @@ const STEPS = [
   { key: 'source_material', label: 'Kildemateriale' },
   { key: 'rammer', label: 'Rammer' },
   { key: 'dialog', label: 'Dynamisk intervju' },
+  { key: 'proposed', label: 'Foreslått brief' },
   { key: 'final', label: 'Ferdig brief' }
 ];
 

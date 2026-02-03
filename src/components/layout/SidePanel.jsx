@@ -27,10 +27,11 @@ const FLOW_STEPS = [
   { key: 'source_material', label: 'Kildemateriale' },
   { key: 'rammer', label: 'Rammer' },
   { key: 'dialog', label: 'Dynamisk intervju' },
+  { key: 'proposed', label: 'Foreslått brief' },
   { key: 'final', label: 'Ferdig brief' }
 ];
 
-const STEP_ORDER = ['source_material', 'rammer', 'dialog', 'final'];
+const STEP_ORDER = ['source_material', 'rammer', 'dialog', 'proposed', 'final'];
 
 export default function SidePanel({ currentPageName, collapsed, onToggleCollapse, briefCurrentStep }) {
   const { isAdmin } = useAuth();
