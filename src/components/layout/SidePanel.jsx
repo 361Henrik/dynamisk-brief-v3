@@ -174,32 +174,51 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
           <h3 className="font-semibold text-gray-900 dark:text-white">Briefmal</h3>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-          Briefmalen styrer strukturen i intervjuet og den ferdige briefen.
+          Briefmalen definerer hvilke hovedpunkter som skal fylles ut i intervjuet og strukturen på den ferdige briefen.
         </p>
 
         {/* Brief Template Status */}
         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 mb-3">
           {briefTemplate ? (
-            <div className="flex items-start space-x-2">
-              {briefTemplate.extractionStatus === 'success' ? (
-                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
-              ) : briefTemplate.extractionStatus === 'pending' ? (
-                <Loader2 className="h-4 w-4 text-yellow-600 animate-spin mt-0.5" />
-              ) : (
-                <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {briefTemplate.title}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {briefTemplate.extractionStatus === 'success' 
-                    ? 'Klar til bruk' 
-                    : briefTemplate.extractionStatus === 'pending' 
-                    ? 'Behandles...' 
-                    : 'Feil ved behandling'}
-                </p>
+            <div>
+              <div className="flex items-start space-x-2 mb-3">
+                {briefTemplate.extractionStatus === 'success' ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
+                ) : briefTemplate.extractionStatus === 'pending' ? (
+                  <Loader2 className="h-4 w-4 text-yellow-600 animate-spin mt-0.5" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {briefTemplate.title}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {briefTemplate.extractionStatus === 'success' 
+                      ? 'Klar til bruk' 
+                      : briefTemplate.extractionStatus === 'pending' 
+                      ? 'Behandles...' 
+                      : 'Feil ved behandling'}
+                  </p>
+                </div>
               </div>
+
+              {/* Hovedkategorier list */}
+              {briefTemplate.extractionStatus === 'success' && (
+                <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
+                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Hovedkategorier:</p>
+                  <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Prosjektinformasjon</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Bakgrunn og situasjonsbeskrivelse</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Mål og suksesskriterier</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Målgrupper</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />GS1-tilbudet og verdiforslag</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Budskap, tone og stil</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Leveranser og kanaler</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Praktiske rammer og godkjenning</li>
+                  </ul>
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-xs text-orange-600 dark:text-orange-400">
@@ -208,13 +227,25 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
           )}
         </div>
 
+        {/* File reference */}
+        {briefTemplate && briefTemplate.extractionStatus === 'success' && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            Gjeldende briefmal: <span className="font-medium">{briefTemplate.title}</span> (PDF)
+          </p>
+        )}
+
         {isAdmin && (
-          <Link to={createPageUrl('AdminBriefmal')}>
-            <Button variant="outline" size="sm" className="w-full">
-              <Upload className="h-4 w-4 mr-2" />
-              Last opp briefmal
-            </Button>
-          </Link>
+          <div>
+            <Link to={createPageUrl('AdminBriefmal')}>
+              <Button variant="outline" size="sm" className="w-full">
+                <Upload className="h-4 w-4 mr-2" />
+                Last opp ny briefmal
+              </Button>
+            </Link>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 text-center">
+              Opplasting av ny briefmal erstatter gjeldende mal.
+            </p>
+          </div>
         )}
       </div>
 
