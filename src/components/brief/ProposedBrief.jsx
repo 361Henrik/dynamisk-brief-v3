@@ -12,7 +12,9 @@ import {
   ChevronUp,
   MessageSquare,
   Sparkles,
-  FileText
+  FileText,
+  Pencil,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,12 +34,20 @@ const SECTION_CONFIG = [
   { key: 'kildemateriale', label: 'Kildemateriale', number: 9 }
 ];
 
+function formatTimestamp(isoString) {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  return date.toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' }) + 
+         ' kl. ' + date.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' });
+}
+
 function ProposedSection({ 
   sectionKey, 
   label, 
   number, 
   content, 
-  notes, 
+  notes,
+  metadata,
   onContentChange, 
   onNotesChange,
   onUpdateWithFeedback,
@@ -46,10 +56,29 @@ function ProposedSection({
   const [expanded, setExpanded] = useState(true);
   const [showNotes, setShowNotes] = useState(!!notes);
   const [localNotes, setLocalNotes] = useState(notes || '');
+  const [isEditing, setIsEditing] = useState(false);
+  const [localContent, setLocalContent] = useState(content || '');
 
   useEffect(() => {
     setLocalNotes(notes || '');
   }, [notes]);
+
+  useEffect(() => {
+    setLocalContent(content || '');
+  }, [content]);
+
+  const handleSaveEdit = () => {
+    onContentChange(sectionKey, localContent);
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setLocalContent(content || '');
+    setIsEditing(false);
+  };
+
+  const isUserEdited = metadata?.lastEditedBy === 'user';
+  const isAiEdited = metadata?.lastEditedBy === 'ai';
 
   return (
     <Card className="mb-4">
@@ -63,67 +92,118 @@ function ProposedSection({
               {number}
             </div>
             <CardTitle className="text-base font-medium">{label}</CardTitle>
+            {isUserEdited && (
+              <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700">
+                <Pencil className="h-3 w-3 mr-1" />
+                Endret
+              </Badge>
+            )}
+            {isAiEdited && (
+              <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700">
+                <Sparkles className="h-3 w-3 mr-1" />
+                AI-oppdatert
+              </Badge>
+            )}
           </div>
           {expanded ? <ChevronUp className="h-5 w-5 text-gray-400" /> : <ChevronDown className="h-5 w-5 text-gray-400" />}
         </div>
+        {/* Metadata line */}
+        {metadata?.lastEditedAt && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-10">
+            Endret {metadata.lastEditedBy === 'user' ? 'av deg' : 'av AI'} · {formatTimestamp(metadata.lastEditedAt)}
+          </p>
+        )}
       </CardHeader>
       
       {expanded && (
         <CardContent className="pt-0 space-y-4">
-          {/* Content Editor */}
+          {/* Content Display / Editor */}
           <div>
-            <Textarea
-              value={content || ''}
-              onChange={(e) => onContentChange(sectionKey, e.target.value)}
-              placeholder={`Skriv innhold for ${label.toLowerCase()}...`}
-              className="min-h-[120px] resize-y"
-            />
-          </div>
-
-          {/* Notes Toggle & Editor */}
-          <div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowNotes(!showNotes)}
-              className="text-gray-500 hover:text-gray-700 -ml-2"
-            >
-              <MessageSquare className="h-4 w-4 mr-1" />
-              {showNotes ? 'Skjul notater' : 'Legg til notater'}
-            </Button>
-            
-            {showNotes && (
-              <div className="mt-2">
+            {isEditing ? (
+              <div className="space-y-2">
                 <Textarea
-                  value={localNotes}
-                  onChange={(e) => {
-                    setLocalNotes(e.target.value);
-                    onNotesChange(sectionKey, e.target.value);
-                  }}
-                  placeholder="Notater eller kommentarer til denne seksjonen..."
-                  className="min-h-[80px] resize-y bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
+                  value={localContent}
+                  onChange={(e) => setLocalContent(e.target.value)}
+                  placeholder={`Skriv innhold for ${label.toLowerCase()}...`}
+                  className="min-h-[150px] resize-y border-blue-300 focus:border-blue-500"
+                  autoFocus
                 />
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+                    Avbryt
+                  </Button>
+                  <Button size="sm" onClick={handleSaveEdit}>
+                    <Save className="h-4 w-4 mr-1" />
+                    Lagre endring
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="relative group">
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 min-h-[100px] whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200">
+                  {content || <span className="text-gray-400 italic">Ingen innhold ennå...</span>}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+                >
+                  <Pencil className="h-4 w-4 mr-1" />
+                  Rediger
+                </Button>
               </div>
             )}
           </div>
 
-          {/* Update with Feedback Button */}
-          <div className="flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onUpdateWithFeedback(sectionKey, localNotes)}
-              disabled={isUpdating || !localNotes?.trim()}
-              className="text-blue-600 border-blue-200 hover:bg-blue-50"
-            >
-              {isUpdating ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4 mr-2" />
+          {/* Notes Toggle & Editor */}
+          {!isEditing && (
+            <div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowNotes(!showNotes)}
+                className="text-gray-500 hover:text-gray-700 -ml-2"
+              >
+                <MessageSquare className="h-4 w-4 mr-1" />
+                {showNotes ? 'Skjul notater' : 'Legg til notater'}
+              </Button>
+              
+              {showNotes && (
+                <div className="mt-2">
+                  <Textarea
+                    value={localNotes}
+                    onChange={(e) => {
+                      setLocalNotes(e.target.value);
+                      onNotesChange(sectionKey, e.target.value);
+                    }}
+                    placeholder="Notater eller kommentarer til denne seksjonen..."
+                    className="min-h-[80px] resize-y bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
+                  />
+                </div>
               )}
-              Oppdater med tilbakemelding
-            </Button>
-          </div>
+            </div>
+          )}
+
+          {/* Update with Feedback Button */}
+          {!isEditing && (
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onUpdateWithFeedback(sectionKey, localNotes)}
+                disabled={isUpdating || !localNotes?.trim()}
+                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              >
+                {isUpdating ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4 mr-2" />
+                )}
+                Oppdater med tilbakemelding
+              </Button>
+            </div>
+          )}
         </CardContent>
       )}
     </Card>
@@ -138,12 +218,20 @@ export default function ProposedBrief({ brief, sources, dialogEntries, onBack, o
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
+  const proposedStatus = brief?.proposedBrief?.status;
+  const wasApproved = proposedStatus === 'approved';
+  const [editedAfterApproval, setEditedAfterApproval] = useState(false);
+
   // Initialize sections from brief or generate if empty
   useEffect(() => {
     if (brief?.proposedBrief?.sections) {
       setSections(brief.proposedBrief.sections);
     }
-  }, [brief?.proposedBrief?.sections]);
+    // Check if edited after approval
+    if (brief?.proposedBrief?.editedAfterApproval) {
+      setEditedAfterApproval(true);
+    }
+  }, [brief?.proposedBrief?.sections, brief?.proposedBrief?.editedAfterApproval]);
 
   const generateProposedBrief = async () => {
     setGenerating(true);
@@ -238,24 +326,37 @@ Returner et JSON-objekt med følgende struktur:
         }
       });
 
-      // Convert to sections format
+      // Convert to sections format with metadata
       const newSections = {};
+      const now = new Date().toISOString();
       for (const key of Object.keys(response)) {
         newSections[key] = {
           content: response[key],
-          notes: ''
+          notes: '',
+          metadata: {
+            lastEditedAt: now,
+            lastEditedBy: 'ai'
+          }
         };
       }
 
       setSections(newSections);
       setHasChanges(true);
 
-      // Save to database
+      // If was approved, mark as edited after approval
+      const newEditedAfterApproval = wasApproved;
+      if (newEditedAfterApproval) {
+        setEditedAfterApproval(true);
+      }
+
+      // Save to database - revert to draft if was approved
       await base44.entities.Brief.update(brief.id, {
         proposedBrief: {
           sections: newSections,
-          status: 'draft',
-          updatedAt: new Date().toISOString()
+          status: wasApproved ? 'draft' : 'draft',
+          updatedAt: now,
+          approvedAt: brief.proposedBrief?.approvedAt,
+          editedAfterApproval: newEditedAfterApproval
         }
       });
 
@@ -269,14 +370,23 @@ Returner et JSON-objekt med følgende struktur:
   };
 
   const handleContentChange = (sectionKey, content) => {
+    const now = new Date().toISOString();
     setSections(prev => ({
       ...prev,
       [sectionKey]: {
         ...prev[sectionKey],
-        content
+        content,
+        metadata: {
+          lastEditedAt: now,
+          lastEditedBy: 'user'
+        }
       }
     }));
     setHasChanges(true);
+    // If was approved, mark as edited after approval
+    if (wasApproved) {
+      setEditedAfterApproval(true);
+    }
   };
 
   const handleNotesChange = (sectionKey, notes) => {
@@ -316,14 +426,23 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
         prompt
       });
 
+      const now = new Date().toISOString();
       setSections(prev => ({
         ...prev,
         [sectionKey]: {
           content: response,
-          notes: '' // Clear notes after applying
+          notes: '', // Clear notes after applying
+          metadata: {
+            lastEditedAt: now,
+            lastEditedBy: 'ai'
+          }
         }
       }));
       setHasChanges(true);
+      // If was approved, mark as edited after approval
+      if (wasApproved) {
+        setEditedAfterApproval(true);
+      }
       toast.success(`"${sectionConfig.label}" oppdatert!`);
     } catch (error) {
       console.error('Update error:', error);
@@ -336,12 +455,16 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
   const handleSave = async () => {
     setSaving(true);
     try {
+      // If was approved and has changes, revert to draft
+      const newStatus = (wasApproved && (hasChanges || editedAfterApproval)) ? 'draft' : (brief.proposedBrief?.status || 'draft');
+      
       await base44.entities.Brief.update(brief.id, {
         proposedBrief: {
           sections,
-          status: brief.proposedBrief?.status || 'draft',
+          status: newStatus,
           updatedAt: new Date().toISOString(),
-          approvedAt: brief.proposedBrief?.approvedAt
+          approvedAt: brief.proposedBrief?.approvedAt,
+          editedAfterApproval: editedAfterApproval || (wasApproved && hasChanges)
         }
       });
       queryClient.invalidateQueries({ queryKey: ['brief', brief.id] });
@@ -354,21 +477,35 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
     setSaving(false);
   };
 
-  const handleApproveAndContinue = async () => {
+  const handleApprove = async () => {
     setSaving(true);
     try {
+      const now = new Date().toISOString();
+      
+      // Create approved snapshot
+      const approvedSnapshot = {};
+      for (const key of Object.keys(sections)) {
+        approvedSnapshot[key] = {
+          content: sections[key]?.content || '',
+          notes: sections[key]?.notes || '',
+          metadata: sections[key]?.metadata
+        };
+      }
+
       await base44.entities.Brief.update(brief.id, {
         proposedBrief: {
           sections,
           status: 'approved',
-          updatedAt: new Date().toISOString(),
-          approvedAt: new Date().toISOString()
-        },
-        currentStep: 'final'
+          updatedAt: now,
+          approvedAt: now,
+          approvedSnapshot: approvedSnapshot, // Freeze content
+          editedAfterApproval: false
+        }
       });
       queryClient.invalidateQueries({ queryKey: ['brief', brief.id] });
-      toast.success('Brief godkjent! Går videre til eksport.');
-      onContinue();
+      setHasChanges(false);
+      setEditedAfterApproval(false);
+      toast.success('Foreslått brief godkjent!');
     } catch (error) {
       console.error('Approve error:', error);
       toast.error('Kunne ikke godkjenne briefen.');
@@ -376,11 +513,39 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
     setSaving(false);
   };
 
+  const handleContinue = async () => {
+    // Save if there are changes first
+    if (hasChanges) {
+      await handleSave();
+    }
+    
+    await base44.entities.Brief.update(brief.id, {
+      currentStep: 'final'
+    });
+    queryClient.invalidateQueries({ queryKey: ['brief', brief.id] });
+    onContinue();
+  };
+
   const hasSections = Object.keys(sections).length > 0;
-  const proposedStatus = brief?.proposedBrief?.status;
+  const isApproved = proposedStatus === 'approved' && !editedAfterApproval;
 
   return (
     <div className="space-y-6">
+      {/* Edited after approval warning */}
+      {editedAfterApproval && (
+        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 flex items-start space-x-3">
+          <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-medium text-amber-800 dark:text-amber-200">
+              Briefen er endret etter godkjenning
+            </p>
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+              Godkjenn på nytt for å oppdatere ferdig brief.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -390,13 +555,13 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          {proposedStatus === 'approved' && (
+          {isApproved && (
             <Badge className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
               <CheckCircle2 className="h-3 w-3 mr-1" />
               Godkjent
             </Badge>
           )}
-          {proposedStatus === 'draft' && (
+          {(proposedStatus === 'draft' || editedAfterApproval) && hasSections && (
             <Badge variant="secondary">Utkast</Badge>
           )}
         </div>
@@ -459,6 +624,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
               number={section.number}
               content={sections[section.key]?.content || ''}
               notes={sections[section.key]?.notes || ''}
+              metadata={sections[section.key]?.metadata}
               onContentChange={handleContentChange}
               onNotesChange={handleNotesChange}
               onUpdateWithFeedback={handleUpdateWithFeedback}
@@ -487,16 +653,29 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
             </Button>
           )}
           
+          {/* Approve button - show if not approved or edited after approval */}
+          {hasSections && (!isApproved || editedAfterApproval) && (
+            <Button 
+              onClick={handleApprove} 
+              disabled={saving}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {saving ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+              )}
+              Godkjenn foreslått brief
+            </Button>
+          )}
+
+          {/* Continue to Step 5 */}
           <Button 
-            onClick={handleApproveAndContinue} 
+            onClick={handleContinue} 
             disabled={!hasSections || saving}
+            variant={isApproved ? "default" : "outline"}
           >
-            {saving ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-            )}
-            Godkjenn og fortsett
+            Gå til ferdig brief
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>

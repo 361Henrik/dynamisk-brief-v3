@@ -24,34 +24,31 @@ import { toast } from 'sonner';
 import ExpandableText from './ExpandableText';
 import FeedbackPanel from './FeedbackPanel';
 
+const SECTION_CONFIG = [
+  { key: 'prosjektinformasjon', label: 'Prosjektinformasjon', number: 1 },
+  { key: 'bakgrunn', label: 'Bakgrunn og situasjonsbeskrivelse', number: 2 },
+  { key: 'maal', label: 'Mål og suksesskriterier', number: 3 },
+  { key: 'maalgrupper', label: 'Målgrupper', number: 4 },
+  { key: 'verdiforslag', label: 'GS1-tilbudet og verdiforslag', number: 5 },
+  { key: 'budskap', label: 'Budskap, tone og stil', number: 6 },
+  { key: 'leveranser', label: 'Leveranser og kanaler', number: 7 },
+  { key: 'rammer', label: 'Praktiske rammer og godkjenning', number: 8 },
+  { key: 'kildemateriale', label: 'Kildemateriale', number: 9 }
+];
+
 export default function FinalBrief({ brief, sources = [], dialogEntries = [], onBack }) {
   const queryClient = useQueryClient();
   const { isAdmin } = useAuth();
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [templateError, setTemplateError] = useState(null);
 
-  const finalBrief = brief.finalBrief;
+  // CRITICAL: Step 5 reads ONLY from approved Step 4 snapshot
+  const proposedBrief = brief?.proposedBrief;
+  const isStep4Approved = proposedBrief?.status === 'approved' && !proposedBrief?.editedAfterApproval;
+  const approvedSections = proposedBrief?.approvedSnapshot || proposedBrief?.sections || {};
+  const approvedAt = proposedBrief?.approvedAt;
+
   const confirmedPoints = brief.confirmedPoints || [];
-
-  // Fetch active brief template
-  const { data: briefTemplate } = useQuery({
-    queryKey: ['briefTemplate'],
-    queryFn: async () => {
-      const templates = await base44.entities.KnowledgeBaseDoc.filter({ 
-        docType: 'brief_template', 
-        isActive: true 
-      });
-      return templates[0] || null;
-    }
-  });
-
-  useEffect(() => {
-    if (!finalBrief && !isGenerating) {
-      generateBrief();
-    }
-  }, [finalBrief]);
 
   const updateBriefMutation = useMutation({
     mutationFn: async (data) => {
@@ -61,99 +58,6 @@ export default function FinalBrief({ brief, sources = [], dialogEntries = [], on
       queryClient.invalidateQueries({ queryKey: ['brief', brief.id] });
     }
   });
-
-  const generateBrief = async () => {
-    setIsGenerating(true);
-    setTemplateError(null);
-
-    const templateText = briefTemplate?.extractedText;
-    if (!templateText && briefTemplate?.extractionStatus === 'pending') {
-      setTemplateError('Briefmalen behandles fortsatt. Vennligst vent og prøv igjen.');
-      setIsGenerating(false);
-      return;
-    }
-    if (!templateText && briefTemplate?.extractionStatus === 'failed') {
-      setTemplateError('Tekstuttrekk fra briefmalen feilet. Kontakt administrator.');
-      setIsGenerating(false);
-      return;
-    }
-
-    const sourceContext = sources.map(s => 
-      s.extractedText || `[${s.sourceType}: ${s.fileName || s.fileUrl}]`
-    ).join('\n\n');
-
-    const dialogContext = dialogEntries.map(e => 
-      `${e.role === 'assistant' ? 'Rådgiver' : 'Fagekspert'}: ${e.content}`
-    ).join('\n\n');
-
-    const confirmedContext = confirmedPoints.map(p => 
-      `- ${p.topic}: ${p.summary}`
-    ).join('\n');
-
-    const templateSection = templateText 
-      ? `BRIEFMAL (HØYESTE PRIORITET - FØLG DENNE STRUKTUREN):\n${templateText}\n\n---\n\n` 
-      : '';
-
-    const prompt = `Du er en kommunikasjonsekspert for GS1 Norway. Generer en komplett kommunikasjonsbrief.
-
-${templateSection}VIKTIG: 
-- Følg strukturen og overskriftene fra briefmalen nøyaktig.
-- Hvis informasjon mangler for å fylle ut en seksjon i malen, skriv "[Mangler informasjon om X]" i den seksjonen.
-- Bruk bekreftede punkter fra dialogen som grunnlag for innholdet.
-
-TEMA: ${brief.themeName}
-
-RAMMER:
-- Målgruppe: ${brief.rammer?.targetAudience || 'Ikke spesifisert'}
-- Mål: ${brief.rammer?.objectives || 'Ikke spesifisert'}
-- Kanaler: ${brief.rammer?.channels?.join(', ') || 'Ikke spesifisert'}
-- Tone: ${brief.rammer?.tone || 'Ikke spesifisert'}
-- Ønskede leveranser: ${brief.rammer?.deliverables?.join(', ') || 'Ikke spesifisert'}
-- Tidsfrist: ${brief.rammer?.deadline || 'Ikke spesifisert'}
-- Aktiveringstidspunkt: ${brief.rammer?.activationDate || 'Ikke spesifisert'}
-
-KILDEMATERIALE:
-${sourceContext || 'Ingen kilder'}
-
-BEKREFTEDE PUNKTER FRA DIALOG:
-${confirmedContext || 'Ingen bekreftede punkter'}
-
-DIALOGHISTORIKK:
-${dialogContext || 'Ingen dialog'}
-
-Generer en strukturert brief i JSON-format med følgende felter:
-- background: Bakgrunn og kontekst (2-3 avsnitt)
-- keyPoints: Nøkkelpunkter som må formidles (punktliste)
-- message: Hovedbudskap (1-2 setninger)
-- examples: Konkrete eksempler eller case som kan brukes`;
-
-    try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            background: { type: 'string' },
-            keyPoints: { type: 'string' },
-            message: { type: 'string' },
-            examples: { type: 'string' }
-          },
-          required: ['background', 'keyPoints', 'message']
-        }
-      });
-
-      await updateBriefMutation.mutateAsync({
-        finalBrief: {
-          ...response,
-          generatedAt: new Date().toISOString()
-        }
-      });
-    } catch (error) {
-      console.error('Failed to generate brief:', error);
-    }
-
-    setIsGenerating(false);
-  };
 
   const handleFeedbackSubmit = async ({ feedback, constraints }) => {
     setIsUpdating(true);
