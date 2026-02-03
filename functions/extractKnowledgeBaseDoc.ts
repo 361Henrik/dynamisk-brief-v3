@@ -35,36 +35,38 @@ Deno.serve(async (req) => {
 
     try {
       if (doc.fileUrl) {
-        console.log('Starting extraction for file:', doc.fileUrl.substring(0, 80));
+        console.log('Starting extraction for file:', doc.fileUrl);
         
-        // Use InvokeLLM with file_urls for DOCX/PDF extraction
-        const extractionResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: `Extract ALL text content from this document. Preserve the exact structure, headings, sections, and formatting as much as possible. Return ONLY the extracted text, nothing else. Do not summarize or interpret - just extract the raw text content.`,
-          file_urls: [doc.fileUrl],
-          response_json_schema: {
+        // Use ExtractDataFromUploadedFile which supports docx, pdf, etc.
+        const extractionResult = await base44.asServiceRole.integrations.Core.ExtractDataFromUploadedFile({
+          file_url: doc.fileUrl,
+          json_schema: {
             type: 'object',
             properties: {
-              text_content: {
+              full_text: {
                 type: 'string',
-                description: 'The complete extracted text from the document with preserved structure'
+                description: 'The complete text content of the document, including all sections, headings, paragraphs, and any structured content. Preserve the original formatting and structure as much as possible.'
               }
             },
-            required: ['text_content']
+            required: ['full_text']
           }
         });
 
         console.log('Extraction result:', { 
-          hasTextContent: !!extractionResult?.text_content,
-          textLength: extractionResult?.text_content?.length || 0
+          status: extractionResult?.status,
+          hasOutput: !!extractionResult?.output,
+          hasFullText: !!extractionResult?.output?.full_text,
+          textLength: extractionResult?.output?.full_text?.length || 0,
+          details: extractionResult?.details
         });
 
-        if (extractionResult?.text_content) {
-          extractedText = extractionResult.text_content;
+        if (extractionResult?.status === 'success' && extractionResult?.output?.full_text) {
+          extractedText = extractionResult.output.full_text;
           extractionStatus = 'success';
           console.log('Extraction successful, text length:', extractedText.length);
         } else {
-          extractionError = 'Kunne ikke trekke ut tekst fra dokumentet - tomt resultat';
-          console.log('Extraction failed: empty result');
+          extractionError = extractionResult?.details || 'Kunne ikke trekke ut tekst fra dokumentet';
+          console.log('Extraction failed:', extractionError);
         }
       } else {
         extractionError = 'Manglende fil-URL';
