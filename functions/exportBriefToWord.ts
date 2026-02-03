@@ -263,14 +263,18 @@ Deno.serve(async (req) => {
         });
 
         const buffer = await Packer.toBuffer(doc);
+        
+        // Convert to Uint8Array for proper binary response
+        const uint8Array = new Uint8Array(buffer);
 
         const filename = `${brief.title.replace(/[^a-zA-Z0-9æøåÆØÅ\s-]/g, '').replace(/\s+/g, '_')}.docx`;
 
-        return new Response(buffer, {
+        return new Response(uint8Array, {
             status: 200,
             headers: {
                 'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'Content-Disposition': `attachment; filename="${filename}"`
+                'Content-Disposition': `attachment; filename="${filename}"`,
+                'Content-Length': uint8Array.byteLength.toString()
             }
         });
     } catch (error) {
