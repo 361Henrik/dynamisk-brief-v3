@@ -1,5 +1,5 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'npm:docx@8.5.0';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'npm:docx@9.0.2';
 
 Deno.serve(async (req) => {
     try {

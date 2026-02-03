@@ -223,7 +223,7 @@ Returner den oppdaterte briefen i JSON-format med feltene: background, keyPoints
   const handleExportWord = async () => {
     setExporting(true);
     try {
-      const response = await base44.functions.invoke('exportBriefToWord', { briefId: brief.id });
+      const response = await base44.functions.invoke('exportBriefToWord', { briefId: brief.id }, { responseType: 'arraybuffer' });
       const blob = new Blob([response.data], { 
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
       });
