@@ -1,17 +1,11 @@
 import React from 'react';
 import { 
   Circle, 
-  CircleDot, 
   CheckCircle2,
-  HelpCircle
+  Sparkles
 } from 'lucide-react';
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 // Required sections for the brief - these must all be confirmed
 export const BRIEF_SECTIONS = [
@@ -57,87 +51,73 @@ export function areAllSectionsConfirmed(confirmedPoints = []) {
 
 export default function InterviewProgress({ confirmedPoints = [] }) {
   const sectionStatus = getSectionStatus(confirmedPoints);
-  const confirmedCount = getConfirmedSectionsCount(confirmedPoints);
-  const totalCount = BRIEF_SECTIONS.length;
+  const activeFocusSection = BRIEF_SECTIONS.find(section => sectionStatus[section.key] === 'missing');
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-          Fremdrift: {confirmedCount}/{totalCount} seksjoner
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-6">
+      
+      <div className="text-center">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Intervjuoversikt
         </h3>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <HelpCircle className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="left" className="max-w-xs">
-              <p className="text-sm">
-                <strong>Hva skjer når jeg bekrefter?</strong><br/>
-                Bekreftede punkter blir låst og brukes direkte i den ferdige briefen. 
-                Du kan ikke endre dem etterpå.
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       </div>
 
-      {/* Progress bar */}
-      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
-        <div 
-          className="bg-green-600 h-2 rounded-full transition-all duration-300"
-          style={{ width: `${(confirmedCount / totalCount) * 100}%` }}
-        />
+      {/* B) Aktivt fokus */}
+      <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg text-center">
+        <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">Aktivt fokus</p>
+        <div className="flex items-center justify-center space-x-2 text-blue-900 dark:text-blue-100">
+          <Sparkles className="h-4 w-4" />
+          <p className="font-semibold">
+            {activeFocusSection ? activeFocusSection.label : "Alle seksjoner bekreftet"}
+          </p>
+        </div>
       </div>
 
-      {/* Section list */}
-      <div className="space-y-2">
-        {BRIEF_SECTIONS.map((section) => {
-          const status = sectionStatus[section.key];
-          const confirmedPoint = confirmedPoints.find(p => 
-            p.sectionKey === section.key || 
-            p.topic?.toLowerCase().includes(section.key.replace('_', ' '))
-          );
-
-          return (
-            <div 
-              key={section.key}
-              className={cn(
-                "flex items-center gap-2 text-sm py-1 px-2 rounded",
-                status === 'confirmed' && "bg-green-50 dark:bg-green-900/20",
-                status === 'partial' && "bg-yellow-50 dark:bg-yellow-900/20",
-                status === 'missing' && "bg-gray-50 dark:bg-gray-700/30"
-              )}
-            >
-              {status === 'confirmed' ? (
-                <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-              ) : status === 'partial' ? (
-                <CircleDot className="h-4 w-4 text-yellow-600 flex-shrink-0" />
-              ) : (
-                <Circle className="h-4 w-4 text-red-400 flex-shrink-0" />
-              )}
-              <span className={cn(
-                "flex-1",
-                status === 'confirmed' && "text-green-800 dark:text-green-300",
-                status === 'partial' && "text-yellow-800 dark:text-yellow-300",
-                status === 'missing' && "text-gray-500 dark:text-gray-400"
-              )}>
-                {section.label}
-              </span>
-              {status === 'missing' && (
-                <span className="text-xs text-red-500">Mangler</span>
-              )}
-            </div>
-          );
-        })}
+      {/* A) Status per intervjuseksjon */}
+      <div>
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+          Status per intervjuseksjon
+        </h4>
+        <div className="space-y-2">
+          {BRIEF_SECTIONS.map((section) => {
+            const status = sectionStatus[section.key];
+            return (
+              <div 
+                key={section.key}
+                className="flex items-center gap-3 text-sm"
+              >
+                {status === 'confirmed' ? (
+                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                ) : (
+                   <Circle className="h-5 w-5 text-red-500 fill-current flex-shrink-0" />
+                )}
+                <span className={cn(
+                  "flex-1",
+                  status === 'confirmed' ? "text-gray-800 dark:text-gray-200" : "text-gray-500 dark:text-gray-400"
+                )}>
+                  {section.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-4 space-y-1 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-md">
+            <p className="flex items-center gap-1.5"><Circle className="h-3 w-3 text-red-500 fill-current" /> <span className="font-semibold">Mangler</span> = ikke bekreftet ennå</p>
+            <p className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-green-600" /> <span className="font-semibold">Bekreftet</span> = låst og brukt i briefen</p>
+        </div>
       </div>
 
-      {/* Explanation */}
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
-        <strong>Bekreft</strong> = dette blir låst og brukt i briefen.
-      </p>
+      {/* C) Bekreftelse – forklaring */}
+      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+          Bekreftelse – forklaring
+        </h4>
+        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+          Svar alene fullfører ikke en seksjon.
+          Når du trykker <strong className="font-semibold text-gray-800 dark:text-gray-200">Bekreft</strong>, låses innholdet og brukes i den endelige briefen.
+        </p>
+      </div>
+
     </div>
   );
 }
