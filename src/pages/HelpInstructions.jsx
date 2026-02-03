@@ -20,7 +20,7 @@ function HelpInstructionsContent() {
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Hjelp & Instruksjoner</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Instruksjoner</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">
           Alt du trenger å vite om hvordan Dynamisk Brief fungerer
         </p>
@@ -34,13 +34,22 @@ function HelpInstructionsContent() {
             Slik fungerer flyten
           </CardTitle>
           <CardDescription>
-            Fra kildemateriale til ferdig brief i fire steg
+            Fra kildemateriale til ferdig brief i fem steg
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-start gap-4">
               <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium flex-shrink-0">1</div>
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">Briefmal</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Briefmalen styrer strukturen i intervjuet og den ferdige briefen.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium flex-shrink-0">2</div>
               <div>
                 <h4 className="font-medium text-gray-900 dark:text-white">Kildemateriale</h4>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -49,32 +58,39 @@ function HelpInstructionsContent() {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium flex-shrink-0">2</div>
-              <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">Rammer</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Definer målgruppe, mål, kanaler og tone for kommunikasjonen.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
               <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium flex-shrink-0">3</div>
               <div>
                 <h4 className="font-medium text-gray-900 dark:text-white">Dynamisk intervju</h4>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  AI-en stiller deg spørsmål for å forstå kommunikasjonsbehovet. Bekreft eller korriger punktene underveis.
+                  AI-en stiller deg spørsmål for å fylle inn manglende informasjon. Svar må bekreftes for å bli brukt i briefen.
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-4">
               <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium flex-shrink-0">4</div>
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">Ferdig brief</h4>
+                <h4 className="font-medium text-gray-900 dark:text-white">Foreslått brief</h4>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  AI-en genererer briefen basert på alt du har lagt inn. Eksporter til Word når du er fornøyd.
+                  Du får en komplett, redigerbar brief basert på intervjuet. Alle seksjoner kan redigeres manuelt. Når du er fornøyd, må briefen <strong>godkjennes</strong> før den regnes som endelig.
                 </p>
               </div>
             </div>
+            <div className="flex items-start gap-4">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium flex-shrink-0">5</div>
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">Ferdig brief</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Den ferdige briefen er alltid basert på <strong>sist godkjente foreslåtte brief</strong>. Her kan du kopiere innhold eller eksportere til Word.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Clarification block */}
+          <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>Foreslått brief</strong> er redigerings- og godkjenningssteget. <strong>Ferdig brief</strong> viser alltid den sist godkjente versjonen. Hvis du gjør endringer etter godkjenning, må briefen godkjennes på nytt.
+            </p>
           </div>
         </CardContent>
       </Card>
