@@ -264,18 +264,20 @@ Deno.serve(async (req) => {
 
         const buffer = await Packer.toBuffer(doc);
         
-        // Convert to Uint8Array for proper binary response
+        // Convert buffer to base64 for safe JSON transport
         const uint8Array = new Uint8Array(buffer);
+        let binaryString = '';
+        for (let i = 0; i < uint8Array.length; i++) {
+            binaryString += String.fromCharCode(uint8Array[i]);
+        }
+        const base64Data = btoa(binaryString);
 
         const filename = `${brief.title.replace(/[^a-zA-Z0-9æøåÆØÅ\s-]/g, '').replace(/\s+/g, '_')}.docx`;
 
-        return new Response(uint8Array, {
-            status: 200,
-            headers: {
-                'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'Content-Disposition': `attachment; filename="${filename}"`,
-                'Content-Length': uint8Array.byteLength.toString()
-            }
+        return Response.json({
+            filename,
+            data: base64Data,
+            mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         });
     } catch (error) {
         console.error('Export error:', error);

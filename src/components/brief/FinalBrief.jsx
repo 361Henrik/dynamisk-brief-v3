@@ -224,31 +224,20 @@ Returner den oppdaterte briefen i JSON-format med feltene: background, keyPoints
     setExporting(true);
     try {
       const response = await base44.functions.invoke('exportBriefToWord', { briefId: brief.id });
+      const { data: base64Data, filename, mimeType } = response.data;
       
-      // Convert response.data to proper binary if it's a string or needs conversion
-      let binaryData;
-      if (response.data instanceof ArrayBuffer) {
-        binaryData = response.data;
-      } else if (typeof response.data === 'string') {
-        // If data came as base64 string, decode it
-        const binaryString = atob(response.data);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        binaryData = bytes.buffer;
-      } else {
-        // Try to use it directly
-        binaryData = response.data;
+      // Decode base64 to binary
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
       }
 
-      const blob = new Blob([binaryData], { 
-        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
-      });
+      const blob = new Blob([bytes], { type: mimeType });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${brief.title.replace(/[^a-zA-Z0-9æøåÆØÅ\s-]/g, '').replace(/\s+/g, '_')}.docx`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
