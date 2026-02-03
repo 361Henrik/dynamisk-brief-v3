@@ -220,22 +220,26 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
             </span>
           </div>
 
-          {/* Text Input - NEW */}
+          {/* Text Input */}
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               <Type className="h-4 w-4 text-green-500" />
               Lim inn tekst / notater
             </label>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Legg til bakgrunnsinformasjon, notater fra møter, eller annet relevant innhold som ikke finnes i dokumenter.
+            </p>
             <Textarea
               placeholder="Lim inn tekst, notater, eller annet innhold her..."
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
               rows={4}
-              className="resize-none"
+              className="resize-y min-h-[100px]"
+              style={{ minHeight: '100px' }}
             />
             <div className="flex justify-between items-center">
               <span className="text-xs text-gray-500">
-                {textInput.length > 0 ? `${textInput.length} tegn` : ''}
+                {textInput.length > 0 ? `${textInput.length} tegn` : 'Tekstfeltet utvides automatisk'}
               </span>
               <Button
                 onClick={handleAddText}
