@@ -4,7 +4,7 @@ import { CheckCircle2, Circle } from 'lucide-react';
 const STEPS = [
   { key: 'source_material', label: 'Kildemateriale' },
   { key: 'rammer', label: 'Rammer' },
-  { key: 'dialog', label: 'AI-dialog' },
+  { key: 'dialog', label: 'Dynamisk intervju' },
   { key: 'final', label: 'Ferdig brief' }
 ];
 

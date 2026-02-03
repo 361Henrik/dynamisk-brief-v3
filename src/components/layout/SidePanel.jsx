@@ -23,21 +23,13 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const FLOW_STEPS = [
-  { key: 'theme', label: 'Tema' },
   { key: 'source_material', label: 'Kildemateriale' },
   { key: 'rammer', label: 'Rammer' },
-  { key: 'dialog', label: 'AI-dialog' },
-  { key: 'confirm', label: 'Avklaring og bekreftelse' },
-  { key: 'final', label: 'Ferdig brief' },
-  { key: 'export', label: 'Word-eksport' }
+  { key: 'dialog', label: 'Dynamisk intervju' },
+  { key: 'final', label: 'Ferdig brief' }
 ];
 
-const STEP_MAP = {
-  'source_material': 'source_material',
-  'rammer': 'rammer',
-  'dialog': 'dialog',
-  'final': 'final'
-};
+const STEP_ORDER = ['source_material', 'rammer', 'dialog', 'final'];
 
 export default function SidePanel({ currentPageName, collapsed, onToggleCollapse, briefCurrentStep }) {
   const { isAdmin } = useAuth();
@@ -58,6 +50,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
     { name: 'Dynamisk brief', page: 'NewBrief', icon: FileText },
     { name: 'Mine briefs', page: 'BriefList', icon: FolderOpen },
     { name: 'Hjelp & Instruksjoner', page: 'HelpInstructions', icon: HelpCircle },
+    { name: 'Innstillinger', page: 'Settings', icon: Settings },
   ];
 
   const adminItems = [
@@ -70,9 +63,8 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
   const getFlowStepStatus = (stepKey) => {
     if (!isInBriefEditor || !briefCurrentStep) return 'upcoming';
     
-    const stepOrder = ['theme', 'source_material', 'rammer', 'dialog', 'confirm', 'final', 'export'];
-    const currentIdx = stepOrder.indexOf(STEP_MAP[briefCurrentStep] || briefCurrentStep);
-    const stepIdx = stepOrder.indexOf(stepKey);
+    const currentIdx = STEP_ORDER.indexOf(briefCurrentStep);
+    const stepIdx = STEP_ORDER.indexOf(stepKey);
     
     if (stepIdx < currentIdx) return 'completed';
     if (stepIdx === currentIdx) return 'current';
@@ -173,19 +165,18 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
         ))}
       </nav>
 
-      {/* Kunnskapsbase Section */}
+      {/* Briefmal Section */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-2 mb-3">
+        <div className="flex items-center space-x-2 mb-2">
           <BookOpen className="h-5 w-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Kunnskapsbase</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">Briefmal</h3>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-          I V1 er kunnskapsbasen den aktive <strong>briefmalen</strong> – strukturen og malen som brukes til å generere alle briefs.
+          Briefmalen styrer strukturen i intervjuet og den ferdige briefen.
         </p>
 
         {/* Brief Template Status */}
         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 mb-3">
-          <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">Aktiv briefmal:</p>
           {briefTemplate ? (
             <div className="flex items-start space-x-2">
               {briefTemplate.extractionStatus === 'success' ? (
@@ -225,45 +216,47 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
         )}
       </div>
 
-      {/* Flow Explanation */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex-1">
-        <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-          Slik fungerer flyten
-        </h4>
-        <div className="space-y-1">
-          {FLOW_STEPS.map((step, idx) => {
-            const status = getFlowStepStatus(step.key);
-            return (
-              <div 
-                key={step.key} 
-                className={cn(
-                  "flex items-center space-x-2 py-1.5 px-2 rounded text-sm transition-colors",
-                  status === 'current' && "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium",
-                  status === 'completed' && "text-green-700 dark:text-green-400",
-                  status === 'upcoming' && "text-gray-400 dark:text-gray-500"
-                )}
-              >
-                <div className={cn(
-                  "w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0",
-                  status === 'current' && "bg-blue-600 text-white",
-                  status === 'completed' && "bg-green-600 text-white",
-                  status === 'upcoming' && "bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
-                )}>
-                  {status === 'completed' ? (
-                    <CheckCircle2 className="h-3 w-3" />
-                  ) : (
-                    idx + 1
+      {/* Brief Progress (only when in editor) */}
+      {isInBriefEditor && briefCurrentStep && (
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex-1">
+          <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+            Fremdrift
+          </h4>
+          <div className="space-y-1">
+            {FLOW_STEPS.map((step, idx) => {
+              const status = getFlowStepStatus(step.key);
+              return (
+                <div 
+                  key={step.key} 
+                  className={cn(
+                    "flex items-center space-x-2 py-1.5 px-2 rounded text-sm transition-colors",
+                    status === 'current' && "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium",
+                    status === 'completed' && "text-green-700 dark:text-green-400",
+                    status === 'upcoming' && "text-gray-400 dark:text-gray-500"
+                  )}
+                >
+                  <div className={cn(
+                    "w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0",
+                    status === 'current' && "bg-blue-600 text-white",
+                    status === 'completed' && "bg-green-600 text-white",
+                    status === 'upcoming' && "bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
+                  )}>
+                    {status === 'completed' ? (
+                      <CheckCircle2 className="h-3 w-3" />
+                    ) : (
+                      idx + 1
+                    )}
+                  </div>
+                  <span>{step.label}</span>
+                  {status === 'current' && (
+                    <ChevronRight className="h-4 w-4 ml-auto" />
                   )}
                 </div>
-                <span>{step.label}</span>
-                {status === 'current' && (
-                  <ChevronRight className="h-4 w-4 ml-auto" />
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

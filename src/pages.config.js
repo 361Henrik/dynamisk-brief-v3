@@ -54,9 +54,10 @@ import AdminThemes from './pages/AdminThemes';
 import AdminUsers from './pages/AdminUsers';
 import BriefEditor from './pages/BriefEditor';
 import BriefList from './pages/BriefList';
+import HelpInstructions from './pages/HelpInstructions';
 import Home from './pages/Home';
 import NewBrief from './pages/NewBrief';
-import HelpInstructions from './pages/HelpInstructions';
+import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
 
 
@@ -68,9 +69,10 @@ export const PAGES = {
     "AdminUsers": AdminUsers,
     "BriefEditor": BriefEditor,
     "BriefList": BriefList,
+    "HelpInstructions": HelpInstructions,
     "Home": Home,
     "NewBrief": NewBrief,
-    "HelpInstructions": HelpInstructions,
+    "Settings": Settings,
 }
 
 export const pagesConfig = {
