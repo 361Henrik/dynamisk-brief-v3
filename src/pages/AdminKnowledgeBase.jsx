@@ -70,7 +70,12 @@ function AdminKnowledgeBaseContent() {
 
   const createDocMutation = useMutation({
     mutationFn: async (data) => {
-      await base44.entities.KnowledgeBaseDoc.create({ ...data, isActive: true });
+      await base44.entities.KnowledgeBaseDoc.create({ 
+        ...data, 
+        isActive: true,
+        extractionStatus: 'pending',
+        extractionError: null
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kbDocs'] });

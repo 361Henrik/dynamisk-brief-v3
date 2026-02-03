@@ -23,8 +23,9 @@ Deno.serve(async (req) => {
     const body = await req.json();
     
     // Support both direct calls and automation triggers
-    entityName = body.entityName || 'KnowledgeBaseDoc';
-    entityId = body.entityId || body.docId || body.briefSourceMaterialId || body.data?.id;
+    // Automation payload: { event: { type, entity_name, entity_id }, data: {...} }
+    entityName = body.entityName || body.event?.entity_name || 'KnowledgeBaseDoc';
+    entityId = body.entityId || body.event?.entity_id || body.docId || body.briefSourceMaterialId || body.data?.id;
     
     console.log(`extractDocumentContent called: entity=${entityName}, id=${entityId}`);
 
@@ -123,13 +124,12 @@ Returner alt relevant tekstinnhold fra siden.`,
           }
         } else if (isDocx || isPptx || isXlsx) {
           // Office formats - NOT supported in V1
-          const formatName = isDocx ? 'Word (DOCX)' : isPptx ? 'PowerPoint (PPTX)' : 'Excel (XLSX)';
-          extractionError = `${formatName}-filer støttes ikke for tekstutrekk i V1. Last opp PDF i stedet.`;
+          extractionError = 'Denne filtypen støttes ikke i versjon 1. Last opp PDF, bruk URL, eller lim inn tekst.';
           extractionStatus = 'failed';
-          console.log('Unsupported format:', formatName);
+          console.log('Unsupported format');
         } else {
           // Unknown format
-          extractionError = 'Ukjent filformat. Støttede formater i V1: PDF, URL.';
+          extractionError = 'Denne filtypen støttes ikke i versjon 1. Last opp PDF, bruk URL, eller lim inn tekst.';
           extractionStatus = 'failed';
           console.log('Unknown file format');
         }
