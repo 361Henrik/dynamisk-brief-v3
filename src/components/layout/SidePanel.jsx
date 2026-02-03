@@ -17,7 +17,8 @@ import {
   Loader2,
   PanelLeftClose,
   PanelLeft,
-  HelpCircle
+  HelpCircle,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -54,7 +55,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
   ];
 
   const adminItems = [
-    { name: 'Admin', page: 'AdminThemes', icon: Settings },
+    { name: 'Admin', page: 'AdminThemes', icon: ShieldCheck },
   ];
 
   const isCurrentPage = (pageName) => currentPageName === pageName;
