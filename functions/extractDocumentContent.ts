@@ -41,10 +41,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Document not found' }, { status: 404 });
     }
 
-    // Only process if status is pending
+    // Only process if status is pending - this is a safety check
+    // The automation should already filter for pending, but we double-check here
     if (doc.extractionStatus !== 'pending') {
       console.log('Skipping - extraction not pending, current status:', doc.extractionStatus);
-      return Response.json({ message: 'Extraction not pending, skipping' }, { status: 200 });
+      // Return success without changing anything - document already processed
+      return Response.json({ 
+        message: 'Extraction not pending, skipping',
+        entityName,
+        entityId,
+        currentStatus: doc.extractionStatus
+      }, { status: 200 });
     }
 
     let extractedText = null;
