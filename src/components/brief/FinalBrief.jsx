@@ -223,26 +223,26 @@ Returner den oppdaterte briefen i JSON-format med feltene: background, keyPoints
   const handleExportWord = async () => {
     setExporting(true);
     try {
-      // Use direct fetch with arraybuffer to ensure binary data is preserved
-      const functionUrl = base44.functions.getUrl('exportBriefToWord');
-      const token = await base44.auth.getToken();
+      const response = await base44.functions.invoke('exportBriefToWord', { briefId: brief.id });
       
-      const response = await fetch(functionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ briefId: brief.id })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Export failed');
+      // Convert response.data to proper binary if it's a string or needs conversion
+      let binaryData;
+      if (response.data instanceof ArrayBuffer) {
+        binaryData = response.data;
+      } else if (typeof response.data === 'string') {
+        // If data came as base64 string, decode it
+        const binaryString = atob(response.data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        binaryData = bytes.buffer;
+      } else {
+        // Try to use it directly
+        binaryData = response.data;
       }
 
-      const arrayBuffer = await response.arrayBuffer();
-      const blob = new Blob([arrayBuffer], { 
+      const blob = new Blob([binaryData], { 
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
       });
       const url = window.URL.createObjectURL(blob);
