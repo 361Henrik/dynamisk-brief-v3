@@ -47,6 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AdminBriefmal from './pages/AdminBriefmal';
 import AdminKnowledgeBase from './pages/AdminKnowledgeBase';
 import AdminSystemInstructions from './pages/AdminSystemInstructions';
 import AdminThemes from './pages/AdminThemes';
@@ -55,11 +56,12 @@ import BriefEditor from './pages/BriefEditor';
 import BriefList from './pages/BriefList';
 import Home from './pages/Home';
 import NewBrief from './pages/NewBrief';
-import AdminBriefmal from './pages/AdminBriefmal';
+import HelpInstructions from './pages/HelpInstructions';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AdminBriefmal": AdminBriefmal,
     "AdminKnowledgeBase": AdminKnowledgeBase,
     "AdminSystemInstructions": AdminSystemInstructions,
     "AdminThemes": AdminThemes,
@@ -68,7 +70,7 @@ export const PAGES = {
     "BriefList": BriefList,
     "Home": Home,
     "NewBrief": NewBrief,
-    "AdminBriefmal": AdminBriefmal,
+    "HelpInstructions": HelpInstructions,
 }
 
 export const pagesConfig = {

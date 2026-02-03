@@ -13,7 +13,8 @@ import {
   Trash2,
   Upload,
   FileText,
-  ExternalLink
+  ExternalLink,
+  Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -124,6 +125,14 @@ function AdminKnowledgeBaseContent() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // V1: Only allow PDF files
+    const fileName = file.name.toLowerCase();
+    if (!fileName.endsWith('.pdf')) {
+      toast.error('Kun PDF-filer støttes i V1. Lagre dokumentet som PDF og prøv igjen.');
+      e.target.value = '';
+      return;
+    }
+
     setSelectedFile(file);
     setUploading(true);
 
@@ -132,6 +141,7 @@ function AdminKnowledgeBaseContent() {
       setFormData(prev => ({ ...prev, fileUrl: file_url }));
     } catch (error) {
       console.error('Upload failed:', error);
+      toast.error('Klarte ikke å laste opp filen');
     } finally {
       setUploading(false);
     }
@@ -155,13 +165,27 @@ function AdminKnowledgeBaseContent() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Kunnskapsbase</h1>
-          <p className="text-gray-500 mt-1">Administrer bakgrunnsmateriale for AI-en</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Kunnskapsbase</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Administrer bakgrunnsmateriale for AI-en</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleOpenCreate}>
           <PlusCircle className="h-4 w-4 mr-2" />
           Last opp dokument
         </Button>
+      </div>
+
+      {/* V1 Format Notice */}
+      <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+        <div className="flex items-start gap-3">
+          <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-medium text-amber-900 dark:text-amber-100">V1: Kun PDF støttes</p>
+            <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+              Word-, Excel- og PowerPoint-filer støttes ikke for tekstutrekk. 
+              Har du et Word-dokument? Lagre det som PDF først (Fil → Lagre som → PDF).
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Document List */}
@@ -318,12 +342,13 @@ function AdminKnowledgeBaseContent() {
                       <Upload className="h-8 w-8 text-gray-400" />
                     )}
                     <span className="text-sm text-gray-500 mt-2">
-                      {uploading ? 'Laster opp...' : 'Klikk for å laste opp fil'}
+                      {uploading ? 'Laster opp...' : 'Klikk for å laste opp PDF'}
                     </span>
+                    <span className="text-xs text-gray-400 mt-1">Kun PDF støttes i V1</span>
                     <input
                       type="file"
                       className="hidden"
-                      accept=".pdf,.docx"
+                      accept=".pdf"
                       onChange={handleFileChange}
                       disabled={uploading}
                     />

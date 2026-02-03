@@ -16,7 +16,8 @@ import {
   AlertCircle,
   Loader2,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  HelpCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -56,6 +57,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
     { name: 'Hjem', page: 'Home', icon: Home },
     { name: 'Dynamisk brief', page: 'NewBrief', icon: FileText },
     { name: 'Mine briefs', page: 'BriefList', icon: FolderOpen },
+    { name: 'Hjelp & Instruksjoner', page: 'HelpInstructions', icon: HelpCircle },
   ];
 
   const adminItems = [

@@ -74,6 +74,13 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
     setUploading(true);
 
     for (const file of files) {
+      // V1: Only allow PDF files
+      const fileName = file.name.toLowerCase();
+      if (!fileName.endsWith('.pdf')) {
+        toast.error(`${file.name}: Kun PDF-filer støttes i V1. Lagre dokumentet som PDF og prøv igjen.`);
+        continue;
+      }
+
       try {
         const { file_url } = await base44.integrations.Core.UploadFile({ file });
         
@@ -162,9 +169,14 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
             <span>Last opp kildemateriale</span>
           </CardTitle>
           <CardDescription>
-            Last opp dokumenter (PDF, Word) eller legg til URL-er som skal brukes som grunnlag for briefen.
+            Last opp PDF-filer eller legg til URL-er som skal brukes som grunnlag for briefen.
             Du må legge til minst én kilde før du kan fortsette.
           </CardDescription>
+          <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-800 dark:text-amber-200">
+            <strong>V1:</strong> Støttede formater er PDF og URL. Word-, Excel- og PowerPoint-filer støttes ikke som kildemateriale.
+            <br />
+            <span className="text-xs">Har du et Word-dokument? Lagre det som PDF først.</span>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* File Upload */}
@@ -179,14 +191,14 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
                 ) : (
                   <div className="flex flex-col items-center">
                     <FileText className="h-10 w-10 text-gray-400" />
-                    <span className="text-sm font-medium text-gray-700 mt-2">Klikk for å laste opp filer</span>
-                    <span className="text-xs text-gray-500 mt-1">PDF, DOCX (maks 10 MB per fil)</span>
+                    <span className="text-sm font-medium text-gray-700 mt-2">Klikk for å laste opp PDF</span>
+                    <span className="text-xs text-gray-500 mt-1">Kun PDF-filer støttes (maks 10 MB)</span>
                   </div>
                 )}
                 <input
                   type="file"
                   className="hidden"
-                  accept=".pdf,.docx"
+                  accept=".pdf"
                   multiple
                   onChange={handleFileUpload}
                   disabled={uploading}
