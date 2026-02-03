@@ -46,39 +46,42 @@ Deno.serve(async (req) => {
         
         if (isDocx || isPdf) {
           // For DOCX and PDF, use InvokeLLM with file_urls (vision model can read documents)
-          console.log('Using InvokeLLM for document extraction');
-          extractionResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
-            prompt: `Du mottar et dokument. Din oppgave er å trekke ut ALT tekstinnhold fra dokumentet og returnere det. 
+          console.log('Using InvokeLLM for document extraction, file URL:', doc.fileUrl);
+          
+          try {
+            extractionResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
+              prompt: `Du mottar et dokument. Din oppgave er å trekke ut ALT tekstinnhold fra dokumentet og returnere det. 
 
 VIKTIG:
 - Trekk ut ALL tekst, inkludert overskrifter, avsnitt, lister, tabeller, etc.
 - Bevar den originale strukturen så godt som mulig
 - IKKE oppsummer eller fortolk - bare trekk ut rå tekst
 - Returner teksten i full_text feltet`,
-            file_urls: [doc.fileUrl],
-            response_json_schema: {
-              type: 'object',
-              properties: {
-                full_text: {
-                  type: 'string',
-                  description: 'The complete extracted text from the document'
-                }
-              },
-              required: ['full_text']
+              file_urls: [doc.fileUrl],
+              response_json_schema: {
+                type: 'object',
+                properties: {
+                  full_text: {
+                    type: 'string',
+                    description: 'The complete extracted text from the document'
+                  }
+                },
+                required: ['full_text']
+              }
+            });
+            
+            console.log('InvokeLLM result:', JSON.stringify(extractionResult).substring(0, 500));
+            
+            if (extractionResult?.full_text) {
+              extractedText = extractionResult.full_text;
+              extractionStatus = 'success';
+              console.log('Extraction successful via LLM, text length:', extractedText.length);
+            } else {
+              extractionError = 'Kunne ikke trekke ut tekst fra dokumentet via AI - tomt resultat';
             }
-          });
-          
-          console.log('InvokeLLM result:', { 
-            hasFullText: !!extractionResult?.full_text,
-            textLength: extractionResult?.full_text?.length || 0
-          });
-          
-          if (extractionResult?.full_text) {
-            extractedText = extractionResult.full_text;
-            extractionStatus = 'success';
-            console.log('Extraction successful via LLM, text length:', extractedText.length);
-          } else {
-            extractionError = 'Kunne ikke trekke ut tekst fra dokumentet via AI';
+          } catch (llmError) {
+            console.error('InvokeLLM error:', llmError.message, llmError);
+            extractionError = `AI-feil: ${llmError.message}`;
           }
         } else {
           // For other file types, try ExtractDataFromUploadedFile
