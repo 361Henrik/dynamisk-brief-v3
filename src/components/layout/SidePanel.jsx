@@ -51,7 +51,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
     { name: 'Hjem', page: 'Home', icon: Home },
     { name: 'Dynamisk brief', page: 'NewBrief', icon: FileText },
     { name: 'Mine briefs', page: 'BriefList', icon: FolderOpen },
-    { name: 'Hjelp & Instruksjoner', page: 'HelpInstructions', icon: HelpCircle },
+    { name: 'Instruksjoner', page: 'HelpInstructions', icon: HelpCircle },
     { name: 'Innstillinger', page: 'Settings', icon: Settings },
   ];
 
