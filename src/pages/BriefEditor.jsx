@@ -1,15 +1,16 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { 
   ArrowLeft,
   Loader2,
   FileText,
   Pencil,
-  Check
+  Check,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,13 +20,17 @@ import RammerForm from '@/components/brief/RammerForm';
 import AIDialog from '@/components/brief/AIDialog';
 import ProposedBrief from '@/components/brief/ProposedBrief';
 import FinalBrief from '@/components/brief/FinalBrief';
+import DeleteBriefDialog from '@/components/brief/DeleteBriefDialog';
+import { toast } from 'sonner';
 
 function BriefEditorContent() {
   const urlParams = new URLSearchParams(window.location.search);
   const briefId = urlParams.get('id');
   const queryClient = useQueryClient();
-  const [editingTitle, setEditingTitle] = React.useState(false);
-  const [titleInput, setTitleInput] = React.useState('');
+  const navigate = useNavigate();
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleInput, setTitleInput] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const { data: brief, isLoading, error, refetch: refetchBrief } = useQuery({
     queryKey: ['brief', briefId],
@@ -72,6 +77,39 @@ function BriefEditorContent() {
     setTitleInput(brief.title);
     setEditingTitle(true);
   };
+
+  const deleteBriefMutation = useMutation({
+    mutationFn: async () => {
+      // Delete related data first
+      const [sources, dialogEntries] = await Promise.all([
+        base44.entities.BriefSourceMaterial.filter({ briefId }),
+        base44.entities.DialogEntry.filter({ briefId })
+      ]);
+      
+      // Delete all related records
+      await Promise.all([
+        ...sources.map(s => base44.entities.BriefSourceMaterial.delete(s.id)),
+        ...dialogEntries.map(d => base44.entities.DialogEntry.delete(d.id))
+      ]);
+      
+      // Delete the brief itself
+      await base44.entities.Brief.delete(briefId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['briefs'] });
+      toast.success('Briefen ble slettet');
+      navigate(createPageUrl('BriefList'));
+    },
+    onError: () => {
+      toast.error('Kunne ikke slette briefen');
+    }
+  });
+
+  const handleConfirmDelete = () => {
+    deleteBriefMutation.mutate();
+  };
+
+  const canDelete = brief && brief.status !== 'godkjent';
 
   if (!briefId) {
     return (
@@ -142,6 +180,17 @@ function BriefEditorContent() {
           )}
           <p className="text-gray-500">{brief.themeName} • {brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}</p>
         </div>
+        {canDelete && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Slett
+          </Button>
+        )}
       </div>
 
       {/* Stepper */}
@@ -194,6 +243,13 @@ function BriefEditorContent() {
           onBack={() => handleUpdateStep('proposed')}
         />
       )}
+
+      <DeleteBriefDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleConfirmDelete}
+        isDeleting={deleteBriefMutation.isPending}
+      />
     </div>
   );
 }

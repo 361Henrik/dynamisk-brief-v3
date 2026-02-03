@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { 
@@ -15,7 +15,9 @@ import {
   ArrowRight,
   Loader2,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  MoreHorizontal,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,11 +29,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import DeleteBriefDialog from '@/components/brief/DeleteBriefDialog';
+import { toast } from 'sonner';
 
 function BriefListContent() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [briefToDelete, setBriefToDelete] = useState(null);
 
   const { data: briefs = [], isLoading } = useQuery({
     queryKey: ['briefs', 'all'],
@@ -41,6 +54,47 @@ function BriefListContent() {
     },
     enabled: !!user?.email
   });
+
+  const deleteBriefMutation = useMutation({
+    mutationFn: async (briefId) => {
+      // Delete related data first
+      const [sources, dialogEntries] = await Promise.all([
+        base44.entities.BriefSourceMaterial.filter({ briefId }),
+        base44.entities.DialogEntry.filter({ briefId })
+      ]);
+      
+      // Delete all related records
+      await Promise.all([
+        ...sources.map(s => base44.entities.BriefSourceMaterial.delete(s.id)),
+        ...dialogEntries.map(d => base44.entities.DialogEntry.delete(d.id))
+      ]);
+      
+      // Delete the brief itself
+      await base44.entities.Brief.delete(briefId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['briefs'] });
+      toast.success('Briefen ble slettet');
+      setDeleteDialogOpen(false);
+      setBriefToDelete(null);
+    },
+    onError: () => {
+      toast.error('Kunne ikke slette briefen');
+    }
+  });
+
+  const handleDeleteClick = (e, brief) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setBriefToDelete(brief);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (briefToDelete) {
+      deleteBriefMutation.mutate(briefToDelete.id);
+    }
+  };
 
   const filteredBriefs = briefs.filter(brief => {
     const matchesSearch = !searchQuery || 
@@ -146,15 +200,15 @@ function BriefListContent() {
                         }
                       </div>
                       <div>
-                        <h3 className="font-medium text-gray-900">{brief.title}</h3>
-                        <div className="flex items-center space-x-3 text-sm text-gray-500 mt-1">
+                        <h3 className="font-medium text-gray-900 dark:text-white">{brief.title}</h3>
+                        <div className="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400 mt-1">
                           <span>{brief.themeName || 'Ukjent tema'}</span>
                           <span>•</span>
                           <span>Opprettet {formatDate(brief.created_date)}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
                       <span className={`text-xs px-3 py-1 rounded-full font-medium ${
                         brief.status === 'godkjent' 
                           ? 'bg-green-100 text-green-700' 
@@ -162,6 +216,29 @@ function BriefListContent() {
                       }`}>
                         {brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}
                       </span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {brief.status !== 'godkjent' ? (
+                            <DropdownMenuItem 
+                              onClick={(e) => handleDeleteClick(e, brief)}
+                              className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Slett brief
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem disabled className="text-gray-400">
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Kan ikke slette godkjent brief
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       <ArrowRight className="h-5 w-5 text-gray-400" />
                     </div>
                   </div>
@@ -171,6 +248,13 @@ function BriefListContent() {
           ))}
         </div>
       )}
+
+      <DeleteBriefDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleConfirmDelete}
+        isDeleting={deleteBriefMutation.isPending}
+      />
     </div>
   );
 }
