@@ -43,6 +43,43 @@ const getMessageType = (entry) => {
   return 'context';
 };
 
+// Detect which section an AI question is targeting based on content keywords
+const detectActiveSection = (content, confirmedPoints = []) => {
+  if (!content) return null;
+  const lowerContent = content.toLowerCase();
+  
+  // Check each section for keyword matches
+  const sectionKeywords = {
+    hovedbudskap: ['hovedbudskap', 'kjernebudskap', 'viktigste budskap', 'kommunisere'],
+    malgruppe_innsikt: ['målgruppe', 'målgruppeinnsikt', 'hvem er', 'kjenner du', 'deres behov'],
+    nokkelpunkter: ['nøkkelpunkt', 'konkrete punkt', 'viktige punkt', 'detaljer'],
+    eksempler: ['eksempel', 'case', 'illustrer', 'konkret historie', 'erfaring'],
+    call_to_action: ['call to action', 'handling', 'ønsker du at', 'neste steg', 'gjøre etterpå']
+  };
+  
+  for (const section of BRIEF_SECTIONS) {
+    // Skip already confirmed sections
+    const isConfirmed = confirmedPoints.some(p => 
+      p.sectionKey === section.key || 
+      p.topic?.toLowerCase().includes(section.key.replace('_', ' '))
+    );
+    if (isConfirmed) continue;
+    
+    const keywords = sectionKeywords[section.key] || [];
+    if (keywords.some(kw => lowerContent.includes(kw))) {
+      return section;
+    }
+  }
+  
+  // Default to first unconfirmed section
+  return BRIEF_SECTIONS.find(section => 
+    !confirmedPoints.some(p => 
+      p.sectionKey === section.key || 
+      p.topic?.toLowerCase().includes(section.key.replace('_', ' '))
+    )
+  );
+};
+
 export default function AIDialog({ brief, sources = [], onBack, onContinue, userName = '' }) {
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
