@@ -71,7 +71,7 @@ export default function FinalBrief({ brief, onBack }) {
       status: 'godkjent',
       approvedAt: new Date().toISOString()
     });
-    toast.success('Briefen er godkjent!');
+    toast.success('Briefen er fullført!');
   };
 
   const handleExportWord = async () => {
@@ -273,11 +273,11 @@ ${content}
           )}
           <div>
             <p className="font-medium text-gray-900 dark:text-white">
-              {brief.status === 'godkjent' ? 'Godkjent brief' : 'Ferdig brief'}
+              {brief.status === 'godkjent' ? 'Fullført brief' : 'Ferdig brief'}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {brief.status === 'godkjent' 
-                ? `Endelig godkjent ${formatDate(brief.approvedAt)}`
+                ? `Markert som fullført ${formatDate(brief.approvedAt)}`
                 : `Basert på godkjent foreslått brief fra ${formatDate(approvedAt)}`
               }
             </p>
@@ -286,7 +286,7 @@ ${content}
         {brief.status !== 'godkjent' && (
           <Button onClick={handleApprove} className="bg-green-600 hover:bg-green-700">
             <CheckCircle2 className="h-4 w-4 mr-2" />
-            Godkjenn brief
+            Fullfør brief
           </Button>
         )}
       </div>
