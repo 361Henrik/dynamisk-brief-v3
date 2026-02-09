@@ -1,6 +1,19 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'npm:docx@9.0.2';
 
+// Mirror of SECTION_CONFIG from FinalBrief.jsx - single source of truth for structure
+const SECTION_CONFIG = [
+  { key: 'prosjektinformasjon', label: 'Prosjektinformasjon', number: 1 },
+  { key: 'bakgrunn', label: 'Bakgrunn og situasjonsbeskrivelse', number: 2 },
+  { key: 'maal', label: 'Mål og suksesskriterier', number: 3 },
+  { key: 'maalgrupper', label: 'Målgrupper', number: 4 },
+  { key: 'verdiforslag', label: 'GS1-tilbudet og verdiforslag', number: 5 },
+  { key: 'budskap', label: 'Budskap, tone og stil', number: 6 },
+  { key: 'leveranser', label: 'Leveranser og kanaler', number: 7 },
+  { key: 'rammer', label: 'Praktiske rammer og godkjenning', number: 8 },
+  { key: 'kildemateriale', label: 'Kildemateriale', number: 9 }
+];
+
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
@@ -24,13 +37,57 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Brief not found' }, { status: 404 });
         }
 
-        const finalBrief = brief.finalBrief;
-        if (!finalBrief) {
-            return Response.json({ error: 'Brief has not been generated yet' }, { status: 400 });
+        // Use approvedSnapshot as single source of truth (same as Step 5)
+        const approvedSnapshot = brief.proposedBrief?.approvedSnapshot;
+        if (!approvedSnapshot || Object.keys(approvedSnapshot).length === 0) {
+            return Response.json({ error: 'No approved brief available. Please approve the proposed brief first.' }, { status: 400 });
         }
 
-        // Fetch confirmed points
-        const confirmedPoints = brief.confirmedPoints || [];
+        const approvedAt = brief.proposedBrief?.approvedAt;
+
+        // Build section paragraphs from SECTION_CONFIG (same order as Step 5)
+        const sectionParagraphs = [];
+        
+        for (const section of SECTION_CONFIG) {
+            const sectionContent = approvedSnapshot[section.key]?.content;
+            
+            // Section heading
+            sectionParagraphs.push(
+                new Paragraph({
+                    children: [
+                        new TextRun({ 
+                            text: `${section.number}. ${section.label.toUpperCase()}`, 
+                            bold: true, 
+                            size: 24, 
+                            color: "1e40af" 
+                        })
+                    ],
+                    heading: HeadingLevel.HEADING_1,
+                    spacing: { before: 400, after: 200 }
+                })
+            );
+
+            // Section content or placeholder
+            if (sectionContent) {
+                const contentLines = sectionContent.split('\n').filter(p => p.trim());
+                for (const line of contentLines) {
+                    sectionParagraphs.push(
+                        new Paragraph({
+                            children: [new TextRun({ text: line })],
+                            spacing: { after: 150 }
+                        })
+                    );
+                }
+            } else {
+                // Empty section placeholder (matches Step 5 behavior)
+                sectionParagraphs.push(
+                    new Paragraph({
+                        children: [new TextRun({ text: 'Ingen informasjon lagt til.', italics: true, color: "9ca3af" })],
+                        spacing: { after: 150 }
+                    })
+                );
+            }
+        }
 
         // Create Word document
         const doc = new Document({
@@ -87,27 +144,11 @@ Deno.serve(async (req) => {
                         spacing: { after: 400 }
                     }),
 
-                    // Rammer Section
-                    new Paragraph({
-                        children: [
-                            new TextRun({ text: "RAMMER", bold: true, size: 24, color: "1e40af" })
-                        ],
-                        heading: HeadingLevel.HEADING_1,
-                        spacing: { before: 200, after: 200 }
-                    }),
-
+                    // Metadata summary
                     new Paragraph({
                         children: [
                             new TextRun({ text: "Målgruppe: ", bold: true }),
                             new TextRun({ text: brief.rammer?.targetAudience || "Ikke spesifisert" })
-                        ],
-                        spacing: { after: 100 }
-                    }),
-
-                    new Paragraph({
-                        children: [
-                            new TextRun({ text: "Mål: ", bold: true }),
-                            new TextRun({ text: brief.rammer?.objectives || "Ikke spesifisert" })
                         ],
                         spacing: { after: 100 }
                     }),
@@ -122,121 +163,22 @@ Deno.serve(async (req) => {
 
                     new Paragraph({
                         children: [
-                            new TextRun({ text: "Tone: ", bold: true }),
-                            new TextRun({ text: brief.rammer?.tone || "Ikke spesifisert" })
+                            new TextRun({ text: "Frist: ", bold: true }),
+                            new TextRun({ text: brief.rammer?.deadline || "Ikke spesifisert" })
                         ],
                         spacing: { after: 100 }
                     }),
 
+                    // Divider before sections
                     new Paragraph({
-                        children: [
-                            new TextRun({ text: "Ønskede leveranser: ", bold: true }),
-                            new TextRun({ text: brief.rammer?.deliverables?.join(", ") || "Ikke spesifisert" })
-                        ],
-                        spacing: { after: 100 }
+                        border: {
+                            bottom: { style: BorderStyle.SINGLE, size: 1, color: "e5e7eb" }
+                        },
+                        spacing: { before: 200, after: 200 }
                     }),
 
-                    ...(brief.rammer?.deadline ? [new Paragraph({
-                        children: [
-                            new TextRun({ text: "Tidsfrist: ", bold: true }),
-                            new TextRun({ text: brief.rammer.deadline })
-                        ],
-                        spacing: { after: 100 }
-                    })] : []),
-
-                    ...(brief.rammer?.activationDate ? [new Paragraph({
-                        children: [
-                            new TextRun({ text: "Aktiveringstidspunkt: ", bold: true }),
-                            new TextRun({ text: brief.rammer.activationDate })
-                        ],
-                        spacing: { after: 100 }
-                    })] : []),
-
-                    // Bakgrunn Section
-                    new Paragraph({
-                        children: [
-                            new TextRun({ text: "BAKGRUNN", bold: true, size: 24, color: "1e40af" })
-                        ],
-                        heading: HeadingLevel.HEADING_1,
-                        spacing: { before: 400, after: 200 }
-                    }),
-
-                    ...finalBrief.background.split('\n').filter(p => p.trim()).map(paragraph => 
-                        new Paragraph({
-                            children: [new TextRun({ text: paragraph })],
-                            spacing: { after: 150 }
-                        })
-                    ),
-
-                    // Nøkkelpunkter Section
-                    new Paragraph({
-                        children: [
-                            new TextRun({ text: "NØKKELPUNKTER", bold: true, size: 24, color: "1e40af" })
-                        ],
-                        heading: HeadingLevel.HEADING_1,
-                        spacing: { before: 400, after: 200 }
-                    }),
-
-                    ...finalBrief.keyPoints.split('\n').filter(p => p.trim()).map(point => 
-                        new Paragraph({
-                            children: [new TextRun({ text: point.replace(/^[-•*]\s*/, '• ') })],
-                            spacing: { after: 100 }
-                        })
-                    ),
-
-                    // Hovedbudskap Section
-                    new Paragraph({
-                        children: [
-                            new TextRun({ text: "HOVEDBUDSKAP", bold: true, size: 24, color: "1e40af" })
-                        ],
-                        heading: HeadingLevel.HEADING_1,
-                        spacing: { before: 400, after: 200 }
-                    }),
-
-                    new Paragraph({
-                        children: [
-                            new TextRun({ text: finalBrief.message, bold: true, size: 24 })
-                        ],
-                        shading: { fill: "eff6ff" },
-                        spacing: { after: 200 }
-                    }),
-
-                    // Eksempler Section (if exists)
-                    ...(finalBrief.examples ? [
-                        new Paragraph({
-                            children: [
-                                new TextRun({ text: "EKSEMPLER", bold: true, size: 24, color: "1e40af" })
-                            ],
-                            heading: HeadingLevel.HEADING_1,
-                            spacing: { before: 400, after: 200 }
-                        }),
-                        ...finalBrief.examples.split('\n').filter(p => p.trim()).map(example => 
-                            new Paragraph({
-                                children: [new TextRun({ text: example })],
-                                spacing: { after: 100 }
-                            })
-                        )
-                    ] : []),
-
-                    // Bekreftede punkter Section (if exists)
-                    ...(confirmedPoints.length > 0 ? [
-                        new Paragraph({
-                            children: [
-                                new TextRun({ text: "BEKREFTEDE PUNKTER FRA DIALOG", bold: true, size: 24, color: "1e40af" })
-                            ],
-                            heading: HeadingLevel.HEADING_1,
-                            spacing: { before: 400, after: 200 }
-                        }),
-                        ...confirmedPoints.map(point => 
-                            new Paragraph({
-                                children: [
-                                    new TextRun({ text: `✓ ${point.topic}: `, bold: true }),
-                                    new TextRun({ text: point.summary })
-                                ],
-                                spacing: { after: 100 }
-                            })
-                        )
-                    ] : []),
+                    // All 9 sections from SECTION_CONFIG
+                    ...sectionParagraphs,
 
                     // Footer
                     new Paragraph({
@@ -249,7 +191,7 @@ Deno.serve(async (req) => {
                     new Paragraph({
                         children: [
                             new TextRun({
-                                text: `Generert: ${new Date(finalBrief.generatedAt).toLocaleDateString('nb-NO')} | GS1 Norway - Dynamisk Brief`,
+                                text: `Godkjent: ${approvedAt ? new Date(approvedAt).toLocaleDateString('nb-NO') : 'Ukjent'} | GS1 Norway - Dynamisk Brief`,
                                 size: 18,
                                 color: "9ca3af",
                                 italics: true
