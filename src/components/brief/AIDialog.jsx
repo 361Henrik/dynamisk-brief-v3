@@ -28,7 +28,7 @@ import InterviewProgress, {
   getConfirmedSectionsCount 
 } from './InterviewProgress';
 
-export default function AIDialog({ brief, sources = [], onBack, onContinue }) {
+export default function AIDialog({ brief, sources = [], onBack, onContinue, userName = '' }) {
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -342,7 +342,7 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
                           <User className="h-4 w-4 text-gray-600" />
                         )}
                         <span className="text-xs text-gray-500">
-                          {entry.role === 'assistant' ? 'Rådgiver' : 'Deg'}
+                          {entry.role === 'assistant' ? 'Dynamisk brief' : (userName || 'Deg')}
                         </span>
                       </div>
                       <div
