@@ -274,13 +274,12 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
         confirmedPoints: [...confirmedPoints, newPoint]
       });
 
-      // Send confirmation message
-      await sendMessage(`Bekreftet: ${entry.clarifyConfirm.topic}`, 'text');
+      // No extra chat message - confirmation is shown in-place on the summary card
+      queryClient.invalidateQueries({ queryKey: ['dialogEntries', brief.id] });
     } else {
       await sendMessage(`Jeg vil korrigere: ${entry.clarifyConfirm.topic}`, 'text');
+      queryClient.invalidateQueries({ queryKey: ['dialogEntries', brief.id] });
     }
-
-    queryClient.invalidateQueries({ queryKey: ['dialogEntries', brief.id] });
   };
 
   const handleKeyDown = (e) => {
@@ -361,54 +360,60 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
                         )}
                       </div>
 
-                      {/* Confirm/Reject buttons */}
-                      {entry.clarifyConfirm?.isConfirmationRequest && 
-                       entry.clarifyConfirm?.status === 'pending' && (
-                        <div className="flex items-center space-x-2 mt-2">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="text-green-600 border-green-300 hover:bg-green-50 dark:hover:bg-green-900/30"
-                                  onClick={() => handleConfirm(entry, true)}
-                                >
-                                  <CheckCircle2 className="h-4 w-4 mr-1" />
-                                  Bekreft
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="text-sm">Dette blir låst og brukt i briefen</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30"
-                            onClick={() => handleConfirm(entry, false)}
-                          >
-                            <XCircle className="h-4 w-4 mr-1" />
-                            Korriger
-                          </Button>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button className="text-gray-400 hover:text-gray-600">
-                                  <HelpCircle className="h-4 w-4" />
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-xs">
-                                <p className="text-sm">
-                                  <strong>Hva skjer når jeg bekrefter?</strong><br/>
-                                  Punktet blir låst og brukes direkte i den ferdige briefen. 
-                                  Velg "Korriger" hvis du vil endre noe.
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
+                      {/* Confirm/Reject buttons or confirmed state */}
+                      {entry.clarifyConfirm?.isConfirmationRequest && (
+                        entry.clarifyConfirm?.status === 'pending' ? (
+                          <div className="flex items-center space-x-2 mt-2">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-green-600 border-green-300 hover:bg-green-50 dark:hover:bg-green-900/30"
+                                    onClick={() => handleConfirm(entry, true)}
+                                  >
+                                    <CheckCircle2 className="h-4 w-4 mr-1" />
+                                    Bekreft
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-sm">Dette blir låst og brukt i briefen</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30"
+                              onClick={() => handleConfirm(entry, false)}
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Korriger
+                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button className="text-gray-400 hover:text-gray-600">
+                                    <HelpCircle className="h-4 w-4" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs">
+                                  <p className="text-sm">
+                                    <strong>Hva skjer når jeg bekrefter?</strong><br/>
+                                    Punktet blir låst og brukes direkte i den ferdige briefen. 
+                                    Velg "Korriger" hvis du vil endre noe.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        ) : entry.clarifyConfirm?.status === 'confirmed' ? (
+                          <div className="flex items-center space-x-2 mt-2 text-green-600">
+                            <CheckCircle2 className="h-4 w-4" />
+                            <span className="text-sm font-medium">Bekreftet</span>
+                          </div>
+                        ) : null
                       )}
                     </div>
                   </div>
