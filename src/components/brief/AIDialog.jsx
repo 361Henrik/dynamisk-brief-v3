@@ -43,6 +43,15 @@ const getMessageType = (entry) => {
   return 'context';
 };
 
+// Static mapping: interview section → brief template sections (UI display only)
+const SECTION_TO_TEMPLATE_MAP = {
+  hovedbudskap: 'Budskap, tone og stil + GS1-tilbudet og verdiforslag',
+  malgruppe_innsikt: 'Målgrupper',
+  nokkelpunkter: 'Budskap, tone og stil + GS1-tilbudet og verdiforslag',
+  eksempler: 'Bakgrunn og situasjonsbeskrivelse + GS1-tilbudet og verdiforslag',
+  call_to_action: 'Mål og suksesskriterier + Budskap, tone og stil'
+};
+
 // Detect which section an AI question is targeting based on content keywords
 const detectActiveSection = (content, confirmedPoints = []) => {
   if (!content) return null;
