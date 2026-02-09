@@ -428,12 +428,13 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
           {/* Input Area */}
           <div className="border-t dark:border-gray-700 p-4">
             <div className="flex space-x-2">
-              <Textarea
+              <textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Skriv meldingen din … (du kan bruke tale-til-tekst på enheten din)"
-                className="min-h-[44px] max-h-32 resize-none"
+                placeholder="Skriv svaret ditt her..."
+                className="flex-1 min-h-[44px] max-h-[192px] resize-none overflow-y-auto rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isProcessing}
               />
               <Button
