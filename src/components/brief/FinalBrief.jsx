@@ -236,7 +236,6 @@ ${content}
         <CardContent className="space-y-6">
           {SECTION_CONFIG.map(section => {
             const sectionContent = sections[section.key]?.content;
-            if (!sectionContent) return null;
             
             return (
               <section key={section.key}>
@@ -246,8 +245,8 @@ ${content}
                   </span>
                   {section.label}
                 </h3>
-                <div className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap pl-8">
-                  {sectionContent}
+                <div className={`whitespace-pre-wrap pl-8 ${sectionContent ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500 italic'}`}>
+                  {sectionContent || 'Ingen informasjon lagt til.'}
                 </div>
               </section>
             );
