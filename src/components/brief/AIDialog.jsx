@@ -458,10 +458,15 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                         }`}
                       >
-                        {/* Section label for question messages */}
+                        {/* Section label + template placement for question messages */}
                         {activeSection && messageType === 'question' && (
-                          <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide mb-2">
-                            {activeSection.label}
+                          <div className="mb-3">
+                            <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                              {activeSection.label}
+                            </div>
+                            <div className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-0.5">
+                              Plasseres i briefmal: {SECTION_TO_TEMPLATE_MAP[activeSection.key] || 'Flere seksjoner'}
+                            </div>
                           </div>
                         )}
                         {entry.role === 'assistant' ? (
