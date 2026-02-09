@@ -290,6 +290,20 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
     }
   };
 
+  const textareaRef = useRef(null);
+
+  const autoResizeTextarea = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 192) + 'px'; // max ~8 lines (192px)
+    }
+  }, []);
+
+  useEffect(() => {
+    autoResizeTextarea();
+  }, [input, autoResizeTextarea]);
+
   const canProceed = areAllSectionsConfirmed(confirmedPoints);
   const confirmedCount = getConfirmedSectionsCount(confirmedPoints);
 
