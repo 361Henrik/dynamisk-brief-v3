@@ -241,7 +241,7 @@ export default function RammerForm({ brief, onBack, onContinue }) {
           {updateBriefMutation.isPending ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
           ) : null}
-          Fortsett til AI-dialog
+          Fortsett til dynamisk intervju
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
