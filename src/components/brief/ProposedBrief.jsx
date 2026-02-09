@@ -21,6 +21,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const SECTION_CONFIG = [
   { key: 'prosjektinformasjon', label: 'Prosjektinformasjon', number: 1 },
@@ -217,6 +227,7 @@ export default function ProposedBrief({ brief, sources, dialogEntries, onBack, o
   const [updatingSections, setUpdatingSections] = useState({});
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
 
   const proposedStatus = brief?.proposedBrief?.status;
   const wasApproved = proposedStatus === 'approved';
@@ -603,7 +614,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
             <Button
               variant="outline"
               size="sm"
-              onClick={generateProposedBrief}
+              onClick={() => setShowRegenerateConfirm(true)}
               disabled={generating}
             >
               {generating ? (
@@ -614,6 +625,30 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
               Generer på nytt
             </Button>
           </div>
+
+          {/* Regenerate Confirmation Dialog */}
+          <AlertDialog open={showRegenerateConfirm} onOpenChange={setShowRegenerateConfirm}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Dette vil erstatte alle endringer du har gjort i den foreslåtte briefen. Handlingen kan ikke angres.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    setShowRegenerateConfirm(false);
+                    generateProposedBrief();
+                  }}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Generer på nytt
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* Section Editors */}
           {SECTION_CONFIG.map(section => (
