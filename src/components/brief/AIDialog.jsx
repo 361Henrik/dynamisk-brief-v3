@@ -410,6 +410,9 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
               <>
                 {dialogEntries.map((entry) => {
                   const messageType = entry.role === 'assistant' ? getMessageType(entry) : null;
+                  const activeSection = (entry.role === 'assistant' && messageType === 'question') 
+                    ? detectActiveSection(entry.content, confirmedPoints) 
+                    : null;
                   
                   return (
                   <div
@@ -446,6 +449,12 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                         }`}
                       >
+                        {/* Section label for question messages */}
+                        {activeSection && messageType === 'question' && (
+                          <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide mb-2">
+                            {activeSection.label}
+                          </div>
+                        )}
                         {entry.role === 'assistant' ? (
                           <ReactMarkdown className="prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-li:my-1 prose-ul:my-2 prose-ol:my-2 prose-headings:my-3 prose-hr:my-4">
                             {entry.content.replace(/^(Rådgiver|Dynamisk brief):\s*/i, '')}
