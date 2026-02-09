@@ -353,11 +353,11 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
                         }`}
                       >
                         {entry.role === 'assistant' ? (
-                          <ReactMarkdown className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-li:my-0">
-                            {entry.content}
+                          <ReactMarkdown className="prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-li:my-1 prose-ul:my-2 prose-ol:my-2 prose-headings:my-3 prose-hr:my-4">
+                            {entry.content.replace(/^(Rådgiver|Dynamisk brief):\s*/i, '')}
                           </ReactMarkdown>
                         ) : (
-                          <p className="text-sm">{entry.content}</p>
+                          <p className="text-sm whitespace-pre-wrap">{entry.content}</p>
                         )}
                       </div>
 
