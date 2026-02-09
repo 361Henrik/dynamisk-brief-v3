@@ -27,6 +27,21 @@ import InterviewProgress, {
   areAllSectionsConfirmed,
   getConfirmedSectionsCount 
 } from './InterviewProgress';
+import { ClipboardList, MessageCircleQuestion } from 'lucide-react';
+
+// Determine AI message type based on content heuristics
+const getMessageType = (entry) => {
+  if (entry.clarifyConfirm?.isConfirmationRequest) {
+    return 'summary';
+  }
+  const content = entry.content || '';
+  // Check if message contains a question (ends with ? or has bold question line)
+  const hasQuestion = content.includes('?') || /\*\*[^*]+\?\*\*/.test(content);
+  if (hasQuestion) {
+    return 'question';
+  }
+  return 'context';
+};
 
 export default function AIDialog({ brief, sources = [], onBack, onContinue, userName = '' }) {
   const queryClient = useQueryClient();
@@ -328,7 +343,10 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
               </div>
             ) : (
               <>
-                {dialogEntries.map((entry) => (
+                {dialogEntries.map((entry) => {
+                  const messageType = entry.role === 'assistant' ? getMessageType(entry) : null;
+                  
+                  return (
                   <div
                     key={entry.id}
                     className={`flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -336,19 +354,31 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
                     <div className={`max-w-[85%] ${entry.role === 'user' ? 'order-2' : ''}`}>
                       <div className="flex items-center space-x-2 mb-1">
                         {entry.role === 'assistant' ? (
-                          <Bot className="h-4 w-4 text-blue-600" />
+                          messageType === 'summary' ? (
+                            <ClipboardList className="h-4 w-4 text-amber-600" />
+                          ) : messageType === 'question' ? (
+                            <MessageCircleQuestion className="h-4 w-4 text-blue-600" />
+                          ) : (
+                            <Bot className="h-4 w-4 text-gray-500" />
+                          )
                         ) : (
                           <User className="h-4 w-4 text-gray-600" />
                         )}
                         <span className="text-xs text-gray-500">
-                          {entry.role === 'assistant' ? 'Dynamisk brief' : (userName || 'Deg')}
+                          {entry.role === 'assistant' 
+                            ? (messageType === 'summary' ? 'Bekreft oppsummering' : 'Dynamisk brief')
+                            : (userName || 'Deg')}
                         </span>
                       </div>
                       <div
                         className={`rounded-lg p-3 ${
                           entry.role === 'user'
                             ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                            : messageType === 'summary'
+                              ? 'bg-amber-50 dark:bg-amber-900/20 border-2 border-dashed border-amber-300 dark:border-amber-700 text-gray-900 dark:text-gray-100'
+                              : messageType === 'question'
+                                ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-gray-900 dark:text-gray-100'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
                         }`}
                       >
                         {entry.role === 'assistant' ? (
@@ -421,7 +451,8 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
                 
                 {isProcessing && (
                   <div className="flex justify-start">
