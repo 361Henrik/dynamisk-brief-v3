@@ -386,7 +386,11 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
                               size="sm"
                               variant="outline"
                               className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30"
-                              onClick={() => handleConfirm(entry, false)}
+                              onClick={() => {
+                                setInput(entry.clarifyConfirm.summary);
+                                textareaRef.current?.focus();
+                                handleConfirm(entry, false);
+                              }}
                             >
                               <XCircle className="h-4 w-4 mr-1" />
                               Korriger
