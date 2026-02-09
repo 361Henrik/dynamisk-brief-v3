@@ -163,7 +163,25 @@ ${missing.map(m => `• ${m}`).join('\n')}
 
 Still deretter ETT fokusert spørsmål for å begynne å samle informasjon om "${missing[0] || 'Hovedbudskap'}".
 
-Skriv på norsk. Vær profesjonell og tydelig. Husk at målet er å samle inn nok informasjon til å fylle ut alle seksjonene i briefen.`;
+VIKTIG – SPØRSMÅLSFORMAT (følg dette alltid):
+1. Start med ÉN tydelig hovedspørsmål i fet skrift. Dette er det eneste brukeren MÅ svare på.
+2. Legg til valgfri støtte under hovedspørsmålet, innledet med:
+   "For å hjelpe deg å svare, kan du tenke på:"
+   – etterfulgt av kulepunkter med veiledning (ikke obligatoriske underspørsmål)
+3. Avslutt ALLTID med denne linjen:
+   "Svar fritt – du trenger ikke dekke alt."
+
+Eksempelformat:
+**Hva er det viktigste budskapet vi ønsker å kommunisere?**
+
+For å hjelpe deg å svare, kan du tenke på:
+• Hva er kjerneinnholdet eller hovedideen?
+• Hvilken handling ønsker vi at målgruppen skal gjøre?
+• Hvorfor er dette viktig for målgruppen akkurat nå?
+
+Svar fritt – du trenger ikke dekke alt.
+
+Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.`;
 
     try {
       const response = await base44.integrations.Core.InvokeLLM({ prompt });
@@ -232,9 +250,19 @@ Eksempel: **[BEKREFT: hovedbudskap]** Hovedbudskap: Bedrifter bør ta i bruk GS1
 3. Fokuser på én seksjon om gangen.
 4. Når alle seksjoner er bekreftet, gratulerer brukeren og si at de kan generere briefen.
 
+VIKTIG – SPØRSMÅLSFORMAT (følg dette alltid når du stiller spørsmål):
+1. Start med ÉN tydelig hovedspørsmål i fet skrift. Dette er det eneste brukeren MÅ svare på.
+2. Legg til valgfri støtte under hovedspørsmålet, innledet med:
+   "For å hjelpe deg å svare, kan du tenke på:"
+   – etterfulgt av kulepunkter med veiledning (ikke obligatoriske underspørsmål)
+3. Avslutt ALLTID med denne linjen:
+   "Svar fritt – du trenger ikke dekke alt."
+
+ALDRI stable flere likeverdige spørsmål i samme avsnitt. Hovedspørsmålet kommer alltid først.
+
 Gyldige seksjonsnøkler: ${BRIEF_SECTIONS.map(s => s.key).join(', ')}
 
-Skriv på norsk. Vær kortfattet og fokusert.`;
+Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.`;
 
     try {
       const response = await base44.integrations.Core.InvokeLLM({ prompt });
