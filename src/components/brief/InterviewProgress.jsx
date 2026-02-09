@@ -64,7 +64,7 @@ export default function InterviewProgress({ confirmedPoints = [] }) {
 
       {/* B) Aktivt fokus */}
       <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg text-center">
-        <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">Aktivt fokus</p>
+        <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">Dette jobber vi med nå</p>
         <div className="flex items-center justify-center space-x-2 text-blue-900 dark:text-blue-100">
           <Sparkles className="h-4 w-4" />
           <p className="font-semibold">

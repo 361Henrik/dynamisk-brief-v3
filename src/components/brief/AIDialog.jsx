@@ -451,7 +451,7 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
 
         {/* Navigation */}
         <div className="flex justify-between items-center">
-          <Button variant="outline" onClick={onBack}>
+          <Button variant="outline" onClick={onBack} className="border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Tilbake til rammer
           </Button>
