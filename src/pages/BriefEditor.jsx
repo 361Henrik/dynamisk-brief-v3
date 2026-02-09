@@ -32,6 +32,11 @@ function BriefEditorContent() {
   const [titleInput, setTitleInput] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me()
+  });
+
   const { data: brief, isLoading, error, refetch: refetchBrief } = useQuery({
     queryKey: ['brief', briefId],
     queryFn: async () => {
@@ -220,6 +225,7 @@ function BriefEditorContent() {
         <AIDialog
           brief={brief}
           sources={sources}
+          userName={currentUser?.full_name}
           onBack={() => handleUpdateStep('rammer')}
           onContinue={() => handleUpdateStep('proposed')}
         />
