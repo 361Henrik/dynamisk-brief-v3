@@ -296,7 +296,9 @@ Skriv på norsk. Vær kortfattet og fokusert.`;
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 192) + 'px'; // max ~8 lines (192px)
+      const minHeight = 120; // ~5-6 lines default
+      const maxHeight = 240; // ~10 lines max
+      textarea.style.height = Math.max(minHeight, Math.min(textarea.scrollHeight, maxHeight)) + 'px';
     }
   }, []);
 
