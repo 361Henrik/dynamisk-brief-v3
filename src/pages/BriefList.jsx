@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 import { createPageUrl } from '@/utils';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -17,7 +18,8 @@ import {
   Clock,
   CheckCircle2,
   MoreHorizontal,
-  Trash2
+  Trash2,
+  Copy
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +43,7 @@ import { toast } from 'sonner';
 function BriefListContent() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -61,6 +64,46 @@ function BriefListContent() {
       setBriefToDelete(null);
     }
   });
+
+  const duplicateBriefMutation = useMutation({
+    mutationFn: async (sourceBrief) => {
+      const newBrief = await base44.entities.Brief.create({
+        title: `${sourceBrief.title} (kopi)`,
+        themeName: sourceBrief.themeName,
+        themeId: sourceBrief.themeId,
+        rammer: sourceBrief.rammer,
+        status: 'utkast',
+        currentStep: 'source_material',
+      });
+      // Copy source materials
+      const sources = await base44.entities.BriefSourceMaterial.filter({ briefId: sourceBrief.id });
+      for (const source of sources) {
+        await base44.entities.BriefSourceMaterial.create({
+          briefId: newBrief.id,
+          sourceType: source.sourceType,
+          fileName: source.fileName,
+          fileUrl: source.fileUrl,
+          extractedText: source.extractedText,
+          extractionStatus: source.extractionStatus,
+        });
+      }
+      return newBrief;
+    },
+    onSuccess: (newBrief) => {
+      queryClient.invalidateQueries({ queryKey: ['briefs'] });
+      toast.success('Brief duplisert!');
+      navigate(createPageUrl('BriefEditor') + `?id=${newBrief.id}`);
+    },
+    onError: () => {
+      toast.error('Kunne ikke duplisere briefen');
+    }
+  });
+
+  const handleDuplicate = (e, brief) => {
+    e.preventDefault();
+    e.stopPropagation();
+    duplicateBriefMutation.mutate(brief);
+  };
 
   const handleDeleteClick = (e, brief) => {
     e.preventDefault();
@@ -199,6 +242,13 @@ function BriefListContent() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={(e) => handleDuplicate(e, brief)}
+                            disabled={duplicateBriefMutation.isPending}
+                          >
+                            <Copy className="h-4 w-4 mr-2" />
+                            Dupliser brief
+                          </DropdownMenuItem>
                           {brief.status !== 'godkjent' ? (
                             <DropdownMenuItem 
                               onClick={(e) => handleDeleteClick(e, brief)}

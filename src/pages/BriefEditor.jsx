@@ -13,8 +13,15 @@ import {
   Check,
   Trash2,
   ChevronRight,
-  Home
+  Home,
+  Copy,
+  StickyNote,
+  ChevronDown,
+  ChevronUp,
+  Save
 } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import BriefStepper from '@/components/brief/BriefStepper';
@@ -34,6 +41,9 @@ function BriefEditorContent() {
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
+  const [briefNotes, setBriefNotes] = useState('');
+  const [notesSaving, setNotesSaving] = useState(false);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -94,6 +104,57 @@ function BriefEditorContent() {
 
   const handleConfirmDelete = () => {
     deleteBriefMutation.mutate(briefId);
+  };
+
+  const duplicateBriefMutation = useMutation({
+    mutationFn: async () => {
+      const newBrief = await base44.entities.Brief.create({
+        title: `${brief.title} (kopi)`,
+        themeName: brief.themeName,
+        themeId: brief.themeId,
+        rammer: brief.rammer,
+        status: 'utkast',
+        currentStep: 'source_material',
+      });
+      const sourceMaterials = await base44.entities.BriefSourceMaterial.filter({ briefId });
+      for (const source of sourceMaterials) {
+        await base44.entities.BriefSourceMaterial.create({
+          briefId: newBrief.id,
+          sourceType: source.sourceType,
+          fileName: source.fileName,
+          fileUrl: source.fileUrl,
+          extractedText: source.extractedText,
+          extractionStatus: source.extractionStatus,
+        });
+      }
+      return newBrief;
+    },
+    onSuccess: (newBrief) => {
+      toast.success('Brief duplisert!');
+      navigate(createPageUrl('BriefEditor') + `?id=${newBrief.id}`);
+    },
+    onError: () => {
+      toast.error('Kunne ikke duplisere briefen');
+    }
+  });
+
+  // Initialize notes from brief
+  React.useEffect(() => {
+    if (brief?.notes !== undefined) {
+      setBriefNotes(brief.notes || '');
+    }
+  }, [brief?.notes]);
+
+  const handleSaveNotes = async () => {
+    setNotesSaving(true);
+    try {
+      await base44.entities.Brief.update(briefId, { notes: briefNotes });
+      queryClient.invalidateQueries({ queryKey: ['brief', briefId] });
+      toast.success('Notater lagret!');
+    } catch {
+      toast.error('Kunne ikke lagre notater');
+    }
+    setNotesSaving(false);
   };
 
   const canDelete = brief && brief.status !== 'godkjent';
@@ -180,18 +241,69 @@ function BriefEditorContent() {
           )}
           <p className="text-gray-500">{brief.themeName} • {brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}</p>
         </div>
-        {canDelete && (
+        <div className="flex items-center gap-1">
           <Button 
             variant="ghost" 
-            size="sm" 
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            onClick={() => setDeleteDialogOpen(true)}
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => setShowNotes(!showNotes)}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Slett
+            <StickyNote className="h-4 w-4 mr-1.5" />
+            <span className="hidden sm:inline">Notater</span>
           </Button>
-        )}
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => duplicateBriefMutation.mutate()}
+            disabled={duplicateBriefMutation.isPending}
+          >
+            {duplicateBriefMutation.isPending 
+              ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+              : <Copy className="h-4 w-4 mr-1.5" />
+            }
+            <span className="hidden sm:inline">Dupliser</span>
+          </Button>
+          {canDelete && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              <span className="hidden sm:inline">Slett</span>
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Brief Notes Panel */}
+      {showNotes && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <StickyNote className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+              <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Notater for denne briefen</h3>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setShowNotes(false)} className="h-7 w-7 p-0">
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+          </div>
+          <Textarea
+            value={briefNotes}
+            onChange={(e) => setBriefNotes(e.target.value)}
+            placeholder="Legg til notater, kommentarer eller informasjon til kommunikasjonsavdelingen..."
+            className="min-h-[80px] resize-y bg-white dark:bg-background border-yellow-200 dark:border-yellow-800"
+          />
+          <div className="flex justify-end">
+            <Button size="sm" variant="outline" onClick={handleSaveNotes} disabled={notesSaving}>
+              {notesSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Save className="h-4 w-4 mr-1.5" />}
+              Lagre notater
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Stepper */}
       <BriefStepper currentStep={currentStep} onStepClick={handleUpdateStep} />

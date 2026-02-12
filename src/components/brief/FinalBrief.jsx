@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -14,7 +14,10 @@ import {
   Calendar,
   Users,
   Target,
-  Clock
+  Clock,
+  Printer,
+  List,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,15 +31,17 @@ export default function FinalBrief({ brief, onBack }) {
   const { isAdmin } = useAuth();
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [showToc, setShowToc] = useState(true);
+  const sectionRefs = useRef({});
 
-  // CRITICAL: Step 4 reads ONLY from approved Step 3 snapshot - NEVER from other sources
   const proposedBrief = brief?.proposedBrief;
   const isStep3Approved = proposedBrief?.status === 'approved' && !proposedBrief?.editedAfterApproval;
-  
-  // ONLY use approved snapshot - do NOT fall back to draft sections, interview data, or sources
   const sections = proposedBrief?.approvedSnapshot || {};
   const approvedAt = proposedBrief?.approvedAt;
   const hasSections = Object.keys(sections).length > 0;
+
+  const filledSections = SECTION_CONFIG.filter(s => sections[s.key]?.content?.trim());
+  const emptySections = SECTION_CONFIG.filter(s => !sections[s.key]?.content?.trim());
 
   const updateBriefMutation = useMutation({
     mutationFn: async (data) => {
@@ -52,7 +57,15 @@ export default function FinalBrief({ brief, onBack }) {
       status: 'godkjent',
       approvedAt: new Date().toISOString()
     });
-    toast.success('Briefen er fullført!');
+    toast.success('Briefen er fullfort!');
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const scrollToSection = (key) => {
+    sectionRefs.current[key]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleExportWord = async () => {
@@ -61,7 +74,6 @@ export default function FinalBrief({ brief, onBack }) {
       const response = await base44.functions.invoke('exportBriefToWord', { briefId: brief.id });
       const { data: base64Data, filename, mimeType } = response.data;
       
-      // Decode base64 to binary
       const binaryString = atob(base64Data);
       const bytes = new Uint8Array(binaryString.length);
       for (let i = 0; i < binaryString.length; i++) {
@@ -88,31 +100,17 @@ export default function FinalBrief({ brief, onBack }) {
   const handleCopyAll = () => {
     if (!hasSections) return;
 
-    let fullText = `═══════════════════════════════════════
-KOMMUNIKASJONSBRIEF
-═══════════════════════════════════════
-
-Tittel: ${brief.title}
-Tema: ${brief.themeName}
-Dato: ${formatDate(new Date().toISOString())}
-Status: Godkjent
-Basert på: Foreslått brief${approvedAt ? ` (godkjent ${formatDate(approvedAt)})` : ''}
-
-Målgruppe: ${brief.rammer?.targetAudience || 'Ikke spesifisert'}
-Kanaler: ${brief.rammer?.channels?.join(', ') || 'Ikke spesifisert'}
-Frist: ${brief.rammer?.deadline || 'Ikke spesifisert'}
-
-═══════════════════════════════════════
-
-`;
+    let fullText = `KOMMUNIKASJONSBRIEF\n${'='.repeat(40)}\n\n`;
+    fullText += `Tittel: ${brief.title}\n`;
+    fullText += `Tema: ${brief.themeName}\n`;
+    fullText += `Dato: ${formatDate(new Date().toISOString())}\n`;
+    fullText += `Status: ${brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}\n\n`;
+    fullText += `${'='.repeat(40)}\n\n`;
 
     SECTION_CONFIG.forEach(section => {
       const content = sections[section.key]?.content;
       if (content) {
-        fullText += `${section.number}. ${section.label.toUpperCase()}
-${content}
-
-`;
+        fullText += `${section.number}. ${section.label.toUpperCase()}\n${'-'.repeat(30)}\n${content}\n\n`;
       }
     });
 
@@ -122,189 +120,158 @@ ${content}
     toast.success('Kopiert til utklippstavlen');
   };
 
-  // Show warning if Step 3 is not approved
+  // Warning: Step 3 not approved
+  if (!isStep3Approved && !hasSections) {
+    return (
+      <div className="space-y-6 animate-fade-in-up">
+        <Card className="border-dashed">
+          <CardContent className="py-12 text-center">
+            <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground/40" />
+            <h3 className="text-lg font-medium text-foreground mb-2">
+              Ingen brief tilgjengelig
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              Fullfar og godkjenn den foreslatte briefen forst.
+            </p>
+            <Button variant="outline" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Tilbake til foreslatt brief
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (!isStep3Approved && hasSections) {
     return (
-      <div className="space-y-6">
-        {/* Warning Banner */}
-        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 flex items-start space-x-3">
+      <div className="space-y-6 animate-fade-in-up">
+        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-amber-800 dark:text-amber-200">
-              Foreslått brief er ikke godkjent
+              Foreslatt brief er ikke godkjent
             </p>
             <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-              Gå tilbake til Foreslått brief og godkjenn for å oppdatere denne visningen.
+              Ga tilbake til Foreslatt brief og godkjenn for a oppdatere denne visningen.
             </p>
           </div>
         </div>
 
-        {/* Show based on last approved version or current draft */}
-        <Card className="bg-gray-50 dark:bg-gray-800/50 border-dashed">
+        <Card className="border-dashed bg-muted/30">
           <CardContent className="py-8 text-center">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground/40" />
+            <p className="text-muted-foreground mb-4">
               {proposedBrief?.approvedSnapshot 
-                ? "Denne visningen er basert på sist godkjente foreslåtte brief. Godkjenn endringene i Foreslått brief for å oppdatere."
-                : "Ingen godkjent brief tilgjengelig ennå. Gå til Foreslått brief og godkjenn innholdet."
+                ? "Denne visningen er basert pa sist godkjente foreslatte brief."
+                : "Ingen godkjent brief tilgjengelig enna."
               }
             </p>
             <Button variant="outline" onClick={onBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Tilbake til foreslått brief
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Still show content if there's an approved snapshot */}
-        {proposedBrief?.approvedSnapshot && (
-          <div className="opacity-75">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 text-center">
-              Basert på sist godkjente foreslåtte brief ({formatDate(approvedAt)})
-            </p>
-            {renderBriefContent()}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // No sections at all
-  if (!hasSections) {
-    return (
-      <div className="space-y-6">
-        <Card className="border-dashed">
-          <CardContent className="py-12 text-center">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Ingen brief tilgjengelig
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">
-              Fullfør og godkjenn den foreslåtte briefen først.
-            </p>
-            <Button variant="outline" onClick={onBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Tilbake til foreslått brief
+              Tilbake til foreslatt brief
             </Button>
           </CardContent>
         </Card>
       </div>
-    );
-  }
-
-  function renderBriefContent() {
-    return (
-      <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4">
-          <div>
-            <CardTitle className="text-xl">{brief.title}</CardTitle>
-            <CardDescription className="flex items-center gap-2 mt-1">
-              <Calendar className="h-3 w-3" />
-              Godkjent {formatDate(approvedAt)}
-            </CardDescription>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={handleExportWord} disabled={exporting}>
-              {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
-              Word
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleCopyAll}>
-              {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
-              {copied ? 'Kopiert' : 'Kopier alt'}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {SECTION_CONFIG.map(section => {
-            const sectionContent = sections[section.key]?.content;
-            
-            return (
-              <section key={section.key}>
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-xs font-semibold text-blue-700 dark:text-blue-300">
-                    {section.number}
-                  </span>
-                  {section.label}
-                </h3>
-                <div className={`whitespace-pre-wrap pl-8 ${sectionContent ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500 italic'}`}>
-                  {sectionContent || 'Ingen informasjon lagt til.'}
-                </div>
-              </section>
-            );
-          })}
-        </CardContent>
-      </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Status Banner */}
       <div className={`p-4 rounded-lg flex items-center justify-between ${
         brief.status === 'godkjent' 
           ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
           : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
       }`}>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           {brief.status === 'godkjent' ? (
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
           ) : (
-            <FileText className="h-5 w-5 text-blue-600" />
+            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           )}
           <div>
-            <p className="font-medium text-gray-900 dark:text-white">
-              {brief.status === 'godkjent' ? 'Fullført brief' : 'Ferdig brief'}
+            <p className="font-medium text-foreground">
+              {brief.status === 'godkjent' ? 'Fullfort brief' : 'Ferdig brief'}
             </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               {brief.status === 'godkjent' 
-                ? `Markert som fullført ${formatDate(brief.approvedAt)}`
-                : `Basert på godkjent foreslått brief fra ${formatDate(approvedAt)}`
+                ? `Markert som fullfort ${formatDate(brief.approvedAt)}`
+                : `Basert pa godkjent foreslatt brief fra ${formatDate(approvedAt)}`
               }
             </p>
           </div>
         </div>
         {brief.status !== 'godkjent' && (
-          <Button onClick={handleApprove} className="bg-green-600 hover:bg-green-700">
+          <Button onClick={handleApprove} className="bg-green-600 hover:bg-green-700 text-white">
             <CheckCircle2 className="h-4 w-4 mr-2" />
-            Fullfør brief
+            Fullfar brief
           </Button>
         )}
       </div>
 
-      {/* Metadata Summary */}
-      <Card className="bg-gray-50 dark:bg-gray-800/50">
+      {/* Action Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 no-print">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowToc(!showToc)}>
+            <List className="h-4 w-4 mr-1.5" />
+            {showToc ? 'Skjul innhold' : 'Vis innhold'}
+          </Button>
+          <Badge variant="secondary" className="text-xs">
+            {filledSections.length}/{SECTION_CONFIG.length} seksjoner
+          </Badge>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handlePrint}>
+            <Printer className="h-4 w-4 mr-1.5" />
+            <span className="hidden sm:inline">Skriv ut</span>
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportWord} disabled={exporting}>
+            {exporting ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <FileDown className="h-4 w-4 mr-1.5" />}
+            <span className="hidden sm:inline">Word</span>
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleCopyAll}>
+            {copied ? <Check className="h-4 w-4 mr-1.5" /> : <Copy className="h-4 w-4 mr-1.5" />}
+            <span className="hidden sm:inline">{copied ? 'Kopiert' : 'Kopier'}</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Metadata Grid */}
+      <Card className="bg-muted/30 no-print">
         <CardContent className="py-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-gray-400" />
+              <Target className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Tema</p>
-                <p className="font-medium text-gray-900 dark:text-white">{brief.themeName}</p>
+                <p className="text-xs text-muted-foreground">Tema</p>
+                <p className="font-medium text-foreground">{brief.themeName}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-gray-400" />
+              <Users className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Målgruppe</p>
-                <p className="font-medium text-gray-900 dark:text-white truncate max-w-[150px]">
+                <p className="text-xs text-muted-foreground">Malgruppe</p>
+                <p className="font-medium text-foreground truncate max-w-[150px]">
                   {brief.rammer?.targetAudience || 'Ikke spesifisert'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-gray-400" />
+              <FileText className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Kanaler</p>
-                <p className="font-medium text-gray-900 dark:text-white">
+                <p className="text-xs text-muted-foreground">Kanaler</p>
+                <p className="font-medium text-foreground">
                   {brief.rammer?.channels?.join(', ') || 'Ikke spesifisert'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-gray-400" />
+              <Clock className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Frist</p>
-                <p className="font-medium text-gray-900 dark:text-white">
+                <p className="text-xs text-muted-foreground">Frist</p>
+                <p className="font-medium text-foreground">
                   {brief.rammer?.deadline || 'Ikke spesifisert'}
                 </p>
               </div>
@@ -313,21 +280,128 @@ ${content}
         </CardContent>
       </Card>
 
-      {/* Brief Content - from approved Step 4 */}
-      {renderBriefContent()}
+      {/* Table of Contents */}
+      {showToc && (
+        <Card className="no-print">
+          <CardHeader className="py-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Innholdsfortegnelse</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 pb-3">
+            <nav className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+              {SECTION_CONFIG.map(section => {
+                const hasContent = !!sections[section.key]?.content?.trim();
+                return (
+                  <button
+                    key={section.key}
+                    onClick={() => scrollToSection(section.key)}
+                    className={`flex items-center gap-2 text-sm px-2 py-1.5 rounded-md text-left transition-colors ${
+                      hasContent 
+                        ? 'hover:bg-muted text-foreground' 
+                        : 'text-muted-foreground/60 hover:bg-muted/50'
+                    }`}
+                  >
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
+                      hasContent 
+                        ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' 
+                        : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {section.number}
+                    </span>
+                    <span className="truncate">{section.label}</span>
+                    <ChevronRight className="h-3 w-3 ml-auto flex-shrink-0 text-muted-foreground/40" />
+                  </button>
+                );
+              })}
+            </nav>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Helper text for editing */}
-      <div className="text-center py-2">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          For å gjøre endringer, gå tilbake til Foreslått brief.
+      {/* Brief Document */}
+      <Card className="print-brief">
+        <CardHeader className="border-b border-border">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <CardTitle className="text-xl text-foreground">{brief.title}</CardTitle>
+              <CardDescription className="flex items-center gap-2 mt-1">
+                <Calendar className="h-3 w-3" />
+                Godkjent {formatDate(approvedAt)}
+              </CardDescription>
+            </div>
+            {brief.status === 'godkjent' && (
+              <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 border-0">
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+                Fullfort
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="py-6 space-y-8">
+          {SECTION_CONFIG.map(section => {
+            const sectionContent = sections[section.key]?.content;
+            const hasContent = !!sectionContent?.trim();
+            
+            return (
+              <section 
+                key={section.key} 
+                ref={el => sectionRefs.current[section.key] = el}
+                className="scroll-mt-24"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 ${
+                    hasContent
+                      ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+                      : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
+                  }`}>
+                    {section.number}
+                  </span>
+                  <h3 className="text-base font-semibold text-foreground">
+                    {section.label}
+                  </h3>
+                </div>
+                <div className="pl-10">
+                  {hasContent ? (
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/80">
+                      {sectionContent}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-md px-3 py-2 border border-amber-200 dark:border-amber-800">
+                      <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                      Denne seksjonen mangler innhold. Ga tilbake til foreslatt brief for a fylle inn.
+                    </div>
+                  )}
+                </div>
+                {section.number < 9 && <div className="border-b border-border/50 mt-6" />}
+              </section>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      {/* Empty sections summary */}
+      {emptySections.length > 0 && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 no-print">
+          <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1">
+            {emptySections.length} seksjon{emptySections.length > 1 ? 'er' : ''} mangler innhold
+          </p>
+          <p className="text-xs text-amber-700 dark:text-amber-300">
+            {emptySections.map(s => s.label).join(', ')}
+          </p>
+        </div>
+      )}
+
+      {/* Helper text */}
+      <div className="text-center py-2 no-print">
+        <p className="text-sm text-muted-foreground">
+          For a gjore endringer, ga tilbake til Foreslatt brief.
         </p>
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between">
+      <div className="flex justify-between no-print">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Tilbake til foreslått brief
+          Tilbake til foreslatt brief
         </Button>
       </div>
     </div>

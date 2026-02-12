@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import { 
@@ -14,7 +14,10 @@ import {
   Sparkles,
   FileText,
   Pencil,
-  AlertTriangle
+  AlertTriangle,
+  Eye,
+  ChevronsUpDown,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,10 +34,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { SECTION_CONFIG } from '@/constants/briefSections';
-import { formatTimestamp } from '@/utils/dateFormatters';
+import { formatTimestamp, formatDate } from '@/utils/dateFormatters';
 
-function ProposedSection({ 
+const ProposedSection = React.memo(function ProposedSection({ 
   sectionKey, 
   label, 
   number, 
@@ -44,13 +53,18 @@ function ProposedSection({
   onContentChange, 
   onNotesChange,
   onUpdateWithFeedback,
-  isUpdating 
+  isUpdating,
+  forceExpanded
 }) {
   const [expanded, setExpanded] = useState(true);
   const [showNotes, setShowNotes] = useState(!!notes);
   const [localNotes, setLocalNotes] = useState(notes || '');
   const [isEditing, setIsEditing] = useState(false);
   const [localContent, setLocalContent] = useState(content || '');
+
+  useEffect(() => {
+    if (forceExpanded !== undefined) setExpanded(forceExpanded);
+  }, [forceExpanded]);
 
   useEffect(() => {
     setLocalNotes(notes || '');
@@ -72,19 +86,29 @@ function ProposedSection({
 
   const isUserEdited = metadata?.lastEditedBy === 'user';
   const isAiEdited = metadata?.lastEditedBy === 'ai';
+  const hasContent = !!content?.trim();
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-3 transition-shadow hover:shadow-sm">
       <CardHeader 
-        className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors py-3"
+        className="cursor-pointer hover:bg-muted/50 transition-colors py-3"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-sm font-semibold text-blue-700 dark:text-blue-300">
+          <div className="flex items-center gap-3">
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0 ${
+              hasContent 
+                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+                : 'bg-muted text-muted-foreground'
+            }`}>
               {number}
             </div>
-            <CardTitle className="text-base font-medium">{label}</CardTitle>
+            <CardTitle className="text-base font-medium text-foreground">{label}</CardTitle>
+            {!hasContent && (
+              <Badge variant="outline" className="text-xs text-muted-foreground border-dashed">
+                Tom
+              </Badge>
+            )}
             {isUserEdited && (
               <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700">
                 <Pencil className="h-3 w-3 mr-1" />
@@ -92,25 +116,23 @@ function ProposedSection({
               </Badge>
             )}
             {isAiEdited && (
-              <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700">
+              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700">
                 <Sparkles className="h-3 w-3 mr-1" />
-                AI-oppdatert
+                AI
               </Badge>
             )}
           </div>
-          {expanded ? <ChevronUp className="h-5 w-5 text-gray-400" /> : <ChevronDown className="h-5 w-5 text-gray-400" />}
+          {expanded ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
         </div>
-        {/* Metadata line */}
         {metadata?.lastEditedAt && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-10">
-            Endret {metadata.lastEditedBy === 'user' ? 'av deg' : 'av AI'} · {formatTimestamp(metadata.lastEditedAt)}
+          <p className="text-xs text-muted-foreground mt-1 ml-10">
+            Endret {metadata.lastEditedBy === 'user' ? 'av deg' : 'av AI'} &middot; {formatTimestamp(metadata.lastEditedAt)}
           </p>
         )}
       </CardHeader>
       
       {expanded && (
         <CardContent className="pt-0 space-y-4">
-          {/* Content Display / Editor */}
           <div>
             {isEditing ? (
               <div className="space-y-2">
@@ -118,10 +140,10 @@ function ProposedSection({
                   value={localContent}
                   onChange={(e) => setLocalContent(e.target.value)}
                   placeholder={`Skriv innhold for ${label.toLowerCase()}...`}
-                  className="min-h-[150px] resize-y border-blue-300 focus:border-blue-500"
+                  className="min-h-[150px] resize-y border-blue-300 dark:border-blue-700 focus:border-blue-500"
                   autoFocus
                 />
-                <div className="flex justify-end space-x-2">
+                <div className="flex justify-end gap-2">
                   <Button variant="outline" size="sm" onClick={handleCancelEdit}>
                     Avbryt
                   </Button>
@@ -133,8 +155,8 @@ function ProposedSection({
               </div>
             ) : (
               <div className="relative group">
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 min-h-[100px] whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200">
-                  {content || <span className="text-gray-400 italic">Ingen innhold ennå...</span>}
+                <div className="bg-muted/50 rounded-lg p-4 min-h-[80px] whitespace-pre-wrap text-sm leading-relaxed text-foreground/80">
+                  {content || <span className="text-muted-foreground italic">Ingen innhold enna...</span>}
                 </div>
                 <Button
                   variant="outline"
@@ -149,14 +171,13 @@ function ProposedSection({
             )}
           </div>
 
-          {/* Notes Toggle & Editor */}
           {!isEditing && (
             <div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowNotes(!showNotes)}
-                className="text-gray-500 hover:text-gray-700 -ml-2"
+                className="text-muted-foreground hover:text-foreground -ml-2"
               >
                 <MessageSquare className="h-4 w-4 mr-1" />
                 {showNotes ? 'Skjul notater' : 'Legg til notater'}
@@ -178,7 +199,6 @@ function ProposedSection({
             </div>
           )}
 
-          {/* Update with Feedback Button */}
           {!isEditing && (
             <div className="flex justify-end">
               <Button
@@ -186,7 +206,7 @@ function ProposedSection({
                 size="sm"
                 onClick={() => onUpdateWithFeedback(sectionKey, localNotes)}
                 disabled={isUpdating || !localNotes?.trim()}
-                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                className="text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30"
               >
                 {isUpdating ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -201,7 +221,7 @@ function ProposedSection({
       )}
     </Card>
   );
-}
+});
 
 export default function ProposedBrief({ brief, sources, dialogEntries, onBack, onContinue }) {
   const queryClient = useQueryClient();
@@ -211,26 +231,50 @@ export default function ProposedBrief({ brief, sources, dialogEntries, onBack, o
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
+  const [allExpanded, setAllExpanded] = useState(true);
+  const [forceExpandState, setForceExpandState] = useState(undefined);
+  const [showPreview, setShowPreview] = useState(false);
 
   const proposedStatus = brief?.proposedBrief?.status;
   const wasApproved = proposedStatus === 'approved';
   const [editedAfterApproval, setEditedAfterApproval] = useState(false);
 
-  // Initialize sections from brief or generate if empty
   useEffect(() => {
     if (brief?.proposedBrief?.sections) {
       setSections(brief.proposedBrief.sections);
     }
-    // Check if edited after approval
     if (brief?.proposedBrief?.editedAfterApproval) {
       setEditedAfterApproval(true);
     }
   }, [brief?.proposedBrief?.sections, brief?.proposedBrief?.editedAfterApproval]);
 
+  // Keyboard shortcut: Ctrl+S to save
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (hasChanges && Object.keys(sections).length > 0) {
+          handleSave();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [hasChanges, sections]);
+
+  const toggleAllSections = () => {
+    const next = !allExpanded;
+    setAllExpanded(next);
+    setForceExpandState(next);
+    // Reset force state after applying
+    setTimeout(() => setForceExpandState(undefined), 100);
+  };
+
+  const filledCount = SECTION_CONFIG.filter(s => sections[s.key]?.content?.trim()).length;
+
   const generateProposedBrief = async () => {
     setGenerating(true);
     try {
-      // Fetch brief template
       const templates = await base44.entities.KnowledgeBaseDoc.filter({ 
         docType: 'brief_template', 
         isActive: true 
@@ -238,26 +282,23 @@ export default function ProposedBrief({ brief, sources, dialogEntries, onBack, o
       const briefTemplate = templates[0];
 
       if (!briefTemplate?.extractedText) {
-        toast.error('Briefmalen er ikke klar. Vennligst last opp en briefmal først.');
+        toast.error('Briefmalen er ikke klar. Vennligst last opp en briefmal forst.');
         setGenerating(false);
         return;
       }
 
-      // Build context from sources
       const sourceContext = sources
         .filter(s => s.extractionStatus === 'success' && s.extractedText)
         .map(s => `[${s.sourceType === 'url' ? s.fileUrl : s.fileName}]:\n${s.extractedText}`)
         .join('\n\n---\n\n');
 
-      // Build dialog context
       const dialogContext = dialogEntries
         .map(entry => `${entry.role === 'assistant' ? 'AI' : 'Bruker'}: ${entry.content}`)
         .join('\n\n');
 
-      // Build rammer context
       const rammerContext = brief.rammer ? `
-Målgruppe: ${brief.rammer.targetAudience || 'Ikke spesifisert'}
-Mål: ${brief.rammer.objectives || 'Ikke spesifisert'}
+Malgruppe: ${brief.rammer.targetAudience || 'Ikke spesifisert'}
+Mal: ${brief.rammer.objectives || 'Ikke spesifisert'}
 Kanaler: ${brief.rammer.channels?.join(', ') || 'Ikke spesifisert'}
 Tone: ${brief.rammer.tone || 'Ikke spesifisert'}
 Leveranser: ${brief.rammer.deliverables?.join(', ') || 'Ikke spesifisert'}
@@ -265,9 +306,9 @@ Tidsfrist: ${brief.rammer.deadline || 'Ikke spesifisert'}
 Aktivering: ${brief.rammer.activationDate || 'Ikke spesifisert'}
       `.trim() : '';
 
-      const prompt = `Du er en ekspert på å skrive kommunikasjonsbriefs for GS1 Norway.
+      const prompt = `Du er en ekspert pa a skrive kommunikasjonsbriefs for GS1 Norway.
 
-BRIEFMAL (følg denne strukturen nøyaktig):
+BRIEFMAL (folg denne strukturen noyaktig):
 ${briefTemplate.extractedText}
 
 KILDEMATERIALE:
@@ -284,11 +325,11 @@ ${brief.confirmedPoints?.map(p => `- ${p.topic}: ${p.summary}`).join('\n') || 'I
 
 ---
 
-Generer et fullstendig kommunikasjonsbrief basert på informasjonen over. 
-Følg GS1-briefmalen nøyaktig med de 9 seksjonene.
-Skriv profesjonelt, presist og på norsk.
+Generer et fullstendig kommunikasjonsbrief basert pa informasjonen over. 
+Folg GS1-briefmalen noyaktig med de 9 seksjonene.
+Skriv profesjonelt, presist og pa norsk.
 
-Returner et JSON-objekt med følgende struktur:
+Returner et JSON-objekt med folgende struktur:
 {
   "prosjektinformasjon": "innhold...",
   "bakgrunn": "innhold...",
@@ -320,7 +361,6 @@ Returner et JSON-objekt med følgende struktur:
         }
       });
 
-      // Convert to sections format with metadata
       const newSections = {};
       const now = new Date().toISOString();
       for (const key of Object.keys(response)) {
@@ -337,17 +377,15 @@ Returner et JSON-objekt med følgende struktur:
       setSections(newSections);
       setHasChanges(true);
 
-      // If was approved, mark as edited after approval
       const newEditedAfterApproval = wasApproved;
       if (newEditedAfterApproval) {
         setEditedAfterApproval(true);
       }
 
-      // Save to database - revert to draft if was approved
       await base44.entities.Brief.update(brief.id, {
         proposedBrief: {
           sections: newSections,
-          status: wasApproved ? 'draft' : 'draft',
+          status: 'draft',
           updatedAt: now,
           approvedAt: brief.proposedBrief?.approvedAt,
           editedAfterApproval: newEditedAfterApproval
@@ -355,15 +393,15 @@ Returner et JSON-objekt med følgende struktur:
       });
 
       queryClient.invalidateQueries({ queryKey: ['brief', brief.id] });
-      toast.success('Foreslått brief generert!');
+      toast.success('Foreslatt brief generert!');
     } catch (error) {
       console.error('Generation error:', error);
-      toast.error('Kunne ikke generere brief. Prøv igjen.');
+      toast.error('Kunne ikke generere brief. Prov igjen.');
     }
     setGenerating(false);
   };
 
-  const handleContentChange = (sectionKey, content) => {
+  const handleContentChange = useCallback((sectionKey, content) => {
     const now = new Date().toISOString();
     setSections(prev => ({
       ...prev,
@@ -377,13 +415,10 @@ Returner et JSON-objekt med følgende struktur:
       }
     }));
     setHasChanges(true);
-    // If was approved, mark as edited after approval
-    if (wasApproved) {
-      setEditedAfterApproval(true);
-    }
-  };
+    if (wasApproved) setEditedAfterApproval(true);
+  }, [wasApproved]);
 
-  const handleNotesChange = (sectionKey, notes) => {
+  const handleNotesChange = useCallback((sectionKey, notes) => {
     setSections(prev => ({
       ...prev,
       [sectionKey]: {
@@ -392,7 +427,7 @@ Returner et JSON-objekt med følgende struktur:
       }
     }));
     setHasChanges(true);
-  };
+  }, []);
 
   const handleUpdateWithFeedback = async (sectionKey, feedback) => {
     if (!feedback?.trim()) return;
@@ -403,7 +438,7 @@ Returner et JSON-objekt med følgende struktur:
       const sectionConfig = SECTION_CONFIG.find(s => s.key === sectionKey);
       const currentContent = sections[sectionKey]?.content || '';
 
-      const prompt = `Du er en ekspert på GS1-kommunikasjonsbriefs.
+      const prompt = `Du er en ekspert pa GS1-kommunikasjonsbriefs.
 
 Gjeldende innhold i seksjonen "${sectionConfig.label}":
 ${currentContent}
@@ -411,8 +446,8 @@ ${currentContent}
 Tilbakemelding fra brukeren:
 ${feedback}
 
-Oppdater seksjonsinnholdet basert på tilbakemeldingen. Behold det som fungerer, og juster eller utvid basert på kommentaren.
-Skriv profesjonelt, presist og på norsk.
+Oppdater seksjonsinnholdet basert pa tilbakemeldingen. Behold det som fungerer, og juster eller utvid basert pa kommentaren.
+Skriv profesjonelt, presist og pa norsk.
 
 Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formatering.`;
 
@@ -425,7 +460,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
         ...prev,
         [sectionKey]: {
           content: response,
-          notes: '', // Clear notes after applying
+          notes: '',
           metadata: {
             lastEditedAt: now,
             lastEditedBy: 'ai'
@@ -433,10 +468,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
         }
       }));
       setHasChanges(true);
-      // If was approved, mark as edited after approval
-      if (wasApproved) {
-        setEditedAfterApproval(true);
-      }
+      if (wasApproved) setEditedAfterApproval(true);
       toast.success(`"${sectionConfig.label}" oppdatert!`);
     } catch (error) {
       console.error('Update error:', error);
@@ -449,7 +481,6 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
   const handleSave = async () => {
     setSaving(true);
     try {
-      // If was approved and has changes, revert to draft
       const newStatus = (wasApproved && (hasChanges || editedAfterApproval)) ? 'draft' : (brief.proposedBrief?.status || 'draft');
       
       await base44.entities.Brief.update(brief.id, {
@@ -476,7 +507,6 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
     try {
       const now = new Date().toISOString();
       
-      // Create approved snapshot
       const approvedSnapshot = {};
       for (const key of Object.keys(sections)) {
         approvedSnapshot[key] = {
@@ -492,14 +522,14 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
           status: 'approved',
           updatedAt: now,
           approvedAt: now,
-          approvedSnapshot: approvedSnapshot, // Freeze content
+          approvedSnapshot: approvedSnapshot,
           editedAfterApproval: false
         }
       });
       queryClient.invalidateQueries({ queryKey: ['brief', brief.id] });
       setHasChanges(false);
       setEditedAfterApproval(false);
-      toast.success('Foreslått brief godkjent!');
+      toast.success('Foreslatt brief godkjent!');
     } catch (error) {
       console.error('Approve error:', error);
       toast.error('Kunne ikke godkjenne briefen.');
@@ -508,7 +538,6 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
   };
 
   const handleContinue = async () => {
-    // Save if there are changes first
     if (hasChanges) {
       await handleSave();
     }
@@ -524,31 +553,31 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
   const isApproved = proposedStatus === 'approved' && !editedAfterApproval;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Edited after approval warning */}
       {editedAfterApproval && (
-        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 flex items-start space-x-3">
+        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-amber-800 dark:text-amber-200">
               Briefen er endret etter godkjenning
             </p>
             <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-              Godkjenn på nytt for å oppdatere ferdig brief.
+              Godkjenn pa nytt for a oppdatere ferdig brief.
             </p>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Foreslått brief</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Rediger og tilpass innholdet før endelig godkjenning
+          <h2 className="text-xl font-semibold text-foreground">Foreslatt brief</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Rediger og tilpass innholdet for endelig godkjenning
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           {isApproved && (
             <Badge className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
               <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -558,6 +587,11 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
           {(proposedStatus === 'draft' || editedAfterApproval) && hasSections && (
             <Badge variant="secondary">Utkast</Badge>
           )}
+          {hasSections && (
+            <Badge variant="outline" className="text-xs">
+              {filledCount}/{SECTION_CONFIG.length} seksjoner
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -565,12 +599,12 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
       {!hasSections && (
         <Card className="border-dashed">
           <CardContent className="py-12 text-center">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Generer foreslått brief
+            <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground/40" />
+            <h3 className="text-lg font-medium text-foreground mb-2">
+              Generer foreslatt brief
             </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-              Basert på kildematerialet, intervjuet og rammene vil AI generere et utkast til kommunikasjonsbriefet.
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Basert pa kildematerialet, intervjuet og rammene vil AI generere et utkast til kommunikasjonsbriefet.
             </p>
             <Button onClick={generateProposedBrief} disabled={generating}>
               {generating ? (
@@ -592,8 +626,20 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
       {/* Sections */}
       {hasSections && (
         <>
-          {/* Regenerate Button */}
-          <div className="flex justify-end">
+          {/* Toolbar */}
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={toggleAllSections}>
+                <ChevronsUpDown className="h-4 w-4 mr-1.5" />
+                {allExpanded ? 'Lukk alle' : 'Apne alle'}
+              </Button>
+              {hasSections && (
+                <Button variant="outline" size="sm" onClick={() => setShowPreview(true)}>
+                  <Eye className="h-4 w-4 mr-1.5" />
+                  Forhandsvisning
+                </Button>
+              )}
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -605,17 +651,17 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
               ) : (
                 <RefreshCw className="h-4 w-4 mr-2" />
               )}
-              Generer på nytt
+              Generer pa nytt
             </Button>
           </div>
 
-          {/* Regenerate Confirmation Dialog */}
+          {/* Regenerate Confirmation */}
           <AlertDialog open={showRegenerateConfirm} onOpenChange={setShowRegenerateConfirm}>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Er du sikker?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Dette vil erstatte alle endringer du har gjort i den foreslåtte briefen. Handlingen kan ikke angres.
+                  Dette vil erstatte alle endringer du har gjort i den foreslatte briefen. Handlingen kan ikke angres.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -627,7 +673,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
                   }}
                   className="bg-red-600 hover:bg-red-700"
                 >
-                  Generer på nytt
+                  Generer pa nytt
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -647,19 +693,56 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
               onNotesChange={handleNotesChange}
               onUpdateWithFeedback={handleUpdateWithFeedback}
               isUpdating={updatingSections[section.key]}
+              forceExpanded={forceExpandState}
             />
           ))}
+
+          {/* Preview Dialog */}
+          <Dialog open={showPreview} onOpenChange={setShowPreview}>
+            <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <div className="flex items-center justify-between">
+                  <DialogTitle>Forhandsvisning av ferdig brief</DialogTitle>
+                </div>
+              </DialogHeader>
+              <div className="space-y-6 mt-4">
+                <div className="border-b border-border pb-4">
+                  <h2 className="text-lg font-bold text-foreground">{brief.title}</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Tema: {brief.themeName} &middot; {formatDate(new Date().toISOString())}
+                  </p>
+                </div>
+                {SECTION_CONFIG.map(section => {
+                  const content = sections[section.key]?.content;
+                  return (
+                    <section key={section.key}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-xs font-semibold text-blue-700 dark:text-blue-300">
+                          {section.number}
+                        </span>
+                        <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
+                      </div>
+                      <div className="pl-8 text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">
+                        {content || <span className="text-muted-foreground italic">Ingen innhold</span>}
+                      </div>
+                      {section.number < 9 && <div className="border-b border-border/50 mt-4" />}
+                    </section>
+                  );
+                })}
+              </div>
+            </DialogContent>
+          </Dialog>
         </>
       )}
 
       {/* Navigation */}
-      <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between pt-6 border-t border-border">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Tilbake til intervju
         </Button>
         
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {hasChanges && hasSections && (
             <Button variant="outline" onClick={handleSave} disabled={saving}>
               {saving ? (
@@ -667,33 +750,32 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
               ) : (
                 <Save className="h-4 w-4 mr-2" />
               )}
-              Lagre endringer
+              Lagre
+              <kbd className="hidden sm:inline ml-2 text-xs bg-muted px-1.5 py-0.5 rounded">Ctrl+S</kbd>
             </Button>
           )}
           
-          {/* Approve button - show if not approved or edited after approval */}
           {hasSections && (!isApproved || editedAfterApproval) && (
             <Button 
               onClick={handleApprove} 
               disabled={saving}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 text-white"
             >
               {saving ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <CheckCircle2 className="h-4 w-4 mr-2" />
               )}
-              Godkjenn foreslått brief
+              Godkjenn
             </Button>
           )}
 
-          {/* Continue to Step 5 */}
           <Button 
             onClick={handleContinue} 
             disabled={!hasSections || saving}
             variant={isApproved ? "default" : "outline"}
           >
-            Gå til ferdig brief
+            Ferdig brief
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
