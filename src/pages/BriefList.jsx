@@ -4,9 +4,9 @@ import { createPageUrl } from '@/utils';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format } from 'date-fns';
-import { nb } from 'date-fns/locale';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDeleteBrief } from '@/hooks/useDeleteBrief';
+import { formatDateShort } from '@/utils/dateFormatters';
 import { 
   FileText, 
   PlusCircle, 
@@ -55,31 +55,10 @@ function BriefListContent() {
     enabled: !!user?.email
   });
 
-  const deleteBriefMutation = useMutation({
-    mutationFn: async (briefId) => {
-      // Delete related data first
-      const [sources, dialogEntries] = await Promise.all([
-        base44.entities.BriefSourceMaterial.filter({ briefId }),
-        base44.entities.DialogEntry.filter({ briefId })
-      ]);
-      
-      // Delete all related records
-      await Promise.all([
-        ...sources.map(s => base44.entities.BriefSourceMaterial.delete(s.id)),
-        ...dialogEntries.map(d => base44.entities.DialogEntry.delete(d.id))
-      ]);
-      
-      // Delete the brief itself
-      await base44.entities.Brief.delete(briefId);
-    },
+  const deleteBriefMutation = useDeleteBrief({
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['briefs'] });
-      toast.success('Briefen ble slettet');
       setDeleteDialogOpen(false);
       setBriefToDelete(null);
-    },
-    onError: () => {
-      toast.error('Kunne ikke slette briefen');
     }
   });
 
@@ -106,18 +85,15 @@ function BriefListContent() {
     return matchesSearch && matchesStatus;
   });
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    return format(new Date(dateString), 'd. MMM yyyy', { locale: nb });
-  };
+  const formatDate = formatDateShort;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mine briefs</h1>
-          <p className="text-gray-500 mt-1">Oversikt over alle dine briefs</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Mine briefs</h1>
+          <p className="text-muted-foreground mt-1">Oversikt over alle dine briefs</p>
         </div>
         <Link to={createPageUrl('NewBrief')}>
           <Button className="bg-blue-600 hover:bg-blue-700">
@@ -162,8 +138,8 @@ function BriefListContent() {
             <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
             {briefs.length === 0 ? (
               <>
-                <h3 className="text-lg font-medium text-gray-900 mb-1">Ingen briefs ennå</h3>
-                <p className="text-gray-500 mb-4">Kom i gang ved å opprette din første brief.</p>
+                <h3 className="text-lg font-medium text-foreground mb-1">Ingen briefs enno</h3>
+                <p className="text-muted-foreground mb-4">Kom i gang ved a opprette din forste brief.</p>
                 <Link to={createPageUrl('NewBrief')}>
                   <Button>
                     <PlusCircle className="h-4 w-4 mr-2" />
@@ -173,8 +149,8 @@ function BriefListContent() {
               </>
             ) : (
               <>
-                <h3 className="text-lg font-medium text-gray-900 mb-1">Ingen treff</h3>
-                <p className="text-gray-500">Prøv å endre søket eller filteret ditt.</p>
+                <h3 className="text-lg font-medium text-foreground mb-1">Ingen treff</h3>
+                <p className="text-muted-foreground">Prøv å endre søket eller filteret ditt.</p>
               </>
             )}
           </CardContent>
@@ -187,12 +163,12 @@ function BriefListContent() {
               to={createPageUrl('BriefEditor') + `?id=${brief.id}`}
               className="block"
             >
-              <Card className="hover:border-blue-200 hover:shadow-md transition-all">
+              <Card className="hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-md transition-all">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        brief.status === 'godkjent' ? 'bg-green-100' : 'bg-orange-100'
+                        brief.status === 'godkjent' ? 'bg-green-100 dark:bg-green-900/40' : 'bg-orange-100 dark:bg-orange-900/40'
                       }`}>
                         {brief.status === 'godkjent' 
                           ? <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -211,8 +187,8 @@ function BriefListContent() {
                     <div className="flex items-center space-x-2">
                       <span className={`text-xs px-3 py-1 rounded-full font-medium ${
                         brief.status === 'godkjent' 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-orange-100 text-orange-700'
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' 
+                          : 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
                       }`}>
                         {brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}
                       </span>

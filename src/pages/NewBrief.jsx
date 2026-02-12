@@ -55,8 +55,8 @@ function NewBriefContent() {
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Start ny brief</h1>
-        <p className="text-gray-500 mt-2">Velg et tema for å komme i gang</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Start ny brief</h1>
+        <p className="text-muted-foreground mt-2">Velg et tema for å komme i gang</p>
       </div>
 
       {/* Theme Selection */}
@@ -69,8 +69,8 @@ function NewBriefContent() {
           <Card>
             <CardContent className="py-12 text-center">
               <Tags className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-medium text-gray-900 mb-1">Ingen temaer ennå</h3>
-              <p className="text-gray-500 mb-4">Opprett ditt første tema for å komme i gang.</p>
+              <h3 className="text-lg font-medium text-foreground mb-1">Ingen temaer enno</h3>
+              <p className="text-muted-foreground mb-4">Opprett ditt forste tema for å komme i gang.</p>
             </CardContent>
           </Card>
           <CreateThemeModal />
@@ -80,7 +80,7 @@ function NewBriefContent() {
           {themes.map((theme) => (
             <Card 
               key={theme.id}
-              className="cursor-pointer hover:border-blue-300 hover:shadow-md transition-all"
+              className="cursor-pointer hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition-all"
               onClick={() => handleSelectTheme(theme)}
             >
               <CardContent className="p-6">
@@ -90,9 +90,9 @@ function NewBriefContent() {
                       <FileText className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 text-lg">{theme.name}</h3>
+                      <h3 className="font-semibold text-foreground text-lg">{theme.name}</h3>
                       {theme.description && (
-                        <p className="text-gray-500 mt-1">{theme.description}</p>
+                        <p className="text-muted-foreground mt-1">{theme.description}</p>
                       )}
                     </div>
                   </div>

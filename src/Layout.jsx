@@ -3,13 +3,18 @@ import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { AuthProvider, useAuth } from '@/components/auth/AuthProvider';
 import SidePanel from '@/components/layout/SidePanel';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { 
   LogOut,
   Menu,
   X,
   ChevronDown,
   Sun,
-  Moon
+  Moon,
+  Home,
+  FileText,
+  FolderOpen,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,7 +55,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
   }, [sidePanelCollapsed]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors flex">
+    <div className="min-h-screen bg-background transition-colors flex">
       {/* Desktop Side Panel */}
       <div className="hidden md:flex h-screen sticky top-0">
         <SidePanel 
@@ -64,7 +69,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
       {/* Main Area */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Header */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+        <header className="bg-card border-b border-border sticky top-0 z-50">
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-14">
               {/* Mobile Logo */}
@@ -72,7 +77,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">GS1</span>
                 </div>
-                <span className="font-semibold text-gray-900 dark:text-white">Dynamisk Brief</span>
+                <span className="font-semibold text-foreground">Dynamisk Brief</span>
               </Link>
 
               {/* Desktop spacer */}
@@ -85,7 +90,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                   variant="ghost"
                   size="icon"
                   onClick={() => setDarkMode(!darkMode)}
-                  className="text-gray-600 dark:text-gray-300"
+                  className="text-muted-foreground"
                 >
                   {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </Button>
@@ -145,9 +150,39 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 dark:text-gray-100">
-          {children}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-20 md:pb-6 text-foreground">
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </main>
+
+        {/* Mobile Bottom Navigation */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border">
+          <div className="flex items-center justify-around h-14">
+            {[
+              { name: 'Hjem', page: 'Home', icon: Home },
+              { name: 'Ny brief', page: 'NewBrief', icon: FileText },
+              { name: 'Mine briefs', page: 'BriefList', icon: FolderOpen },
+              { name: 'Innstillinger', page: 'Settings', icon: Settings },
+            ].map((item) => {
+              const isActive = currentPageName === item.page;
+              return (
+                <Link
+                  key={item.page}
+                  to={createPageUrl(item.page)}
+                  className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
+                    isActive
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span className="text-[10px] font-medium">{item.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </div>
     </div>
   );

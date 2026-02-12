@@ -3,14 +3,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDeleteBrief } from '@/hooks/useDeleteBrief';
 import { 
   ArrowLeft,
   Loader2,
   FileText,
   Pencil,
   Check,
-  Trash2
+  Trash2,
+  ChevronRight,
+  Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -83,35 +86,14 @@ function BriefEditorContent() {
     setEditingTitle(true);
   };
 
-  const deleteBriefMutation = useMutation({
-    mutationFn: async () => {
-      // Delete related data first
-      const [sources, dialogEntries] = await Promise.all([
-        base44.entities.BriefSourceMaterial.filter({ briefId }),
-        base44.entities.DialogEntry.filter({ briefId })
-      ]);
-      
-      // Delete all related records
-      await Promise.all([
-        ...sources.map(s => base44.entities.BriefSourceMaterial.delete(s.id)),
-        ...dialogEntries.map(d => base44.entities.DialogEntry.delete(d.id))
-      ]);
-      
-      // Delete the brief itself
-      await base44.entities.Brief.delete(briefId);
-    },
+  const deleteBriefMutation = useDeleteBrief({
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['briefs'] });
-      toast.success('Briefen ble slettet');
       navigate(createPageUrl('BriefList'));
-    },
-    onError: () => {
-      toast.error('Kunne ikke slette briefen');
     }
   });
 
   const handleConfirmDelete = () => {
-    deleteBriefMutation.mutate();
+    deleteBriefMutation.mutate(briefId);
   };
 
   const canDelete = brief && brief.status !== 'godkjent';
@@ -153,7 +135,20 @@ function BriefEditorContent() {
   const currentStep = brief.currentStep || 'source_material';
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in-up">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1 text-sm text-muted-foreground">
+        <Link to={createPageUrl('Home')} className="hover:text-foreground transition-colors">
+          <Home className="h-4 w-4" />
+        </Link>
+        <ChevronRight className="h-3 w-3" />
+        <Link to={createPageUrl('BriefList')} className="hover:text-foreground transition-colors">
+          Mine briefs
+        </Link>
+        <ChevronRight className="h-3 w-3" />
+        <span className="text-foreground font-medium truncate max-w-[200px]">{brief?.title || 'Brief'}</span>
+      </nav>
+
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link to={createPageUrl('BriefList')}>
@@ -177,7 +172,7 @@ function BriefEditorContent() {
             </div>
           ) : (
             <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-bold text-gray-900">{brief.title}</h1>
+              <h1 className="text-2xl font-bold text-foreground">{brief.title}</h1>
               <Button size="icon" variant="ghost" onClick={startEditingTitle}>
                 <Pencil className="h-4 w-4 text-gray-400" />
               </Button>
@@ -199,7 +194,7 @@ function BriefEditorContent() {
       </div>
 
       {/* Stepper */}
-      <BriefStepper currentStep={currentStep} />
+      <BriefStepper currentStep={currentStep} onStepClick={handleUpdateStep} />
 
       {/* Step Content */}
       {currentStep === 'source_material' && (

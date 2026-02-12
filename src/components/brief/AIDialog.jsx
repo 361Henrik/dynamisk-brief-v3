@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { formatRelativeTime } from '@/utils/dateFormatters';
 import { 
   Send, 
   Loader2, 
@@ -10,11 +11,15 @@ import {
   XCircle,
   Bot,
   User,
-  HelpCircle
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  Settings2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { 
   Tooltip,
   TooltipContent,
@@ -29,13 +34,32 @@ import InterviewProgress, {
 } from './InterviewProgress';
 import { ClipboardList, MessageCircleQuestion } from 'lucide-react';
 
+// Typing indicator component
+function TypingIndicator() {
+  return (
+    <div className="flex justify-start">
+      <div className="bg-muted rounded-lg p-3 flex items-center gap-1.5">
+        <div className="w-2 h-2 rounded-full bg-muted-foreground/60 typing-dot" />
+        <div className="w-2 h-2 rounded-full bg-muted-foreground/60 typing-dot" />
+        <div className="w-2 h-2 rounded-full bg-muted-foreground/60 typing-dot" />
+      </div>
+    </div>
+  );
+}
+
+// Quick reply chips
+const QUICK_REPLIES = [
+  { label: 'Ja, det stemmer', value: 'Ja, det stemmer.' },
+  { label: 'Kan du utdype?', value: 'Kan du utdype dette litt mer?' },
+  { label: 'Hopp over denne', value: 'Hopp over denne seksjonen for nå, gå videre til neste.' },
+];
+
 // Determine AI message type based on content heuristics
 const getMessageType = (entry) => {
   if (entry.clarifyConfirm?.isConfirmationRequest) {
     return 'summary';
   }
   const content = entry.content || '';
-  // Check if message contains a question (ends with ? or has bold question line)
   const hasQuestion = content.includes('?') || /\*\*[^*]+\?\*\*/.test(content);
   if (hasQuestion) {
     return 'question';
@@ -43,7 +67,7 @@ const getMessageType = (entry) => {
   return 'context';
 };
 
-// Static mapping: interview section → brief template sections (UI display only)
+// Static mapping: interview section -> brief template sections (UI display only)
 const SECTION_TO_TEMPLATE_MAP = {
   hovedbudskap: 'Budskap, tone og stil + GS1-tilbudet og verdiforslag',
   malgruppe_innsikt: 'Målgrupper',
@@ -57,7 +81,6 @@ const detectActiveSection = (content, confirmedPoints = []) => {
   if (!content) return null;
   const lowerContent = content.toLowerCase();
   
-  // Check each section for keyword matches
   const sectionKeywords = {
     hovedbudskap: ['hovedbudskap', 'kjernebudskap', 'viktigste budskap', 'kommunisere'],
     malgruppe_innsikt: ['målgruppe', 'målgruppeinnsikt', 'hvem er', 'kjenner du', 'deres behov'],
@@ -67,7 +90,6 @@ const detectActiveSection = (content, confirmedPoints = []) => {
   };
   
   for (const section of BRIEF_SECTIONS) {
-    // Skip already confirmed sections
     const isConfirmed = confirmedPoints.some(p => 
       p.sectionKey === section.key || 
       p.topic?.toLowerCase().includes(section.key.replace('_', ' '))
@@ -80,7 +102,6 @@ const detectActiveSection = (content, confirmedPoints = []) => {
     }
   }
   
-  // Default to first unconfirmed section
   return BRIEF_SECTIONS.find(section => 
     !confirmedPoints.some(p => 
       p.sectionKey === section.key || 
@@ -93,7 +114,9 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showContext, setShowContext] = useState(false);
   const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const { data: dialogEntries = [], isLoading } = useQuery({
     queryKey: ['dialogEntries', brief.id],
@@ -110,7 +133,7 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [dialogEntries]);
+  }, [dialogEntries, isProcessing]);
 
   // Start conversation if empty
   useEffect(() => {
@@ -150,7 +173,6 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
     const known = [];
     const missing = [];
 
-    // What we know
     if (brief.themeName) known.push(`Tema: ${brief.themeName}`);
     if (brief.rammer?.targetAudience) known.push(`Målgruppe: ${brief.rammer.targetAudience}`);
     if (brief.rammer?.objectives) known.push(`Mål: ${brief.rammer.objectives}`);
@@ -158,7 +180,6 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
     if (brief.rammer?.tone) known.push(`Tone: ${brief.rammer.tone}`);
     if (sources.length > 0) known.push(`${sources.length} kildemateriale(r) lastet opp`);
 
-    // What we're missing (based on BRIEF_SECTIONS)
     BRIEF_SECTIONS.forEach(section => {
       const hasConfirmed = confirmedPoints.some(p => 
         p.sectionKey === section.key || 
@@ -249,19 +270,16 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
     setIsProcessing(true);
     setInput('');
 
-    // Add user message
     await addEntryMutation.mutateAsync({
       role: 'user',
       content: message,
       inputMethod
     });
 
-    // Build conversation history
     const history = [...dialogEntries, { role: 'user', content: message }]
       .map(e => `${e.role === 'assistant' ? 'Rådgiver' : 'Fagekspert'}: ${e.content}`)
       .join('\n\n');
 
-    // Get remaining sections
     const remainingSections = BRIEF_SECTIONS.filter(section => {
       return !confirmedPoints.some(p => 
         p.sectionKey === section.key || 
@@ -313,7 +331,6 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
     try {
       const response = await base44.integrations.Core.InvokeLLM({ prompt });
       
-      // Check if this is a confirmation request with section key
       const confirmMatch = response.match(/\*\*\[BEKREFT:\s*(\w+)\]\*\*\s*([^:]+):\s*(.+)/s);
       
       const entryData = {
@@ -342,7 +359,6 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
   const handleConfirm = async (entry, confirmed) => {
     if (!entry.clarifyConfirm) return;
 
-    // Update the dialog entry
     await base44.entities.DialogEntry.update(entry.id, {
       clarifyConfirm: {
         ...entry.clarifyConfirm,
@@ -351,7 +367,6 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
     });
 
     if (confirmed) {
-      // Add to brief's confirmed points with section key
       const newPoint = {
         sectionKey: entry.clarifyConfirm.sectionKey,
         topic: entry.clarifyConfirm.topic,
@@ -363,7 +378,6 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
         confirmedPoints: [...confirmedPoints, newPoint]
       });
 
-      // No extra chat message - confirmation is shown in-place on the summary card
       queryClient.invalidateQueries({ queryKey: ['dialogEntries', brief.id] });
     } else {
       await sendMessage(`Jeg vil korrigere: ${entry.clarifyConfirm.topic}`, 'text');
@@ -372,20 +386,19 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    // Enter or Ctrl+Enter to send
+    if (e.key === 'Enter' && (e.ctrlKey || !e.shiftKey)) {
       e.preventDefault();
       sendMessage(input);
     }
   };
 
-  const textareaRef = useRef(null);
-
   const autoResizeTextarea = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
-      const minHeight = 120; // ~5-6 lines default
-      const maxHeight = 240; // ~10 lines max
+      const minHeight = 56;
+      const maxHeight = 160;
       textarea.style.height = Math.max(minHeight, Math.min(textarea.scrollHeight, maxHeight)) + 'px';
     }
   }, []);
@@ -396,24 +409,71 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
 
   const canProceed = areAllSectionsConfirmed(confirmedPoints);
   const confirmedCount = getConfirmedSectionsCount(confirmedPoints);
+  const { known } = buildContextSummary();
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* Progress sidebar */}
       <div className="lg:col-span-1 order-2 lg:order-1">
-        <div className="sticky top-4">
+        <div className="sticky top-20">
           <InterviewProgress confirmedPoints={confirmedPoints} />
         </div>
       </div>
 
       {/* Main chat area */}
-      <div className="lg:col-span-2 order-1 lg:order-2 space-y-4">
+      <div className="lg:col-span-2 order-1 lg:order-2 flex flex-col gap-4">
+
+        {/* Collapsible Context Panel */}
+        <button
+          type="button"
+          onClick={() => setShowContext(!showContext)}
+          className="flex items-center justify-between w-full text-left px-4 py-2.5 bg-muted/50 rounded-lg border border-border hover:bg-muted transition-colors"
+        >
+          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <Settings2 className="h-4 w-4 text-muted-foreground" />
+            Kontekst
+            <Badge variant="secondary" className="text-xs">{known.length} elementer</Badge>
+          </div>
+          {showContext ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </button>
+        {showContext && (
+          <div className="bg-muted/30 border border-border rounded-lg p-4 -mt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              {known.map((item, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                  <span className="text-muted-foreground">{item}</span>
+                </div>
+              ))}
+              {sources.length > 0 && (
+                <div className="flex items-start gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <span className="text-muted-foreground">{sources.length} kilde(r): {sources.map(s => s.fileName || s.fileUrl).join(', ')}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Empty state card */}
+        {!isLoading && dialogEntries.length === 0 && !isProcessing && (
+          <Card className="border-dashed bg-blue-50/50 dark:bg-blue-900/10">
+            <CardContent className="p-6 text-center">
+              <Bot className="h-10 w-10 mx-auto mb-3 text-blue-500" />
+              <h3 className="font-semibold text-foreground mb-1">AI-radgiver</h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                AI-rådgiveren vil stille deg spørsmål for å fylle ut briefen. Svar så godt du kan -- du kan alltid korrigere etterpå.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Chat Messages */}
-        <Card className="h-[450px] overflow-hidden flex flex-col">
-          <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+        <Card className="min-h-[300px] max-h-[calc(100vh-400px)] overflow-hidden flex flex-col">
+          <CardContent className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
-                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : (
               <>
@@ -426,38 +486,51 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                   return (
                   <div
                     key={entry.id}
-                    className={`flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`}
                   >
                     <div className={`max-w-[85%] ${entry.role === 'user' ? 'order-2' : ''}`}>
-                      <div className="flex items-center space-x-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1">
                         {entry.role === 'assistant' ? (
                           messageType === 'summary' ? (
                             <ClipboardList className="h-4 w-4 text-amber-600" />
                           ) : messageType === 'question' ? (
                             <MessageCircleQuestion className="h-4 w-4 text-blue-600" />
                           ) : (
-                            <Bot className="h-4 w-4 text-gray-500" />
+                            <Bot className="h-4 w-4 text-muted-foreground" />
                           )
                         ) : (
-                          <User className="h-4 w-4 text-gray-600" />
+                          <User className="h-4 w-4 text-muted-foreground" />
                         )}
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {entry.role === 'assistant' 
                             ? (messageType === 'summary' ? 'Bekreft oppsummering' : 'Dynamisk brief')
                             : (userName || 'Deg')}
                         </span>
+                        {entry.created_date && (
+                          <span className="text-xs text-muted-foreground/60">
+                            {formatRelativeTime(entry.created_date)}
+                          </span>
+                        )}
                       </div>
                       <div
                         className={`rounded-lg p-3 ${
                           entry.role === 'user'
                             ? 'bg-blue-600 text-white'
                             : messageType === 'summary'
-                              ? 'bg-amber-50 dark:bg-amber-900/20 border-2 border-dashed border-amber-300 dark:border-amber-700 text-gray-900 dark:text-gray-100'
+                              ? 'bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-400 dark:border-amber-600 text-foreground'
                               : messageType === 'question'
-                                ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-gray-900 dark:text-gray-100'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-foreground'
+                                : 'bg-muted text-foreground'
                         }`}
                       >
+                        {/* Section label for summary messages */}
+                        {messageType === 'summary' && entry.clarifyConfirm?.topic && (
+                          <div className="mb-2">
+                            <Badge variant="outline" className="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-700">
+                              {entry.clarifyConfirm.topic}
+                            </Badge>
+                          </div>
+                        )}
                         {/* Section label + template placement for question messages */}
                         {activeSection && messageType === 'question' && (
                           <div className="mb-3">
@@ -470,7 +543,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                           </div>
                         )}
                         {entry.role === 'assistant' ? (
-                          <ReactMarkdown className="prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-li:my-1 prose-ul:my-2 prose-ol:my-2 prose-headings:my-3 prose-hr:my-4">
+                          <ReactMarkdown className="prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-li:my-1 prose-ul:my-2 prose-ol:my-2 prose-headings:my-3 prose-hr:my-4 leading-relaxed">
                             {entry.content.replace(/^(Rådgiver|Dynamisk brief):\s*/i, '')}
                           </ReactMarkdown>
                         ) : (
@@ -481,7 +554,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                       {/* Confirm/Reject buttons or confirmed state */}
                       {entry.clarifyConfirm?.isConfirmationRequest && (
                         entry.clarifyConfirm?.status === 'pending' ? (
-                          <div className="flex items-center space-x-2 mt-2">
+                          <div className="flex items-center gap-2 mt-2">
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -496,7 +569,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p className="text-sm">Dette blir låst og brukt i briefen</p>
+                                  <p className="text-sm">Dette blir last og brukt i briefen</p>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -516,14 +589,14 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <button className="text-gray-400 hover:text-gray-600">
+                                  <button className="text-muted-foreground hover:text-foreground">
                                     <HelpCircle className="h-4 w-4" />
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-xs">
                                   <p className="text-sm">
                                     <strong>Hva skjer når jeg bekrefter?</strong><br/>
-                                    Punktet blir låst og brukes direkte i den ferdige briefen. 
+                                    Punktet blir last og brukes direkte i den ferdige briefen. 
                                     Velg "Korriger" hvis du vil endre noe.
                                   </p>
                                 </TooltipContent>
@@ -531,7 +604,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                             </TooltipProvider>
                           </div>
                         ) : entry.clarifyConfirm?.status === 'confirmed' ? (
-                          <div className="flex items-center space-x-2 mt-2 text-green-600">
+                          <div className="flex items-center gap-2 mt-2 text-green-600">
                             <CheckCircle2 className="h-4 w-4" />
                             <span className="text-sm font-medium">Bekreftet</span>
                           </div>
@@ -542,13 +615,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                   );
                 })}
                 
-                {isProcessing && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
-                      <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
-                    </div>
-                  </div>
-                )}
+                {isProcessing && <TypingIndicator />}
                 
                 <div ref={messagesEndRef} />
               </>
@@ -556,36 +623,63 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
           </CardContent>
 
           {/* Input Area */}
-          <div className="border-t dark:border-gray-700 p-4">
-            <div className="flex space-x-2">
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Skriv svaret ditt her – eller bruk tale-til-tekst via PC/Mac-mikrofonen."
-                className="flex-1 min-h-[120px] max-h-[240px] resize-none overflow-y-auto rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-gray-500 dark:placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={isProcessing}
-              />
+          <div className="border-t border-border p-4 space-y-3">
+            {/* Quick reply chips */}
+            {dialogEntries.length > 0 && !isProcessing && (
+              <div className="flex flex-wrap gap-2">
+                {QUICK_REPLIES.map((reply) => (
+                  <button
+                    key={reply.label}
+                    type="button"
+                    onClick={() => sendMessage(reply.value)}
+                    className="text-xs px-3 py-1.5 rounded-full border border-border bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  >
+                    {reply.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
+                <textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Skriv svaret ditt her..."
+                  className="w-full min-h-[56px] max-h-[160px] resize-none overflow-y-auto rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={isProcessing}
+                />
+                {input.length > 0 && (
+                  <span className="absolute bottom-1.5 right-2 text-[10px] text-muted-foreground/60">
+                    {input.length}
+                  </span>
+                )}
+              </div>
               <Button
                 onClick={() => sendMessage(input)}
                 disabled={!input.trim() || isProcessing}
+                className="self-end"
               >
                 <Send className="h-4 w-4" />
+                <span className="hidden sm:inline ml-2">Send</span>
               </Button>
             </div>
+            <p className="text-[10px] text-muted-foreground/60 text-center">
+              Trykk Enter for å sende, Shift+Enter for ny linje
+            </p>
           </div>
         </Card>
 
         {/* Navigation */}
         <div className="flex justify-between items-center">
-          <Button variant="outline" onClick={onBack} className="border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+          <Button variant="outline" onClick={onBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Tilbake til rammer
           </Button>
           <div className="flex items-center gap-3">
             {!canProceed && (
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 {confirmedCount}/{BRIEF_SECTIONS.length} seksjoner bekreftet
               </span>
             )}

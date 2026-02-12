@@ -156,3 +156,56 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+/* Page fade-in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+/* Typing indicator dots */
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+.typing-dot {
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* Skeleton pulse */
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.skeleton-pulse {
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+/* Print styles */
+@media print {
+  body { background: white !important; }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  main { padding: 0 !important; }
+  .print-brief {
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
