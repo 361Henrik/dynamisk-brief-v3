@@ -316,6 +316,17 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
     setIsProcessing(false);
   };
 
+  // Merge server confirmedPoints with any pending local additions (skip/confirm that hasn't round-tripped yet)
+  const getEffectiveConfirmedPoints = () => {
+    const base = confirmedPoints;
+    const pending = pendingPointsRef.current;
+    if (pending.length === 0) return base;
+    // Deduplicate by sectionKey
+    const baseKeys = new Set(base.map(p => p.sectionKey));
+    const merged = [...base, ...pending.filter(p => !baseKeys.has(p.sectionKey))];
+    return merged;
+  };
+
   const sendMessage = async (message, inputMethod = 'text') => {
     if (!message.trim() || isProcessing) return;
 
@@ -329,14 +340,17 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
       inputMethod
     });
 
+    // Use effective confirmed points (includes pending skip/confirm)
+    const effectivePoints = getEffectiveConfirmedPoints();
+
     // Build conversation history
     const history = [...dialogEntries, { role: 'user', content: message }]
       .map(e => `${e.role === 'assistant' ? 'Rådgiver' : 'Fagekspert'}: ${e.content}`)
       .join('\n\n');
 
-    // Get remaining sections
+    // Get remaining sections using effective points
     const remainingSections = BRIEF_SECTIONS.filter(section => {
-      return !confirmedPoints.some(p => 
+      return !effectivePoints.some(p => 
         p.sectionKey === section.key || 
         p.topic?.toLowerCase().includes(section.key.replace('_', ' '))
       );
@@ -349,8 +363,8 @@ Tema: ${brief.themeName}
 Målgruppe: ${brief.rammer?.targetAudience || 'Ikke spesifisert'}
 Mål: ${brief.rammer?.objectives || 'Ikke spesifisert'}
 
-ALLEREDE BEKREFTET (${confirmedPoints.length}/${BRIEF_SECTIONS.length}):
-${confirmedPoints.map(p => `✓ ${p.sectionKey || p.topic}: ${p.summary}`).join('\n') || 'Ingen seksjoner bekreftet ennå'}
+ALLEREDE BEKREFTET (${effectivePoints.length}/${BRIEF_SECTIONS.length}):
+${effectivePoints.map(p => `✓ ${p.sectionKey || p.topic}: ${p.summary}`).join('\n') || 'Ingen seksjoner bekreftet ennå'}
 
 GJENSTÅENDE SEKSJONER:
 ${remainingSections.map(s => `• ${s.label}: ${s.description}`).join('\n') || 'Alle seksjoner er bekreftet!'}
@@ -386,7 +400,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
     try {
       const response = await base44.integrations.Core.InvokeLLM({ prompt });
       
-      // Use multi-strategy parser instead of single regex
+      // Use multi-strategy parser
       const parsed = parseConfirmation(response);
       
       const entryData = {
@@ -403,15 +417,30 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
           status: 'pending'
         };
         // Reset loop count for this section since we got a valid confirmation
-        setSectionRepeatCounts(prev => ({ ...prev, [parsed.sectionKey]: 0 }));
+        setSectionRepeatCounts(prev => {
+          const next = { ...prev };
+          delete next[parsed.sectionKey];
+          return next;
+        });
       } else {
-        // Track which section the AI is targeting to detect loops
-        const detectedSection = detectActiveSection(response, confirmedPoints);
-        if (detectedSection) {
-          setSectionRepeatCounts(prev => {
-            const count = (prev[detectedSection.key] || 0) + 1;
-            return { ...prev, [detectedSection.key]: count };
-          });
+        // Only track repeat counts for QUESTION-type messages (not summaries or context)
+        const responseType = getMessageType({ content: response });
+        if (responseType === 'question') {
+          const detectedSection = detectActiveSection(response, effectivePoints);
+          if (detectedSection) {
+            setSectionRepeatCounts(prev => {
+              const existing = prev[detectedSection.key];
+              const currentConfirmedCount = effectivePoints.length;
+              if (existing) {
+                // If confirmedPoints grew since we started counting, reset — it's a new topic cycle
+                if (currentConfirmedCount > existing.confirmedAtStart) {
+                  return { ...prev, [detectedSection.key]: { count: 1, confirmedAtStart: currentConfirmedCount } };
+                }
+                return { ...prev, [detectedSection.key]: { count: existing.count + 1, confirmedAtStart: existing.confirmedAtStart } };
+              }
+              return { ...prev, [detectedSection.key]: { count: 1, confirmedAtStart: currentConfirmedCount } };
+            });
+          }
         }
       }
 
@@ -420,6 +449,8 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
       console.error('Failed to get AI response:', error);
     }
 
+    // Clear pending points — by now the query invalidation from the mutation should have fresh data
+    pendingPointsRef.current = [];
     setIsProcessing(false);
   };
 
