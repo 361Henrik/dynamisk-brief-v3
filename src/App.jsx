@@ -35,7 +35,7 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Try to redirect to login -- if it fails or we're still here, show a message
+      // Show a login screen -- do NOT auto-redirect (causes infinite loop in preview)
       return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
           <div className="text-center max-w-md p-8">
@@ -44,14 +44,23 @@ const AuthenticatedApp = () => {
             </div>
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Dynamisk Brief</h1>
             <p className="text-gray-500 dark:text-gray-400 mb-6">
-              Du er ikke logget inn. Klikk knappen under for å logge inn via Base44.
+              Du er ikke logget inn. Klikk knappen under for a logge inn via Base44.
             </p>
             <button
-              onClick={() => navigateToLogin()}
+              onClick={() => {
+                try {
+                  navigateToLogin();
+                } catch (e) {
+                  console.error('Login redirect failed:', e);
+                }
+              }}
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
               Logg inn
             </button>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
+              Denne appen krever tilkobling til Base44-plattformen for autentisering.
+            </p>
           </div>
         </div>
       );
