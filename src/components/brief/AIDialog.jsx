@@ -417,6 +417,69 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
     setIsProcessing(false);
   };
 
+  // Manual confirm: used when parsing failed but user agrees the content is a valid summary
+  const handleManualConfirm = async (entry, sectionKey) => {
+    const section = BRIEF_SECTIONS.find(s => s.key === sectionKey);
+    if (!section) return;
+
+    // Extract a summary from the message content (strip markdown formatting cruft)
+    const rawSummary = (entry?.content || '')
+      .replace(/\*\*\[BEKREFT[^\]]*\]\*\*/gi, '')
+      .replace(/^\s*[\*\-–]+\s*/gm, '')
+      .trim();
+    const summary = rawSummary.substring(0, 500) || section.label;
+
+    const newPoint = {
+      sectionKey: section.key,
+      topic: section.label,
+      summary,
+      confirmedAt: new Date().toISOString()
+    };
+
+    await updateBriefMutation.mutateAsync({
+      confirmedPoints: [...confirmedPoints, newPoint]
+    });
+
+    // Also update the dialog entry so it shows as confirmed
+    if (entry?.id) {
+      await base44.entities.DialogEntry.update(entry.id, {
+        clarifyConfirm: {
+          isConfirmationRequest: true,
+          sectionKey: section.key,
+          topic: section.label,
+          summary,
+          status: 'confirmed'
+        }
+      });
+    }
+
+    setSectionRepeatCounts(prev => ({ ...prev, [sectionKey]: 0 }));
+    queryClient.invalidateQueries({ queryKey: ['dialogEntries', brief.id] });
+  };
+
+  // Skip a section: marks it with a placeholder so interview advances
+  const handleSkipSection = async (sectionKey) => {
+    const section = BRIEF_SECTIONS.find(s => s.key === sectionKey);
+    if (!section) return;
+
+    const newPoint = {
+      sectionKey: section.key,
+      topic: section.label,
+      summary: '(Hoppet over av bruker)',
+      confirmedAt: new Date().toISOString()
+    };
+
+    await updateBriefMutation.mutateAsync({
+      confirmedPoints: [...confirmedPoints, newPoint]
+    });
+
+    setSectionRepeatCounts(prev => ({ ...prev, [sectionKey]: 0 }));
+    queryClient.invalidateQueries({ queryKey: ['dialogEntries', brief.id] });
+
+    // Prompt AI to move on
+    await sendMessage('Jeg hopper over denne seksjonen. Gå videre til neste.', 'text');
+  };
+
   const handleConfirm = async (entry, confirmed) => {
     if (!entry.clarifyConfirm) return;
 
