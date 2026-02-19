@@ -577,7 +577,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                           messageType === 'summary' ? (
                             <ClipboardList className="h-4 w-4 text-amber-600" />
                           ) : messageType === 'question' ? (
-                            <MessageCircleQuestion className="h-4 w-4 text-blue-600" />
+                            <MessageSquare className="h-4 w-4 text-blue-600" />
                           ) : (
                             <Bot className="h-4 w-4 text-gray-500" />
                           )
