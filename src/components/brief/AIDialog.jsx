@@ -493,7 +493,11 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
       });
     }
 
-    setSectionRepeatCounts(prev => ({ ...prev, [sectionKey]: 0 }));
+    setSectionRepeatCounts(prev => {
+      const next = { ...prev };
+      delete next[sectionKey];
+      return next;
+    });
     queryClient.invalidateQueries({ queryKey: ['dialogEntries', brief.id] });
   };
 
