@@ -589,12 +589,24 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
   const canProceed = areAllSectionsConfirmed(confirmedPoints);
   const confirmedCount = getConfirmedSectionsCount(confirmedPoints);
 
+  // Derive active section from the most recent assistant QUESTION message
+  const derivedActiveSectionKey = (() => {
+    for (let i = dialogEntries.length - 1; i >= 0; i--) {
+      const e = dialogEntries[i];
+      if (e.role === 'assistant' && getMessageType(e) === 'question') {
+        const section = detectActiveSection(e.content, confirmedPoints);
+        return section?.key || null;
+      }
+    }
+    return null;
+  })();
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* Progress sidebar */}
       <div className="lg:col-span-1 order-2 lg:order-1">
         <div className="sticky top-4">
-          <InterviewProgress confirmedPoints={confirmedPoints} />
+          <InterviewProgress confirmedPoints={confirmedPoints} activeSectionKey={derivedActiveSectionKey} />
         </div>
       </div>
 
