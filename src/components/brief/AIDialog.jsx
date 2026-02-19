@@ -506,14 +506,21 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
       confirmedAt: new Date().toISOString()
     };
 
+    // Store in pending ref so the next sendMessage prompt sees it immediately
+    pendingPointsRef.current = [...pendingPointsRef.current, newPoint];
+
     await updateBriefMutation.mutateAsync({
       confirmedPoints: [...confirmedPoints, newPoint]
     });
 
-    setSectionRepeatCounts(prev => ({ ...prev, [sectionKey]: 0 }));
+    setSectionRepeatCounts(prev => {
+      const next = { ...prev };
+      delete next[sectionKey];
+      return next;
+    });
     queryClient.invalidateQueries({ queryKey: ['dialogEntries', brief.id] });
 
-    // Prompt AI to move on
+    // Prompt AI to move on — sendMessage will use effective points including the skip
     await sendMessage('Jeg hopper over denne seksjonen. Gå videre til neste.', 'text');
   };
 
