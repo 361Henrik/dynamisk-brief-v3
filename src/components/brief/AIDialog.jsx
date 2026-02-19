@@ -473,6 +473,9 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
       confirmedAt: new Date().toISOString()
     };
 
+    // Store in pending ref so next sendMessage sees it immediately
+    pendingPointsRef.current = [...pendingPointsRef.current, newPoint];
+
     await updateBriefMutation.mutateAsync({
       confirmedPoints: [...confirmedPoints, newPoint]
     });
