@@ -49,9 +49,11 @@ export function areAllSectionsConfirmed(confirmedPoints = []) {
   return getConfirmedSectionsCount(confirmedPoints) >= BRIEF_SECTIONS.length;
 }
 
-export default function InterviewProgress({ confirmedPoints = [] }) {
+export default function InterviewProgress({ confirmedPoints = [], activeSectionKey = null }) {
   const sectionStatus = getSectionStatus(confirmedPoints);
-  const activeFocusSection = BRIEF_SECTIONS.find(section => sectionStatus[section.key] === 'missing');
+  // Prefer explicit active section from conversation, fallback to first missing
+  const activeFocusSection = (activeSectionKey && BRIEF_SECTIONS.find(s => s.key === activeSectionKey && sectionStatus[s.key] === 'missing'))
+    || BRIEF_SECTIONS.find(section => sectionStatus[section.key] === 'missing');
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-6">
