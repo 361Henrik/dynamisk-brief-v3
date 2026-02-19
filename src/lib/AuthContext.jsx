@@ -14,6 +14,16 @@ export const AuthProvider = ({ children }) => {
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
   useEffect(() => {
+    // If no access token, skip auth and enter preview/demo mode
+    // Base44 auth requires a token from the redirect flow which isn't available in preview environments
+    if (!appParams.token) {
+      console.log('[v0] No access token found, entering preview mode');
+      setIsLoadingPublicSettings(false);
+      setIsLoadingAuth(false);
+      setIsAuthenticated(true);
+      setUser({ name: 'Preview-bruker', email: 'preview@example.com' });
+      return;
+    }
     checkAppState();
   }, []);
 

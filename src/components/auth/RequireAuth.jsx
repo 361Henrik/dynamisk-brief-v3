@@ -20,12 +20,18 @@ export function RequireAuth({ children, requireAdmin = false }) {
   }
 
   if (!user) {
-    base44.auth.redirectToLogin();
+    // Only redirect if we have a real Base44 connection (token exists)
+    // Otherwise show a static message to avoid infinite redirect loops
+    try {
+      base44.auth.redirectToLogin();
+    } catch (e) {
+      console.error('Login redirect failed:', e);
+    }
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Omdirigerer til innlogging...</p>
+          <p className="text-gray-600 dark:text-gray-400">Omdirigerer til innlogging...</p>
         </div>
       </div>
     );

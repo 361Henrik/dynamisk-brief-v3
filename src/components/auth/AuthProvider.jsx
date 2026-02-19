@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { appParams } from '@/lib/app-params';
 
 const AuthContext = createContext(null);
 
@@ -13,6 +14,12 @@ export function AuthProvider({ children }) {
   }, []);
 
   const loadUser = async () => {
+    // If no token, enter preview mode with a mock user
+    if (!appParams.token) {
+      setUser({ name: 'Preview-bruker', email: 'preview@example.com', role: 'admin', isActive: true });
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const isAuth = await base44.auth.isAuthenticated();
