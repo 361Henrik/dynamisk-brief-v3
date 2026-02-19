@@ -161,7 +161,11 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  // Loop guard: { [sectionKey]: { count: number, confirmedAtStart: number } }
   const [sectionRepeatCounts, setSectionRepeatCounts] = useState({});
+  // Local overlay of confirmed points used to immediately reflect skip/confirm in the next LLM prompt
+  // without waiting for query invalidation. Cleared on each re-render from brief prop.
+  const pendingPointsRef = useRef([]);
   const messagesEndRef = useRef(null);
 
   const { data: dialogEntries = [], isLoading } = useQuery({
