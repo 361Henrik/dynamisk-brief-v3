@@ -768,8 +768,8 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
 
           {/* Loop guard: stuck recovery UI */}
           {(() => {
-            const stuckKey = Object.entries(sectionRepeatCounts).find(([key, count]) => 
-              count >= 3 && !confirmedPoints.some(p => p.sectionKey === key)
+            const stuckKey = Object.entries(sectionRepeatCounts).find(([key, val]) => 
+              val.count >= 3 && !confirmedPoints.some(p => p.sectionKey === key)
             );
             if (!stuckKey) return null;
             const [sectionKey] = stuckKey;
