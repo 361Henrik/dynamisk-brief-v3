@@ -159,6 +159,7 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [sectionRepeatCounts, setSectionRepeatCounts] = useState({});
   const messagesEndRef = useRef(null);
 
   const { data: dialogEntries = [], isLoading } = useQuery({
