@@ -27,7 +27,8 @@ import InterviewProgress, {
   areAllSectionsConfirmed,
   getConfirmedSectionsCount 
 } from './InterviewProgress';
-import { ClipboardList, MessageCircleQuestion } from 'lucide-react';
+import StuckRecovery from './StuckRecovery';
+import { ClipboardList, MessageCircleQuestion, AlertTriangle } from 'lucide-react';
 
 // Determine AI message type based on content heuristics
 const getMessageType = (entry) => {
