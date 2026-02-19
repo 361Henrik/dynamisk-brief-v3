@@ -10,7 +10,10 @@ import {
   XCircle,
   Bot,
   User,
-  HelpCircle
+  HelpCircle,
+  ClipboardList,
+  MessageSquare,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,7 +31,6 @@ import InterviewProgress, {
   getConfirmedSectionsCount 
 } from './InterviewProgress';
 import StuckRecovery from './StuckRecovery';
-import { ClipboardList, MessageCircleQuestion, AlertTriangle } from 'lucide-react';
 
 // Try multiple strategies to parse a confirmation from AI response
 function parseConfirmation(response) {
