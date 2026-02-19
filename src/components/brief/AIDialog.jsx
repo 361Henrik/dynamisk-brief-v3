@@ -678,6 +678,29 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                           </div>
                         ) : null
                       )}
+
+                      {/* Manual confirm fallback: message looks like confirmation but parsing failed */}
+                      {entry.role === 'assistant' && !entry.clarifyConfirm && looksLikeConfirmation(entry.content) && (() => {
+                        const fallbackSection = detectActiveSection(entry.content, confirmedPoints);
+                        return fallbackSection && !confirmedPoints.some(p => p.sectionKey === fallbackSection.key);
+                      })() && (
+                        <div className="flex items-center gap-2 mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded border border-amber-200 dark:border-amber-700">
+                          <AlertTriangle className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
+                          <span className="text-xs text-amber-700 dark:text-amber-300">Bekreftelse ikke gjenkjent automatisk.</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-green-700 border-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 text-xs ml-auto h-7"
+                            onClick={() => {
+                              const section = detectActiveSection(entry.content, confirmedPoints);
+                              if (section) handleManualConfirm(entry, section.key);
+                            }}
+                          >
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            Bekreft manuelt
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                   );
