@@ -380,22 +380,33 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
     try {
       const response = await base44.integrations.Core.InvokeLLM({ prompt });
       
-      // Check if this is a confirmation request with section key
-      const confirmMatch = response.match(/\*\*\[BEKREFT:\s*(\w+)\]\*\*\s*([^:]+):\s*(.+)/s);
+      // Use multi-strategy parser instead of single regex
+      const parsed = parseConfirmation(response);
       
       const entryData = {
         role: 'assistant',
         content: response
       };
 
-      if (confirmMatch) {
+      if (parsed) {
         entryData.clarifyConfirm = {
           isConfirmationRequest: true,
-          sectionKey: confirmMatch[1].trim(),
-          topic: confirmMatch[2].trim(),
-          summary: confirmMatch[3].trim(),
+          sectionKey: parsed.sectionKey,
+          topic: parsed.topic,
+          summary: parsed.summary,
           status: 'pending'
         };
+        // Reset loop count for this section since we got a valid confirmation
+        setSectionRepeatCounts(prev => ({ ...prev, [parsed.sectionKey]: 0 }));
+      } else {
+        // Track which section the AI is targeting to detect loops
+        const detectedSection = detectActiveSection(response, confirmedPoints);
+        if (detectedSection) {
+          setSectionRepeatCounts(prev => {
+            const count = (prev[detectedSection.key] || 0) + 1;
+            return { ...prev, [detectedSection.key]: count };
+          });
+        }
       }
 
       await addEntryMutation.mutateAsync(entryData);
