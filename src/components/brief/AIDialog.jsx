@@ -719,6 +719,26 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
             )}
           </CardContent>
 
+          {/* Loop guard: stuck recovery UI */}
+          {(() => {
+            const stuckKey = Object.entries(sectionRepeatCounts).find(([key, count]) => 
+              count >= 3 && !confirmedPoints.some(p => p.sectionKey === key)
+            );
+            if (!stuckKey) return null;
+            const [sectionKey] = stuckKey;
+            const section = BRIEF_SECTIONS.find(s => s.key === sectionKey);
+            if (!section) return null;
+            // Find the last assistant message for manual confirm
+            const lastAssistant = [...dialogEntries].reverse().find(e => e.role === 'assistant');
+            return (
+              <StuckRecovery
+                sectionLabel={section.label}
+                onManualConfirm={() => handleManualConfirm(lastAssistant, sectionKey)}
+                onSkip={() => handleSkipSection(sectionKey)}
+              />
+            );
+          })()}
+
           {/* Input Area */}
           <div className="border-t dark:border-gray-700 p-4">
             <div className="flex space-x-2">
