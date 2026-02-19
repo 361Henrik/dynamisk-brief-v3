@@ -30,12 +30,77 @@ import InterviewProgress, {
 import StuckRecovery from './StuckRecovery';
 import { ClipboardList, MessageCircleQuestion, AlertTriangle } from 'lucide-react';
 
+// Try multiple strategies to parse a confirmation from AI response
+function parseConfirmation(response) {
+  if (!response) return null;
+
+  // Strategy 1: Strict original format  **[BEKREFT: key]** Topic: Summary
+  const strict = response.match(/\*\*\[BEKREFT:\s*(\w+)\]\*\*\s*([^:\n]+):\s*(.+)/s);
+  if (strict) {
+    const key = strict[1].trim().toLowerCase();
+    if (BRIEF_SECTIONS.some(s => s.key === key)) {
+      return { sectionKey: key, topic: strict[2].trim(), summary: strict[3].trim() };
+    }
+  }
+
+  // Strategy 2: Relaxed — [BEKREFT: key] anywhere, with or without bold
+  const relaxed = response.match(/\[BEKREFT:\s*(\w+)\]\s*\**\s*([^:\n]*?):\s*(.+)/si);
+  if (relaxed) {
+    const key = relaxed[1].trim().toLowerCase();
+    if (BRIEF_SECTIONS.some(s => s.key === key)) {
+      return { sectionKey: key, topic: relaxed[2].trim() || BRIEF_SECTIONS.find(s => s.key === key)?.label || key, summary: relaxed[3].trim() };
+    }
+  }
+
+  // Strategy 3: Just [BEKREFT: key] with summary on next line or same line
+  const minimal = response.match(/\[BEKREFT:\s*(\w+)\]\s*[:\-–]?\s*(.+)/si);
+  if (minimal) {
+    const key = minimal[1].trim().toLowerCase();
+    const section = BRIEF_SECTIONS.find(s => s.key === key);
+    if (section) {
+      return { sectionKey: key, topic: section.label, summary: minimal[2].replace(/^\*+|\*+$/g, '').trim() };
+    }
+  }
+
+  // Strategy 4: Contains BEKREFT keyword + a valid section key somewhere
+  const bekreftIdx = response.toLowerCase().indexOf('bekreft');
+  if (bekreftIdx !== -1) {
+    for (const section of BRIEF_SECTIONS) {
+      if (response.toLowerCase().includes(section.key)) {
+        // Extract everything after the section key mention as summary
+        const afterKey = response.substring(response.toLowerCase().indexOf(section.key) + section.key.length);
+        const summaryText = afterKey.replace(/^[\s:\]\*\-–]+/, '').split('\n')[0].trim();
+        if (summaryText.length > 10) {
+          return { sectionKey: section.key, topic: section.label, summary: summaryText };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+// Check if AI message looks like it's trying to summarize/confirm (even if parsing failed)
+function looksLikeConfirmation(content) {
+  if (!content) return false;
+  const lower = content.toLowerCase();
+  return (
+    lower.includes('bekreft') ||
+    lower.includes('oppsummering') ||
+    (lower.includes('oppsummert') && lower.includes(':')) ||
+    /\[bekreft/i.test(content)
+  );
+}
+
 // Determine AI message type based on content heuristics
 const getMessageType = (entry) => {
   if (entry.clarifyConfirm?.isConfirmationRequest) {
     return 'summary';
   }
   const content = entry.content || '';
+  if (looksLikeConfirmation(content)) {
+    return 'summary';
+  }
   // Check if message contains a question (ends with ? or has bold question line)
   const hasQuestion = content.includes('?') || /\*\*[^*]+\?\*\*/.test(content);
   if (hasQuestion) {
