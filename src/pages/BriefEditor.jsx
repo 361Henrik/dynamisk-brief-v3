@@ -123,7 +123,7 @@ function BriefEditorContent() {
         <h2 className="text-xl font-medium text-gray-900 mb-2">Ingen brief valgt</h2>
         <p className="text-gray-500 mb-4">Velg en brief fra listen eller opprett en ny.</p>
         <Link to={createPageUrl('BriefList')}>
-          <Button>Gå til mine briefs</Button>
+          <Button className="bg-[#002C6C] hover:bg-[#001a45]">Gå til mine briefs</Button>
         </Link>
       </div>
     );
@@ -144,7 +144,7 @@ function BriefEditorContent() {
         <h2 className="text-xl font-medium text-gray-900 mb-2">Brief ikke funnet</h2>
         <p className="text-gray-500 mb-4">Briefen du leter etter finnes ikke eller er slettet.</p>
         <Link to={createPageUrl('BriefList')}>
-          <Button>Gå til mine briefs</Button>
+          <Button className="bg-[#002C6C] hover:bg-[#001a45]">Gå til mine briefs</Button>
         </Link>
       </div>
     );

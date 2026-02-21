@@ -654,7 +654,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                       <div
                         className={`rounded-lg p-3 ${
                           entry.role === 'user'
-                            ? 'bg-blue-600 text-white'
+                            ? 'bg-[#002C6C] text-white'
                             : messageType === 'summary'
                               ? 'bg-amber-50 dark:bg-amber-900/20 border-2 border-dashed border-amber-300 dark:border-amber-700 text-gray-900 dark:text-gray-100'
                               : messageType === 'question'
@@ -843,7 +843,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                     <Button
                       onClick={onContinue}
                       disabled={!canProceed}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-[#002C6C] hover:bg-[#001a45]"
                     >
                       Generer brief
                       <ArrowRight className="h-4 w-4 ml-2" />
