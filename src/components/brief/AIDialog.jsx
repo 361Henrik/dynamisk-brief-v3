@@ -656,19 +656,19 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                           entry.role === 'user'
                             ? 'bg-[#002C6C] text-white'
                             : messageType === 'summary'
-                              ? 'bg-amber-50 dark:bg-amber-900/20 border-2 border-dashed border-amber-300 dark:border-amber-700 text-gray-900 dark:text-gray-100'
+                              ? 'bg-amber-50 border-2 border-dashed border-amber-300 text-gray-900'
                               : messageType === 'question'
-                                ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-gray-900 dark:text-gray-100'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                                ? 'bg-[#002C6C]/5 border border-[#002C6C]/20 text-gray-900'
+                                : 'bg-gray-100 text-gray-900'
                         }`}
                       >
                         {/* Section label + template placement for question messages */}
                         {activeSection && messageType === 'question' && (
                           <div className="mb-3">
-                            <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                            <div className="text-xs font-semibold text-[#002C6C] uppercase tracking-wide">
                               {activeSection.label}
                             </div>
-                            <div className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-0.5">
+                            <div className="text-xs text-[#002C6C]/60 mt-0.5">
                               Plasseres i briefmal: {SECTION_TO_TEMPLATE_MAP[activeSection.key] || 'Flere seksjoner'}
                             </div>
                           </div>
@@ -692,7 +692,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="text-green-600 border-green-300 hover:bg-green-50 dark:hover:bg-green-900/30"
+                                    className="text-green-600 border-green-300 hover:bg-green-50"
                                     onClick={() => handleConfirm(entry, true)}
                                   >
                                     <CheckCircle2 className="h-4 w-4 mr-1" />
@@ -707,7 +707,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                             <Button
                               size="sm"
                               variant="outline"
-                              className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
                               onClick={() => {
                                 setInput(entry.clarifyConfirm.summary);
                                 textareaRef.current?.focus();
@@ -747,13 +747,13 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                         const fallbackSection = detectActiveSection(entry.content, confirmedPoints);
                         return fallbackSection && !confirmedPoints.some(p => p.sectionKey === fallbackSection.key);
                       })() && (
-                        <div className="flex items-center gap-2 mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded border border-amber-200 dark:border-amber-700">
+                        <div className="flex items-center gap-2 mt-2 p-2 bg-amber-50 rounded border border-amber-200">
                           <AlertTriangle className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
-                          <span className="text-xs text-amber-700 dark:text-amber-300">Bekreftelse ikke gjenkjent automatisk.</span>
+                          <span className="text-xs text-amber-700">Bekreftelse ikke gjenkjent automatisk.</span>
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-green-700 border-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 text-xs ml-auto h-7"
+                            className="text-green-700 border-green-300 hover:bg-green-50 text-xs ml-auto h-7"
                             onClick={() => {
                               const section = detectActiveSection(entry.content, confirmedPoints);
                               if (section) handleManualConfirm(entry, section.key);
@@ -771,7 +771,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                 
                 {isProcessing && (
                   <div className="flex justify-start">
-                    <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
+                    <div className="bg-gray-100 rounded-lg p-3">
                       <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
                     </div>
                   </div>
@@ -803,7 +803,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
           })()}
 
           {/* Input Area */}
-          <div className="border-t dark:border-gray-700 p-4">
+          <div className="border-t border-[#B1B3B3] p-4">
             <div className="flex space-x-2">
               <textarea
                 ref={textareaRef}
@@ -811,7 +811,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Skriv svaret ditt her – eller bruk tale-til-tekst via PC/Mac-mikrofonen."
-                className="flex-1 min-h-[120px] max-h-[240px] resize-none overflow-y-auto rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-gray-500 dark:placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 min-h-[120px] max-h-[240px] resize-none overflow-y-auto rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isProcessing}
               />
               <Button
@@ -826,7 +826,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
 
         {/* Navigation */}
         <div className="flex justify-between items-center">
-          <Button variant="outline" onClick={onBack} className="border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+          <Button variant="outline" onClick={onBack} className="border-gray-300 text-gray-700 hover:bg-gray-100">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Tilbake til rammer
           </Button>
