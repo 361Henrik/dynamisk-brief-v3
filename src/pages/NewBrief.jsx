@@ -86,13 +86,13 @@ function NewBriefContent() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-blue-600" />
+                    <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <FileText className="h-6 w-6 text-[#002C6C]" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-lg">{theme.name}</h3>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-[#454545] text-lg">{theme.name}</h3>
                       {theme.description && (
-                        <p className="text-gray-500 mt-1">{theme.description}</p>
+                        <p className="text-[#888B8D] mt-1 text-sm">{theme.description}</p>
                       )}
                     </div>
                   </div>
