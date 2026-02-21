@@ -75,7 +75,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
 
   if (collapsed) {
     return (
-      <div className="w-16 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col items-center py-4 space-y-4">
+      <div className="w-16 bg-white border-r border-[#B1B3B3] flex flex-col items-center py-4 space-y-4">
         <Button
           variant="ghost"
           size="icon"
