@@ -119,14 +119,14 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
   }
 
   return (
-    <div className="w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col h-full overflow-y-auto">
+    <div className="w-72 bg-white border-r border-[#B1B3B3] flex flex-col h-full overflow-y-auto">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+      <div className="p-4 border-b border-[#B1B3B3] flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">GS1</span>
           </div>
-          <span className="font-semibold text-gray-900 dark:text-white">Dynamisk Brief</span>
+          <span className="font-semibold text-[#454545]">Dynamisk Brief</span>
         </div>
         <Button variant="ghost" size="icon" onClick={onToggleCollapse}>
           <PanelLeftClose className="h-5 w-5" />
