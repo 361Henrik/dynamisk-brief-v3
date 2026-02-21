@@ -161,24 +161,24 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
                 : "text-[#454545] hover:bg-[#F4F4F4]"
             )}
           >
-            <item.icon className="h-5 w-5" />
+            <item.icon className="h-5 w-5 flex-shrink-0" />
             <span>{item.name}</span>
           </Link>
         ))}
       </nav>
 
       {/* Briefmal Section */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-t border-[#B1B3B3]">
         <div className="flex items-center space-x-2 mb-2">
           <BookOpen className="h-5 w-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">Briefmal</h3>
+          <h3 className="font-semibold text-[#454545]">Briefmal</h3>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
           Briefmalen definerer hvilke hovedpunkter som skal fylles ut i intervjuet og strukturen på den ferdige briefen.
         </p>
 
         {/* Brief Template Status */}
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 mb-3">
+        <div className="bg-[#F4F4F4] rounded-lg p-3 mb-3">
           {briefTemplate ? (
             <div>
               <div className="flex items-start space-x-2 mb-3">
@@ -190,10 +190,10 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
                   <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  <p className="text-sm font-medium text-[#454545] truncate">
                     {briefTemplate.title}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-[#888B8D]">
                     {briefTemplate.extractionStatus === 'success' 
                       ? 'Klar til bruk' 
                       : briefTemplate.extractionStatus === 'pending' 
@@ -205,9 +205,9 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
 
               {/* Hovedkategorier list */}
               {briefTemplate.extractionStatus === 'success' && (
-                <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
-                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Hovedkategorier:</p>
-                  <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                <div className="border-t border-[#B1B3B3] pt-2">
+                  <p className="text-xs font-medium text-[#454545] mb-2">Hovedkategorier:</p>
+                  <ul className="text-xs text-[#888B8D] space-y-1">
                     <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Prosjektinformasjon</li>
                     <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Bakgrunn og situasjonsbeskrivelse</li>
                     <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Mål og suksesskriterier</li>
@@ -221,7 +221,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
               )}
             </div>
           ) : (
-            <p className="text-xs text-orange-600 dark:text-orange-400">
+            <p className="text-xs text-[#F26334]">
               Ingen briefmal lastet opp ennå.
             </p>
           )}
@@ -229,7 +229,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
 
         {/* File reference */}
         {briefTemplate && briefTemplate.extractionStatus === 'success' && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+          <p className="text-xs text-[#888B8D] mb-3">
             Gjeldende briefmal: <span className="font-medium">{briefTemplate.title}</span> (PDF)
           </p>
         )}
@@ -242,7 +242,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
                 Last opp ny briefmal
               </Button>
             </Link>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 text-center">
+            <p className="text-xs text-[#B1B3B3] mt-1.5 text-center">
               Opplasting av ny briefmal erstatter gjeldende mal.
             </p>
           </div>
@@ -251,8 +251,8 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
 
       {/* Brief Progress (only when in editor) */}
       {isInBriefEditor && briefCurrentStep && (
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex-1">
-          <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+        <div className="p-4 border-t border-[#B1B3B3] flex-1">
+          <h4 className="text-xs font-semibold text-[#888B8D] uppercase tracking-wider mb-3">
             Fremdrift
           </h4>
           <div className="space-y-1">
@@ -263,16 +263,16 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
                   key={step.key} 
                   className={cn(
                     "flex items-center space-x-2 py-1.5 px-2 rounded text-sm transition-colors",
-                    status === 'current' && "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium",
-                    status === 'completed' && "text-green-700 dark:text-green-400",
-                    status === 'upcoming' && "text-gray-400 dark:text-gray-500"
+                    status === 'current' && "bg-[#002C6C]/10 text-[#002C6C] font-medium",
+                    status === 'completed' && "text-green-700",
+                    status === 'upcoming' && "text-[#B1B3B3]"
                   )}
                 >
                   <div className={cn(
                     "w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0",
-                    status === 'current' && "bg-blue-600 text-white",
+                    status === 'current' && "bg-[#002C6C] text-white",
                     status === 'completed' && "bg-green-600 text-white",
-                    status === 'upcoming' && "bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
+                    status === 'upcoming' && "bg-[#B1B3B3] text-white"
                   )}>
                     {status === 'completed' ? (
                       <CheckCircle2 className="h-3 w-3" />
