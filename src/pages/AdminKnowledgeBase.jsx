@@ -11,9 +11,7 @@ import {
   MoreVertical,
   Pencil,
   Trash2,
-  Upload,
-  FileText,
-  ExternalLink,
+  AlignLeft,
   Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,6 +43,8 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 
+const MAX_CHARS = 2000;
+
 const DOC_TYPE_LABELS = {
   brand_guidelines: 'Merkevareprofil',
   tone_of_voice: 'Tone of Voice',
@@ -52,66 +52,51 @@ const DOC_TYPE_LABELS = {
   other: 'Annet'
 };
 
+const emptyForm = { title: '', description: '', docType: 'other', extractedText: '' };
+
 function AdminKnowledgeBaseContent() {
   const queryClient = useQueryClient();
   const [showDialog, setShowDialog] = useState(false);
   const [editingDoc, setEditingDoc] = useState(null);
-  const [formData, setFormData] = useState({ title: '', description: '', docType: 'other', fileUrl: '' });
-  const [uploading, setUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [formData, setFormData] = useState(emptyForm);
 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: ['kbDocs', 'all'],
-    queryFn: async () => {
-      const allDocs = await base44.entities.KnowledgeBaseDoc.list('-created_date');
-      return allDocs;
-    }
+    queryFn: () => base44.entities.KnowledgeBaseDoc.list('-created_date')
   });
 
   const createDocMutation = useMutation({
-    mutationFn: async (data) => {
-      await base44.entities.KnowledgeBaseDoc.create({ 
-        ...data, 
-        isActive: true,
-        extractionStatus: 'pending',
-        extractionError: null
-      });
-    },
+    mutationFn: (data) => base44.entities.KnowledgeBaseDoc.create({ 
+      ...data, 
+      isActive: true,
+      extractionStatus: 'success'
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kbDocs'] });
       setShowDialog(false);
-      resetForm();
+      setFormData(emptyForm);
+      setEditingDoc(null);
     }
   });
 
   const updateDocMutation = useMutation({
-    mutationFn: async ({ id, data }) => {
-      await base44.entities.KnowledgeBaseDoc.update(id, data);
-    },
+    mutationFn: ({ id, data }) => base44.entities.KnowledgeBaseDoc.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kbDocs'] });
       setShowDialog(false);
-      resetForm();
+      setFormData(emptyForm);
+      setEditingDoc(null);
     }
   });
 
   const deleteDocMutation = useMutation({
-    mutationFn: async (id) => {
-      await base44.entities.KnowledgeBaseDoc.delete(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['kbDocs'] });
-    }
+    mutationFn: (id) => base44.entities.KnowledgeBaseDoc.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['kbDocs'] })
   });
 
-  const resetForm = () => {
-    setFormData({ title: '', description: '', docType: 'other', fileUrl: '' });
-    setEditingDoc(null);
-    setSelectedFile(null);
-  };
-
   const handleOpenCreate = () => {
-    resetForm();
+    setEditingDoc(null);
+    setFormData(emptyForm);
     setShowDialog(true);
   };
 
@@ -121,35 +106,9 @@ function AdminKnowledgeBaseContent() {
       title: doc.title || '',
       description: doc.description || '',
       docType: doc.docType || 'other',
-      fileUrl: doc.fileUrl || ''
+      extractedText: doc.extractedText || ''
     });
     setShowDialog(true);
-  };
-
-  const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // V1: Only allow PDF files
-    const fileName = file.name.toLowerCase();
-    if (!fileName.endsWith('.pdf')) {
-      toast.error('Kun PDF-filer støttes i V1. Lagre dokumentet som PDF og prøv igjen.');
-      e.target.value = '';
-      return;
-    }
-
-    setSelectedFile(file);
-    setUploading(true);
-
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setFormData(prev => ({ ...prev, fileUrl: file_url }));
-    } catch (error) {
-      console.error('Upload failed:', error);
-      toast.error('Klarte ikke å laste opp filen');
-    } finally {
-      setUploading(false);
-    }
   };
 
   const handleSubmit = () => {
@@ -159,6 +118,11 @@ function AdminKnowledgeBaseContent() {
       createDocMutation.mutate(formData);
     }
   };
+
+  const charsUsed = formData.extractedText.length;
+  const charsRemaining = MAX_CHARS - charsUsed;
+  const isOverLimit = charsUsed > MAX_CHARS;
+  const canSubmit = formData.title && formData.extractedText.trim() && !isOverLimit;
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -170,26 +134,23 @@ function AdminKnowledgeBaseContent() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Kunnskapsbase</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Administrer bakgrunnsmateriale for AI-en</p>
+          <h1 className="text-2xl font-bold text-[#454545]">Kunnskapsbase</h1>
+          <p className="text-[#888B8D] mt-1">Administrer bakgrunnstekster for AI-kontekst</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleOpenCreate}>
+        <Button className="bg-[#002C6C] hover:bg-[#002C6C]/90" onClick={handleOpenCreate}>
           <PlusCircle className="h-4 w-4 mr-2" />
-          Last opp dokument
+          Legg til dokument
         </Button>
       </div>
 
-      {/* V1 Format Notice */}
-      <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+      {/* Info notice */}
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <div className="flex items-start gap-3">
-          <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="font-medium text-amber-900 dark:text-amber-100">V1: Kun PDF støttes</p>
-            <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
-              Word-, Excel- og PowerPoint-filer støttes ikke for tekstutrekk. 
-              Har du et Word-dokument? Lagre det som PDF først (Fil → Lagre som → PDF).
-            </p>
-          </div>
+          <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-blue-800">
+            Teksten du skriver her blir brukt som bakgrunnskontekst for AI-en når briefs genereres for tilknyttede temaer. 
+            Maks {MAX_CHARS.toLocaleString()} tegn (~300 ord).
+          </p>
         </div>
       </div>
 
@@ -202,11 +163,11 @@ function AdminKnowledgeBaseContent() {
         <Card>
           <CardContent className="py-16 text-center">
             <BookOpen className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-medium text-gray-900 mb-1">Ingen dokumenter ennå</h3>
-            <p className="text-gray-500 mb-4">Last opp dokumenter som AI-en skal bruke som kontekst.</p>
-            <Button onClick={handleOpenCreate}>
-              <Upload className="h-4 w-4 mr-2" />
-              Last opp dokument
+            <h3 className="text-lg font-medium text-[#454545] mb-1">Ingen dokumenter ennå</h3>
+            <p className="text-[#888B8D] mb-4">Legg til bakgrunnstekster som AI-en skal bruke som kontekst.</p>
+            <Button onClick={handleOpenCreate} className="bg-[#002C6C] hover:bg-[#002C6C]/90">
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Legg til dokument
             </Button>
           </CardContent>
         </Card>
@@ -217,31 +178,24 @@ function AdminKnowledgeBaseContent() {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <FileText className="h-5 w-5 text-purple-600" />
+                    <div className="w-10 h-10 bg-[#002C6C]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <AlignLeft className="h-5 w-5 text-[#002C6C]" />
                     </div>
                     <div>
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold text-gray-900">{doc.title}</h3>
+                      <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                        <h3 className="font-semibold text-[#454545]">{doc.title}</h3>
                         <Badge variant="outline">{DOC_TYPE_LABELS[doc.docType] || doc.docType}</Badge>
                       </div>
                       {doc.description && (
-                        <p className="text-gray-500 mt-1 text-sm">{doc.description}</p>
+                        <p className="text-[#888B8D] mt-1 text-sm">{doc.description}</p>
                       )}
-                      <div className="flex items-center space-x-3 mt-2 text-xs text-gray-400">
-                        <span>Oppdatert {formatDate(doc.updated_date || doc.created_date)}</span>
-                        {doc.fileUrl && (
-                          <a 
-                            href={doc.fileUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center text-blue-600 hover:underline"
-                          >
-                            <ExternalLink className="h-3 w-3 mr-1" />
-                            Åpne fil
-                          </a>
-                        )}
-                      </div>
+                      {doc.extractedText && (
+                        <p className="text-[#454545] mt-2 text-sm line-clamp-2">{doc.extractedText}</p>
+                      )}
+                      <p className="text-xs text-[#B1B3B3] mt-2">
+                        Oppdatert {formatDate(doc.updated_date || doc.created_date)}
+                        {doc.extractedText && ` · ${doc.extractedText.length} tegn`}
+                      </p>
                     </div>
                   </div>
                   <DropdownMenu>
@@ -276,9 +230,9 @@ function AdminKnowledgeBaseContent() {
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingDoc ? 'Rediger dokument' : 'Last opp dokument'}</DialogTitle>
+            <DialogTitle>{editingDoc ? 'Rediger dokument' : 'Legg til dokument'}</DialogTitle>
             <DialogDescription>
-              {editingDoc ? 'Oppdater informasjon om dokumentet.' : 'Legg til et nytt dokument i kunnskapsbasen.'}
+              {editingDoc ? 'Oppdater bakgrunnsteksten.' : 'Skriv inn bakgrunnstekst som AI-en skal bruke som kontekst.'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -286,13 +240,13 @@ function AdminKnowledgeBaseContent() {
               <Label htmlFor="title">Tittel *</Label>
               <Input
                 id="title"
-                placeholder="f.eks. GS1 Merkevarestandard 2024"
+                placeholder="f.eks. GS1 Merkevarestandard"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="docType">Type dokument *</Label>
+              <Label htmlFor="docType">Type</Label>
               <Select 
                 value={formData.docType} 
                 onValueChange={(value) => setFormData(prev => ({ ...prev, docType: value }))}
@@ -309,57 +263,31 @@ function AdminKnowledgeBaseContent() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Beskrivelse</Label>
-              <Textarea
+              <Label htmlFor="description">Kort beskrivelse</Label>
+              <Input
                 id="description"
-                placeholder="Kort beskrivelse av innholdet..."
+                placeholder="Hva handler dette dokumentet om?"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
-              <Label>Fil</Label>
-              <div className="border-2 border-dashed border-gray-200 rounded-lg p-4">
-                {formData.fileUrl ? (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <FileText className="h-5 w-5 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        {selectedFile?.name || 'Fil lastet opp'}
-                      </span>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => {
-                        setFormData(prev => ({ ...prev, fileUrl: '' }));
-                        setSelectedFile(null);
-                      }}
-                    >
-                      Fjern
-                    </Button>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center cursor-pointer">
-                    {uploading ? (
-                      <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                    ) : (
-                      <Upload className="h-8 w-8 text-gray-400" />
-                    )}
-                    <span className="text-sm text-gray-500 mt-2">
-                      {uploading ? 'Laster opp...' : 'Klikk for å laste opp PDF'}
-                    </span>
-                    <span className="text-xs text-gray-400 mt-1">Kun PDF støttes i V1</span>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept=".pdf"
-                      onChange={handleFileChange}
-                      disabled={uploading}
-                    />
-                  </label>
-                )}
+              <div className="flex justify-between items-center">
+                <Label htmlFor="extractedText">Bakgrunnstekst *</Label>
+                <span className={`text-xs ${isOverLimit ? 'text-red-500 font-medium' : 'text-[#888B8D]'}`}>
+                  {charsRemaining >= 0 ? `${charsRemaining} tegn igjen` : `${Math.abs(charsRemaining)} tegn for mye`}
+                </span>
               </div>
+              <Textarea
+                id="extractedText"
+                placeholder="Lim inn eller skriv inn bakgrunnsteksten her..."
+                className="min-h-[160px] resize-none"
+                value={formData.extractedText}
+                onChange={(e) => setFormData(prev => ({ ...prev, extractedText: e.target.value }))}
+              />
+              {isOverLimit && (
+                <p className="text-xs text-red-500">Teksten er for lang. Maks {MAX_CHARS.toLocaleString()} tegn.</p>
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -367,9 +295,9 @@ function AdminKnowledgeBaseContent() {
               Avbryt
             </Button>
             <Button 
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-[#002C6C] hover:bg-[#002C6C]/90"
               onClick={handleSubmit}
-              disabled={!formData.title || !formData.fileUrl || createDocMutation.isPending || updateDocMutation.isPending}
+              disabled={!canSubmit || createDocMutation.isPending || updateDocMutation.isPending}
             >
               {createDocMutation.isPending || updateDocMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
