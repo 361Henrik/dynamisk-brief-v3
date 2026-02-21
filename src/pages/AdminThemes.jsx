@@ -228,7 +228,9 @@ function AdminThemesContent() {
           <DialogHeader>
             <DialogTitle>{editingTheme ? 'Rediger tema' : 'Nytt tema'}</DialogTitle>
             <DialogDescription>
-              {editingTheme ? 'Oppdater informasjon om temaet.' : 'Opprett et nytt tema for briefs.'}
+              {editingTheme 
+                ? 'Oppdater informasjon om temaet.' 
+                : 'Opprett et nytt tema som du og andre kan bruke til å lage briefs. En god beskrivelse hjelper AI-en med å generere mer relevante utkast.'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -242,13 +244,15 @@ function AdminThemesContent() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Beskrivelse</Label>
+              <Label htmlFor="description">Beskrivelse *</Label>
               <Textarea
                 id="description"
-                placeholder="Kort beskrivelse av temaet..."
+                placeholder="Beskriv hva temaet handler om. Dette brukes som kontekst når AI-en genererer briefs for dette temaet. (maks 500 tegn)"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value.slice(0, 500) }))}
+                rows={4}
               />
+              <p className="text-xs text-right text-[#888B8D]">{formData.description.length}/500</p>
             </div>
             {kbDocs.length > 0 && (
               <div className="space-y-2">
