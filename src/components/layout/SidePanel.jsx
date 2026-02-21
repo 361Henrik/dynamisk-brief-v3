@@ -173,7 +173,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
           <BookOpen className="h-5 w-5 text-blue-600" />
           <h3 className="font-semibold text-[#454545]">Briefmal</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+        <p className="text-xs text-[#888B8D] mb-3">
           Briefmalen definerer hvilke hovedpunkter som skal fylles ut i intervjuet og strukturen på den ferdige briefen.
         </p>
 
