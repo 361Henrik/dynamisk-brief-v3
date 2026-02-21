@@ -136,10 +136,10 @@ function AdminThemesContent() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Temaer</h1>
-          <p className="text-gray-500 mt-1">Administrer temaer for briefs</p>
+          <h1 className="text-2xl font-bold text-[#454545]">Temaer</h1>
+          <p className="text-[#888B8D] mt-1">Administrer temaer for briefs</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleOpenCreate}>
+        <Button className="bg-[#002C6C] hover:bg-[#001d47]" onClick={handleOpenCreate}>
           <PlusCircle className="h-4 w-4 mr-2" />
           Nytt tema
         </Button>
@@ -169,18 +169,18 @@ function AdminThemesContent() {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Tags className="h-5 w-5 text-blue-600" />
+                    <div className="w-10 h-10 bg-[#002C6C]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Tags className="h-5 w-5 text-[#002C6C]" />
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold text-gray-900">{theme.name}</h3>
+                        <h3 className="font-semibold text-[#454545]">{theme.name}</h3>
                         {theme.isActive === false && (
                           <Badge variant="secondary">Deaktivert</Badge>
                         )}
                       </div>
                       {theme.description && (
-                        <p className="text-gray-500 mt-1">{theme.description}</p>
+                        <p className="text-[#888B8D] mt-1">{theme.description}</p>
                       )}
                       {getLinkedDocNames(theme).length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
@@ -275,7 +275,7 @@ function AdminThemesContent() {
               Avbryt
             </Button>
             <Button 
-              className="bg-blue-600 hover:bg-blue-700"
+            className="bg-[#002C6C] hover:bg-[#001d47]"
               onClick={handleSubmit}
               disabled={!formData.name || createThemeMutation.isPending || updateThemeMutation.isPending}
             >
