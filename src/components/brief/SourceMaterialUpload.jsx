@@ -186,18 +186,18 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
           </CardDescription>
           
           {/* Helper text */}
-          <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <div className="flex items-start gap-2">
-              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-blue-800 dark:text-blue-200">
-                <p><strong>Støttet i V1:</strong> PDF, URL og lim inn tekst.</p>
-                <p className="text-xs mt-1 text-blue-600 dark:text-blue-300">
-                  Word/Excel/PowerPoint støttes ikke som kildemateriale i V1.
-                </p>
-                <Link 
-                  to={createPageUrl('HelpInstructions')} 
-                  className="inline-flex items-center gap-1 text-xs mt-1 text-blue-700 dark:text-blue-300 hover:underline"
-                >
+          <div className="mt-3 p-3 bg-[#002C6C]/5 border border-[#002C6C]/20 rounded-lg">
+          <div className="flex items-start gap-2">
+            <Info className="h-4 w-4 text-[#002C6C] mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-[#002C6C]">
+              <p><strong>Støttet i V1:</strong> PDF, URL og lim inn tekst.</p>
+              <p className="text-xs mt-1 text-[#002C6C]/70">
+                Word/Excel/PowerPoint støttes ikke som kildemateriale i V1.
+              </p>
+              <Link 
+                to={createPageUrl('HelpInstructions')} 
+                className="inline-flex items-center gap-1 text-xs mt-1 text-[#002C6C] hover:underline"
+              >
                   <HelpCircle className="h-3 w-3" />
                   Les mer
                 </Link>
@@ -259,17 +259,17 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
           {/* File Upload */}
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              <FileText className="h-4 w-4 text-blue-500" />
+              <FileText className="h-4 w-4 text-[#002C6C]" />
               Last opp PDF ({pdfCount}/{MAX_PDFS})
             </label>
             <label className="block">
               <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer
                 ${pdfCount >= MAX_PDFS 
                   ? 'border-gray-200 bg-gray-50 dark:bg-gray-800 cursor-not-allowed' 
-                  : 'border-gray-200 hover:border-blue-300 dark:border-gray-600 dark:hover:border-blue-500'}`}>
+                  : 'border-gray-200 hover:border-[#002C6C]/40'}`}>
                 {uploading ? (
                   <div className="flex flex-col items-center">
-                    <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+                    <Loader2 className="h-8 w-8 text-[#002C6C] animate-spin" />
                     <span className="text-sm text-gray-500 mt-2">Laster opp...</span>
                   </div>
                 ) : pdfCount >= MAX_PDFS ? (

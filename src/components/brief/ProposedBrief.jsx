@@ -93,7 +93,7 @@ function ProposedSection({
   return (
     <Card className="mb-4">
       <CardHeader 
-        className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors py-3"
+        className="cursor-pointer hover:bg-[#F4F4F4] transition-colors py-3"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center justify-between">
@@ -135,7 +135,7 @@ function ProposedSection({
                   value={localContent}
                   onChange={(e) => setLocalContent(e.target.value)}
                   placeholder={`Skriv innhold for ${label.toLowerCase()}...`}
-                  className="min-h-[150px] resize-y border-blue-300 focus:border-blue-500"
+                  className="min-h-[150px] resize-y border-[#002C6C]/30 focus:border-[#002C6C]"
                   autoFocus
                 />
                 <div className="flex justify-end space-x-2">
@@ -203,7 +203,7 @@ function ProposedSection({
                 size="sm"
                 onClick={() => onUpdateWithFeedback(sectionKey, localNotes)}
                 disabled={isUpdating || !localNotes?.trim()}
-                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                className="text-[#002C6C] border-[#002C6C]/30 hover:bg-[#002C6C]/5"
               >
                 {isUpdating ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

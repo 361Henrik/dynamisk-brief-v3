@@ -165,7 +165,7 @@ function BriefListContent() {
                 <h3 className="text-lg font-medium text-gray-900 mb-1">Ingen briefs ennå</h3>
                 <p className="text-gray-500 mb-4">Kom i gang ved å opprette din første brief.</p>
                 <Link to={createPageUrl('NewBrief')}>
-                  <Button>
+                  <Button className="bg-[#002C6C] hover:bg-[#001a45]">
                     <PlusCircle className="h-4 w-4 mr-2" />
                     Start ny brief
                   </Button>
