@@ -142,11 +142,11 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
             className={cn(
               "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
               isCurrentPage(item.page)
-                ? "bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                ? "bg-[#002C6C]/10 text-[#002C6C] font-semibold"
+                : "text-[#454545] hover:bg-[#F4F4F4]"
             )}
           >
-            <item.icon className="h-5 w-5" />
+            <item.icon className="h-5 w-5 flex-shrink-0" />
             <span>{item.name}</span>
           </Link>
         ))}
@@ -157,8 +157,8 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
             className={cn(
               "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
               isCurrentPage(item.page)
-                ? "bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                ? "bg-[#002C6C]/10 text-[#002C6C] font-semibold"
+                : "text-[#454545] hover:bg-[#F4F4F4]"
             )}
           >
             <item.icon className="h-5 w-5" />
