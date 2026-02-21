@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// GS1 brand colors: #002C6C (blue), #F26334 (orange), #454545 (dark gray), #888B8D (medium gray), #B1B3B3 (light gray), #F4F4F4 (bg)
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { AuthProvider, useAuth } from '@/components/auth/AuthProvider';
@@ -37,7 +38,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
   }, [sidePanelCollapsed]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors flex">
+    <div className="min-h-screen bg-[#F4F4F4] flex">
       {/* Desktop Side Panel */}
       <div className="hidden md:flex h-screen sticky top-0">
         <SidePanel 
