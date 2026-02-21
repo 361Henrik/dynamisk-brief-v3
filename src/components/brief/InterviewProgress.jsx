@@ -56,18 +56,18 @@ export default function InterviewProgress({ confirmedPoints = [], activeSectionK
     || BRIEF_SECTIONS.find(section => sectionStatus[section.key] === 'missing');
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-6">
+    <div className="bg-white border border-[#B1B3B3] rounded-lg p-4 space-y-6">
       
       <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-[#454545]">
           Intervjuoversikt
         </h3>
       </div>
 
       {/* B) Aktivt fokus */}
-      <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg text-center">
-        <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">Dette jobber vi med nå</p>
-        <div className="flex items-center justify-center space-x-2 text-blue-900 dark:text-blue-100">
+      <div className="bg-[#002C6C]/5 border border-[#002C6C]/15 p-3 rounded-lg text-center">
+        <p className="text-xs text-[#002C6C] font-medium mb-1">Dette jobber vi med nå</p>
+        <div className="flex items-center justify-center space-x-2 text-[#002C6C]">
           <Sparkles className="h-4 w-4" />
           <p className="font-semibold">
             {activeFocusSection ? activeFocusSection.label : "Alle seksjoner bekreftet"}
@@ -77,7 +77,7 @@ export default function InterviewProgress({ confirmedPoints = [], activeSectionK
 
       {/* A) Status per intervjuseksjon */}
       <div>
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+        <h4 className="text-sm font-semibold text-[#454545] mb-3">
           Status per intervjuseksjon
         </h4>
         <div className="space-y-2">
@@ -95,7 +95,7 @@ export default function InterviewProgress({ confirmedPoints = [], activeSectionK
                 )}
                 <span className={cn(
                   "flex-1",
-                  status === 'confirmed' ? "text-gray-800 dark:text-gray-200" : "text-gray-500 dark:text-gray-400"
+                  status === 'confirmed' ? "text-[#454545]" : "text-[#888B8D]"
                 )}>
                   {section.label}
                 </span>
@@ -103,20 +103,20 @@ export default function InterviewProgress({ confirmedPoints = [], activeSectionK
             );
           })}
         </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 mt-4 space-y-1 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-md">
+        <div className="text-xs text-[#888B8D] mt-4 space-y-1 bg-[#F4F4F4] p-2 rounded-md">
             <p className="flex items-center gap-1.5"><Circle className="h-3 w-3 text-red-500 fill-current" /> <span className="font-semibold">Mangler</span> = ikke bekreftet ennå</p>
             <p className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-green-600" /> <span className="font-semibold">Bekreftet</span> = låst og brukt i briefen</p>
         </div>
       </div>
 
       {/* C) Bekreftelse – forklaring */}
-      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+      <div className="border-t border-[#B1B3B3] pt-4">
+        <h4 className="text-sm font-semibold text-[#454545] mb-2">
           Bekreftelse – forklaring
         </h4>
-        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p className="text-xs text-[#888B8D] leading-relaxed">
           Svar alene fullfører ikke en seksjon.
-          Når du trykker <strong className="font-semibold text-gray-800 dark:text-gray-200">Bekreft</strong>, låses innholdet og brukes i den endelige briefen.
+          Når du trykker <strong className="font-semibold text-[#454545]">Bekreft</strong>, låses innholdet og brukes i den endelige briefen.
         </p>
       </div>
 
