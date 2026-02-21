@@ -146,23 +146,23 @@ ${content}
     return (
       <div className="space-y-6">
         {/* Warning Banner */}
-        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 flex items-start space-x-3">
-          <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start space-x-3">
+        <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-amber-800 dark:text-amber-200">
+            <p className="font-medium text-amber-800">
               Foreslått brief er ikke godkjent
             </p>
-            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+            <p className="text-sm text-amber-700 mt-1">
               Gå tilbake til Foreslått brief og godkjenn for å oppdatere denne visningen.
             </p>
           </div>
         </div>
 
         {/* Show based on last approved version or current draft */}
-        <Card className="bg-gray-50 dark:bg-gray-800/50 border-dashed">
+        <Card className="bg-[#F4F4F4] border-dashed">
           <CardContent className="py-8 text-center">
             <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-[#888B8D] mb-4">
               {proposedBrief?.approvedSnapshot 
                 ? "Denne visningen er basert på sist godkjente foreslåtte brief. Godkjenn endringene i Foreslått brief for å oppdatere."
                 : "Ingen godkjent brief tilgjengelig ennå. Gå til Foreslått brief og godkjenn innholdet."
@@ -178,7 +178,7 @@ ${content}
         {/* Still show content if there's an approved snapshot */}
         {proposedBrief?.approvedSnapshot && (
           <div className="opacity-75">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 text-center">
+            <p className="text-xs text-[#888B8D] mb-4 text-center">
               Basert på sist godkjente foreslåtte brief ({formatDate(approvedAt)})
             </p>
             {renderBriefContent()}
@@ -239,13 +239,13 @@ ${content}
             
             return (
               <section key={section.key}>
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-xs font-semibold text-blue-700 dark:text-blue-300">
+                <h3 className="text-base font-semibold text-[#454545] mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#002C6C]/10 flex items-center justify-center text-xs font-semibold text-[#002C6C]">
                     {section.number}
                   </span>
                   {section.label}
                 </h3>
-                <div className={`whitespace-pre-wrap pl-8 ${sectionContent ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500 italic'}`}>
+                <div className={`whitespace-pre-wrap pl-8 ${sectionContent ? 'text-[#454545]' : 'text-[#B1B3B3] italic'}`}>
                   {sectionContent || 'Ingen informasjon lagt til.'}
                 </div>
               </section>
@@ -261,20 +261,20 @@ ${content}
       {/* Status Banner */}
       <div className={`p-4 rounded-lg flex items-center justify-between ${
         brief.status === 'godkjent' 
-          ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
-          : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+          ? 'bg-green-50 border border-green-200' 
+          : 'bg-[#002C6C]/5 border border-[#002C6C]/20'
       }`}>
         <div className="flex items-center space-x-3">
           {brief.status === 'godkjent' ? (
             <CheckCircle2 className="h-5 w-5 text-green-600" />
           ) : (
-            <FileText className="h-5 w-5 text-blue-600" />
+            <FileText className="h-5 w-5 text-[#002C6C]" />
           )}
           <div>
-            <p className="font-medium text-gray-900 dark:text-white">
+            <p className="font-medium text-[#454545]">
               {brief.status === 'godkjent' ? 'Fullført brief' : 'Ferdig brief'}
             </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-[#888B8D]">
               {brief.status === 'godkjent' 
                 ? `Markert som fullført ${formatDate(brief.approvedAt)}`
                 : `Basert på godkjent foreslått brief fra ${formatDate(approvedAt)}`
@@ -291,21 +291,21 @@ ${content}
       </div>
 
       {/* Metadata Summary */}
-      <Card className="bg-gray-50 dark:bg-gray-800/50">
+      <Card className="bg-[#F4F4F4]">
         <CardContent className="py-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4 text-gray-400" />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Tema</p>
-                <p className="font-medium text-gray-900 dark:text-white">{brief.themeName}</p>
+                <p className="text-xs text-[#888B8D]">Tema</p>
+                <p className="font-medium text-[#454545]">{brief.themeName}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-gray-400" />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Målgruppe</p>
-                <p className="font-medium text-gray-900 dark:text-white truncate max-w-[150px]">
+                <p className="text-xs text-[#888B8D]">Målgruppe</p>
+                <p className="font-medium text-[#454545] truncate max-w-[150px]">
                   {brief.rammer?.targetAudience || 'Ikke spesifisert'}
                 </p>
               </div>
@@ -313,8 +313,8 @@ ${content}
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-gray-400" />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Kanaler</p>
-                <p className="font-medium text-gray-900 dark:text-white">
+                <p className="text-xs text-[#888B8D]">Kanaler</p>
+                <p className="font-medium text-[#454545]">
                   {brief.rammer?.channels?.join(', ') || 'Ikke spesifisert'}
                 </p>
               </div>
@@ -322,8 +322,8 @@ ${content}
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-gray-400" />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Frist</p>
-                <p className="font-medium text-gray-900 dark:text-white">
+                <p className="text-xs text-[#888B8D]">Frist</p>
+                <p className="font-medium text-[#454545]">
                   {brief.rammer?.deadline || 'Ikke spesifisert'}
                 </p>
               </div>
@@ -337,7 +337,7 @@ ${content}
 
       {/* Helper text for editing */}
       <div className="text-center py-2">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-[#888B8D]">
           For å gjøre endringer, gå tilbake til Foreslått brief.
         </p>
       </div>
