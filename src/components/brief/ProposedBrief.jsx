@@ -98,18 +98,18 @@ function ProposedSection({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-7 h-7 rounded-full bg-[#002C6C]/10 dark:bg-blue-900/50 flex items-center justify-center text-sm font-semibold text-[#002C6C] dark:text-blue-300">
+            <div className="w-7 h-7 rounded-full bg-[#002C6C]/10 flex items-center justify-center text-sm font-semibold text-[#002C6C]">
               {number}
             </div>
             <CardTitle className="text-base font-medium">{label}</CardTitle>
             {isUserEdited && (
-              <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700">
+              <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
                 <Pencil className="h-3 w-3 mr-1" />
                 Endret
               </Badge>
             )}
             {isAiEdited && (
-              <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700">
+              <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
                 <Sparkles className="h-3 w-3 mr-1" />
                 AI-oppdatert
               </Badge>
@@ -119,7 +119,7 @@ function ProposedSection({
         </div>
         {/* Metadata line */}
         {metadata?.lastEditedAt && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-10">
+          <p className="text-xs text-[#888B8D] mt-1 ml-10">
             Endret {metadata.lastEditedBy === 'user' ? 'av deg' : 'av AI'} · {formatTimestamp(metadata.lastEditedAt)}
           </p>
         )}
@@ -150,7 +150,7 @@ function ProposedSection({
               </div>
             ) : (
               <div className="relative group">
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 min-h-[100px] whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200">
+                <div className="bg-[#F4F4F4] rounded-lg p-4 min-h-[100px] whitespace-pre-wrap text-sm text-[#454545]">
                   {content || <span className="text-gray-400 italic">Ingen innhold ennå...</span>}
                 </div>
                 <Button
@@ -544,13 +544,13 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
     <div className="space-y-6">
       {/* Edited after approval warning */}
       {editedAfterApproval && (
-        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 flex items-start space-x-3">
-          <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start space-x-3">
+          <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-amber-800 dark:text-amber-200">
+            <p className="font-medium text-amber-800">
               Briefen er endret etter godkjenning
             </p>
-            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+            <p className="text-sm text-amber-700 mt-1">
               Godkjenn på nytt for å oppdatere ferdig brief.
             </p>
           </div>
@@ -560,14 +560,14 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Foreslått brief</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <h2 className="text-xl font-semibold text-[#454545]">Foreslått brief</h2>
+          <p className="text-sm text-[#888B8D] mt-1">
             Rediger og tilpass innholdet før endelig godkjenning
           </p>
         </div>
         <div className="flex items-center space-x-2">
           {isApproved && (
-            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+            <Badge className="bg-green-100 text-green-800">
               <CheckCircle2 className="h-3 w-3 mr-1" />
               Godkjent
             </Badge>
@@ -670,7 +670,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
       )}
 
       {/* Navigation */}
-      <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between pt-6 border-t border-[#B1B3B3]">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Tilbake til intervju
