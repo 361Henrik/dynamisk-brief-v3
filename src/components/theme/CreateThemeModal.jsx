@@ -64,7 +64,7 @@ export default function CreateThemeModal({ onThemeCreated }) {
         <DialogHeader>
           <DialogTitle>Opprett nytt tema</DialogTitle>
           <DialogDescription>
-            Legg til et nytt tema som du og andre kan bruke til å lage briefs.
+            Legg til et nytt tema som du og andre kan bruke til å lage briefs. En god beskrivelse hjelper AI-en med å generere mer relevante utkast.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -79,20 +79,22 @@ export default function CreateThemeModal({ onThemeCreated }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Beskrivelse (valgfritt)</Label>
+            <Label htmlFor="description">Beskrivelse *</Label>
             <Textarea
               id="description"
-              placeholder="Kort beskrivelse av hva temaet handler om..."
+              placeholder="Beskriv hva temaet handler om. Dette brukes som kontekst når AI-en genererer briefs for dette temaet. (maks 500 tegn)"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
+              onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+              rows={4}
+              required
             />
+            <p className="text-xs text-right text-[#888B8D]">{description.length}/500</p>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Avbryt
             </Button>
-            <Button type="submit" disabled={!name.trim() || createThemeMutation.isPending}>
+            <Button type="submit" disabled={!name.trim() || !description.trim() || createThemeMutation.isPending}>
               {createThemeMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
