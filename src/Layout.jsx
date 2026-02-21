@@ -52,7 +52,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
       {/* Main Area */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Header */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+        <header className="bg-white border-b border-[#B1B3B3] sticky top-0 z-50">
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-14">
               {/* Mobile Logo */}
@@ -60,7 +60,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">GS1</span>
                 </div>
-                <span className="font-semibold text-gray-900 dark:text-white">Dynamisk Brief</span>
+                <span className="font-semibold text-[#454545]">Dynamisk Brief</span>
               </Link>
 
               {/* Desktop spacer */}
@@ -71,20 +71,20 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-200">
+                      <div className="w-8 h-8 bg-[#002C6C] rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-white">
                           {user?.full_name?.charAt(0) || user?.email?.charAt(0) || '?'}
                         </span>
                       </div>
-                      <span className="hidden sm:block text-sm text-gray-700 dark:text-gray-300">{user?.full_name || user?.email}</span>
-                      <ChevronDown className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                      <span className="hidden sm:block text-sm text-[#454545]">{user?.full_name || user?.email}</span>
+                      <ChevronDown className="h-3 w-3 text-[#888B8D]" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="px-3 py-2">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.full_name || 'Bruker'}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
-                      <p className="text-xs text-blue-600 dark:text-blue-400 capitalize mt-1">{user?.role || 'fagperson'}</p>
+                      <p className="text-sm font-medium text-[#454545]">{user?.full_name || 'Bruker'}</p>
+                      <p className="text-xs text-[#888B8D]">{user?.email}</p>
+                      <p className="text-xs text-[#002C6C] capitalize mt-1">{user?.role || 'fagperson'}</p>
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer">
@@ -111,7 +111,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <div className="md:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setMobileMenuOpen(false)}>
-            <div className="w-72 h-full bg-white dark:bg-gray-800 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="w-72 h-full bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
               <SidePanel 
                 currentPageName={currentPageName} 
                 collapsed={false}
@@ -123,7 +123,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 dark:text-gray-100">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 text-[#454545]">
           {children}
         </main>
       </div>
