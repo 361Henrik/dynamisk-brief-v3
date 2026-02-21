@@ -67,16 +67,6 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
 
               {/* User Menu */}
               <div className="flex items-center space-x-2">
-                {/* Dark Mode Toggle */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="text-gray-600 dark:text-gray-300"
-                >
-                  {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                </Button>
-
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center space-x-2">
