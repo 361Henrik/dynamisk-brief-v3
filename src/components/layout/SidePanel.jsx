@@ -98,21 +98,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
             <item.icon className="h-5 w-5" />
           </Link>
         ))}
-        {isAdmin && adminItems.map((item) => (
-          <Link
-            key={item.page}
-            to={createPageUrl(item.page)}
-            className={cn(
-              "p-2 rounded-lg transition-colors",
-              isCurrentPage(item.page)
-                ? "bg-[#002C6C]/10 text-[#002C6C]"
-                : "text-[#454545] hover:bg-[#F4F4F4]"
-            )}
-            title={item.name}
-          >
-            <item.icon className="h-5 w-5" />
-          </Link>
-        ))}
+
       </div>
     );
   }
@@ -149,21 +135,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
             <span>{item.name}</span>
           </Link>
         ))}
-        {isAdmin && adminItems.map((item) => (
-          <Link
-            key={item.page}
-            to={createPageUrl(item.page)}
-            className={cn(
-              "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-              isCurrentPage(item.page)
-                ? "bg-[#002C6C]/10 text-[#002C6C] font-semibold"
-                : "text-[#454545] hover:bg-[#F4F4F4]"
-            )}
-          >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
-            <span>{item.name}</span>
-          </Link>
-        ))}
+
       </nav>
 
       {/* Briefmal Section */}
