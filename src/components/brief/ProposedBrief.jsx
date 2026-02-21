@@ -589,7 +589,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
             <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
               Basert på kildematerialet, intervjuet og rammene vil AI generere et utkast til kommunikasjonsbriefet.
             </p>
-            <Button onClick={generateProposedBrief} disabled={generating}>
+            <Button onClick={generateProposedBrief} disabled={generating} className="bg-[#002C6C] hover:bg-[#001a45]">
               {generating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -709,6 +709,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
             onClick={handleContinue} 
             disabled={!hasSections || saving}
             variant={isApproved ? "default" : "outline"}
+            className={isApproved ? "bg-[#002C6C] hover:bg-[#001a45]" : ""}
           >
             Gå til ferdig brief
             <ArrowRight className="h-4 w-4 ml-2" />

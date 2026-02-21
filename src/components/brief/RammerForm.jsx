@@ -236,7 +236,7 @@ export default function RammerForm({ brief, onBack, onContinue }) {
         <Button
           onClick={handleSubmit}
           disabled={!isValid || updateBriefMutation.isPending}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-[#002C6C] hover:bg-[#001a45]"
         >
           {updateBriefMutation.isPending ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />

@@ -354,7 +354,7 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
         <Button
           onClick={onContinue}
           disabled={!allSourcesReady}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-[#002C6C] hover:bg-[#001a45]"
         >
           {hasPendingSources ? (
             <>
