@@ -34,7 +34,7 @@ function HomeContent() {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
+      <div className="bg-gradient-to-r from-[#002C6C] to-[#003d94] rounded-2xl p-8 text-white">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
           Velkommen{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}!
         </h1>
@@ -42,7 +42,7 @@ function HomeContent() {
           Bruk Dynamisk Brief til å lage komplette, kvalitetssikrede kommunikasjonsbriefs for kommunikasjonsavdelingen.
         </p>
         <Link to={createPageUrl('NewBrief')}>
-          <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-blue-50">
+          <Button size="lg" variant="secondary" className="bg-white text-[#002C6C] hover:bg-[#F4F4F4]">
             <PlusCircle className="h-5 w-5 mr-2" />
             Start ny brief
           </Button>

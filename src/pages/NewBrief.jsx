@@ -80,7 +80,7 @@ function NewBriefContent() {
           {themes.map((theme) => (
             <Card 
               key={theme.id}
-              className="cursor-pointer hover:border-blue-300 hover:shadow-md transition-all"
+              className="cursor-pointer hover:border-[#002C6C] hover:shadow-md transition-all"
               onClick={() => handleSelectTheme(theme)}
             >
               <CardContent className="p-6">
