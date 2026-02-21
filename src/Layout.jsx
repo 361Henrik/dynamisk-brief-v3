@@ -57,7 +57,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
             <div className="flex justify-between items-center h-14">
               {/* Mobile Logo */}
               <Link to={createPageUrl('Home')} className="flex items-center space-x-2 md:hidden">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#002C6C] rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">GS1</span>
                 </div>
                 <span className="font-semibold text-[#454545]">Dynamisk Brief</span>
