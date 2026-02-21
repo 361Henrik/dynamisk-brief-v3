@@ -48,7 +48,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
   });
 
   const navItems = [
-    { name: 'Hjem', page: 'Home', icon: Home },
+    { name: 'Oversikt Briefs', page: 'Home', icon: Home },
     { name: 'Dynamisk brief', page: 'NewBrief', icon: FileText },
     { name: 'Mine briefs', page: 'BriefList', icon: FolderOpen },
     { name: 'Instruksjoner', page: 'HelpInstructions', icon: HelpCircle },
@@ -56,7 +56,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
   ];
 
   const adminItems = [
-    { name: 'Admin', page: 'AdminThemes', icon: ShieldCheck },
+    { name: 'Temaer', page: 'AdminThemes', icon: ShieldCheck },
   ];
 
   const isCurrentPage = (pageName) => currentPageName === pageName;
