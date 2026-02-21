@@ -281,7 +281,7 @@ function AdminThemesContent() {
             <Button 
             className="bg-[#002C6C] hover:bg-[#001d47]"
               onClick={handleSubmit}
-              disabled={!formData.name || createThemeMutation.isPending || updateThemeMutation.isPending}
+              disabled={!formData.name || !formData.description.trim() || createThemeMutation.isPending || updateThemeMutation.isPending}
             >
               {createThemeMutation.isPending || updateThemeMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
