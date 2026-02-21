@@ -27,21 +27,10 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
     }
     return false;
   });
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('darkMode') === 'true';
-    }
-    return false;
-  });
-
+  // Dark mode removed - light mode only
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('darkMode', darkMode);
-  }, [darkMode]);
+    document.documentElement.classList.remove('dark');
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('sidePanelCollapsed', sidePanelCollapsed);
