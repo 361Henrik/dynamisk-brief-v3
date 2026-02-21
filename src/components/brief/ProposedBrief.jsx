@@ -98,7 +98,7 @@ function ProposedSection({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-sm font-semibold text-blue-700 dark:text-blue-300">
+            <div className="w-7 h-7 rounded-full bg-[#002C6C]/10 dark:bg-blue-900/50 flex items-center justify-center text-sm font-semibold text-[#002C6C] dark:text-blue-300">
               {number}
             </div>
             <CardTitle className="text-base font-medium">{label}</CardTitle>
