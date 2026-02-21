@@ -123,7 +123,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
       {/* Header */}
       <div className="p-4 border-b border-[#B1B3B3] flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#002C6C] rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">GS1</span>
           </div>
           <span className="font-semibold text-[#454545]">Dynamisk Brief</span>
@@ -170,7 +170,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
       {/* Briefmal Section */}
       <div className="p-4 border-t border-[#B1B3B3]">
         <div className="flex items-center space-x-2 mb-2">
-          <BookOpen className="h-5 w-5 text-blue-600" />
+          <BookOpen className="h-5 w-5 text-[#002C6C]" />
           <h3 className="font-semibold text-[#454545]">Briefmal</h3>
         </div>
         <p className="text-xs text-[#888B8D] mb-3">
