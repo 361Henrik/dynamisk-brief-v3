@@ -120,7 +120,7 @@ function BriefListContent() {
           <p className="text-gray-500 mt-1">Oversikt over alle dine briefs</p>
         </div>
         <Link to={createPageUrl('NewBrief')}>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button className="bg-[#002C6C] hover:bg-[#001a45]">
             <PlusCircle className="h-4 w-4 mr-2" />
             Start ny brief
           </Button>
@@ -187,7 +187,7 @@ function BriefListContent() {
               to={createPageUrl('BriefEditor') + `?id=${brief.id}`}
               className="block"
             >
-              <Card className="hover:border-blue-200 hover:shadow-md transition-all">
+              <Card className="hover:border-[#002C6C]/30 hover:shadow-md transition-all">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
