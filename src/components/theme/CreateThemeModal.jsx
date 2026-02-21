@@ -27,7 +27,7 @@ export default function CreateThemeModal({ onThemeCreated }) {
     mutationFn: async () => {
       return await base44.entities.Theme.create({
         name: name.trim(),
-        description: description.trim() || undefined,
+        description: description.trim(),
         isActive: true
       });
     },
