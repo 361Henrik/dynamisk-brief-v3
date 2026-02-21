@@ -91,8 +91,8 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
             className={cn(
               "p-2 rounded-lg transition-colors",
               isCurrentPage(item.page)
-                ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                ? "bg-[#002C6C]/10 text-[#002C6C]"
+                : "text-[#454545] hover:bg-[#F4F4F4]"
             )}
             title={item.name}
           >
@@ -106,8 +106,8 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
             className={cn(
               "p-2 rounded-lg transition-colors",
               isCurrentPage(item.page)
-                ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                ? "bg-[#002C6C]/10 text-[#002C6C]"
+                : "text-[#454545] hover:bg-[#F4F4F4]"
             )}
             title={item.name}
           >
