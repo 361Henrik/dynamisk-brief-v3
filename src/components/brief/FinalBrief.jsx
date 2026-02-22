@@ -318,7 +318,7 @@ ${content}
             </p>
             <p className="text-sm text-[#888B8D]">
               {brief.status === 'godkjent' 
-                ? `Markert som fullført ${formatDate(brief.approvedAt)}`
+                ? `Godkjent ${formatDate(brief.approvedAt)} – dokument generert`
                 : `Basert på godkjent foreslått brief fra ${formatDate(approvedAt)}`
               }
             </p>
