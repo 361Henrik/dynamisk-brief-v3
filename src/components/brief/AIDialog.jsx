@@ -91,12 +91,21 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [dialogEntries]);
 
-  // Start conversation if empty
+  // Show intro panel if no dialog entries and not previously dismissed
   useEffect(() => {
-    if (!isLoading && dialogEntries.length === 0) {
-      startConversation();
+    if (!isLoading && dialogEntries.length === 0 && localStorage.getItem('briefIntroSeen') !== 'true') {
+      setShowIntroPanel(true);
+    } else {
+      setShowIntroPanel(false);
     }
   }, [isLoading, dialogEntries.length]);
+
+  // Start conversation if empty and intro panel is not shown
+  useEffect(() => {
+    if (!isLoading && dialogEntries.length === 0 && !showIntroPanel) {
+      startConversation();
+    }
+  }, [isLoading, dialogEntries.length, showIntroPanel]);
 
   const addEntryMutation = useMutation({
     mutationFn: async (entryData) => {
