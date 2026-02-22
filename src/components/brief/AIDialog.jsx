@@ -401,22 +401,8 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
   const canProceed = areAllSectionsConfirmed(confirmedPoints);
   const confirmedCount = getConfirmedSectionsCount(confirmedPoints);
 
-  // Derive active section from the most recent assistant message
-  const derivedActiveSectionKey = (() => {
-    for (let i = dialogEntries.length - 1; i >= 0; i--) {
-      const e = dialogEntries[i];
-      if (e.role === 'assistant') {
-        const section = detectActiveSection(e.content, confirmedPoints);
-        if (section) return section.key;
-        // Fallback: first missing section
-        const firstMissing = BRIEF_SECTIONS.find(s =>
-          !confirmedPoints.some(p => p.sectionKey === s.key)
-        );
-        return firstMissing?.key || null;
-      }
-    }
-    return null;
-  })();
+  // Active section is always the deterministic currentSectionKey
+  const derivedActiveSectionKey = currentSectionKey;
 
   const handleDismissIntro = (startConvo) => {
     localStorage.setItem('briefIntroSeen', 'true');
