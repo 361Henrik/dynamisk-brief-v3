@@ -401,8 +401,10 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
   const canProceed = areAllSectionsConfirmed(confirmedPoints);
   const confirmedCount = getConfirmedSectionsCount(confirmedPoints);
 
-  // Active section is always the deterministic currentSectionKey
-  const derivedActiveSectionKey = currentSectionKey;
+  // Active section label for chat message headers
+  const currentSectionObj = currentSectionKey
+    ? BRIEF_SECTIONS.find(s => s.key === currentSectionKey)
+    : null;
 
   const handleDismissIntro = (startConvo) => {
     localStorage.setItem('briefIntroSeen', 'true');
@@ -414,7 +416,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
       {/* Progress sidebar */}
       <div className="lg:col-span-1 order-2 lg:order-1">
         <div className="sticky top-4">
-          <InterviewProgress confirmedPoints={confirmedPoints} activeSectionKey={derivedActiveSectionKey} />
+          <InterviewProgress confirmedPoints={confirmedPoints} activeSectionKey={currentSectionKey} />
         </div>
       </div>
 
@@ -480,10 +482,6 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
             ) : (
               <>
                 {dialogEntries.map((entry) => {
-                  const activeSection = entry.role === 'assistant'
-                    ? detectActiveSection(entry.content, confirmedPoints)
-                    : null;
-                  
                   return (
                   <div
                     key={entry.id}
@@ -508,13 +506,13 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
                         }`}
                       >
                         {/* Section label + template placement for assistant messages */}
-                        {activeSection && (
+                        {entry.role === 'assistant' && currentSectionObj && (
                           <div className="mb-3">
                             <div className="text-xs font-semibold text-[#002C6C] uppercase tracking-wide">
-                              {activeSection.label}
+                              {currentSectionObj.label}
                             </div>
                             <div className="text-xs text-[#002C6C]/60 mt-0.5">
-                              Plasseres i briefmal: {SECTION_TO_TEMPLATE_MAP[activeSection.key] || 'Flere seksjoner'}
+                              Plasseres i briefmal: {SECTION_TO_TEMPLATE_MAP[currentSectionObj.key] || 'Flere seksjoner'}
                             </div>
                           </div>
                         )}
