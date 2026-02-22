@@ -48,14 +48,13 @@ export default function FinalBrief({ brief, onBack }) {
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  // CRITICAL: Step 4 reads ONLY from approved Step 3 snapshot - NEVER from other sources
+  // Source of truth: approvedSnapshot (set by approveBrief backend), fallback to proposedBrief.sections
   const proposedBrief = brief?.proposedBrief;
-  const isStep3Approved = proposedBrief?.status === 'approved' && !proposedBrief?.editedAfterApproval;
-  
-  // ONLY use approved snapshot - do NOT fall back to draft sections, interview data, or sources
-  const sections = proposedBrief?.approvedSnapshot || {};
-  const approvedAt = proposedBrief?.approvedAt;
+  const sections = proposedBrief?.approvedSnapshot || proposedBrief?.sections || {};
+  const approvedAt = brief?.approvedAt || proposedBrief?.approvedAt;
   const hasSections = Object.keys(sections).length > 0;
+  const isApproved = brief?.status === 'godkjent';
+  const hasDocument = !!brief?.generatedDocumentUrl;
 
   const updateBriefMutation = useMutation({
     mutationFn: async (data) => {
@@ -182,55 +181,8 @@ ${content}
     toast.success('Kopiert til utklippstavlen');
   };
 
-  // Show warning if Step 3 is not approved
-  if (!isStep3Approved && hasSections) {
-    return (
-      <div className="space-y-6">
-        {/* Warning Banner */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start space-x-3">
-        <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="font-medium text-amber-800">
-              Foreslått brief er ikke godkjent
-            </p>
-            <p className="text-sm text-amber-700 mt-1">
-              Gå tilbake til Foreslått brief og godkjenn for å oppdatere denne visningen.
-            </p>
-          </div>
-        </div>
-
-        {/* Show based on last approved version or current draft */}
-        <Card className="bg-[#F4F4F4] border-dashed">
-          <CardContent className="py-8 text-center">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-[#888B8D] mb-4">
-              {proposedBrief?.approvedSnapshot 
-                ? "Denne visningen er basert på sist godkjente foreslåtte brief. Godkjenn endringene i Foreslått brief for å oppdatere."
-                : "Ingen godkjent brief tilgjengelig ennå. Gå til Foreslått brief og godkjenn innholdet."
-              }
-            </p>
-            <Button variant="outline" onClick={onBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Tilbake til foreslått brief
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Still show content if there's an approved snapshot */}
-        {proposedBrief?.approvedSnapshot && (
-          <div className="opacity-75">
-            <p className="text-xs text-[#888B8D] mb-4 text-center">
-              Basert på sist godkjente foreslåtte brief ({formatDate(approvedAt)})
-            </p>
-            {renderBriefContent()}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // No sections at all
-  if (!hasSections) {
+  // No content available at all
+  if (!hasSections && !hasDocument && !isApproved) {
     return (
       <div className="space-y-6">
         <Card className="border-dashed">
@@ -264,7 +216,7 @@ ${content}
             </CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
-            {brief.generatedDocumentUrl && (
+            {hasDocument && (
               <Button variant="outline" size="sm" onClick={handleDownloadSignedUrl} disabled={downloading}>
                 {downloading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
                 Last ned Word
@@ -307,29 +259,29 @@ ${content}
     <div className="space-y-6">
       {/* Status Banner */}
       <div className={`p-4 rounded-lg flex items-center justify-between ${
-        brief.status === 'godkjent' 
+        isApproved 
           ? 'bg-green-50 border border-green-200' 
           : 'bg-[#002C6C]/5 border border-[#002C6C]/20'
       }`}>
         <div className="flex items-center space-x-3">
-          {brief.status === 'godkjent' ? (
+          {isApproved ? (
             <CheckCircle2 className="h-5 w-5 text-green-600" />
           ) : (
             <FileText className="h-5 w-5 text-[#002C6C]" />
           )}
           <div>
             <p className="font-medium text-[#454545]">
-              {brief.status === 'godkjent' ? 'Fullført brief' : 'Ferdig brief'}
+              {isApproved ? 'Fullført brief' : 'Ferdig brief'}
             </p>
             <p className="text-sm text-[#888B8D]">
-              {brief.status === 'godkjent' 
-                ? `Godkjent ${formatDate(brief.approvedAt)} – dokument generert`
-                : `Basert på godkjent foreslått brief fra ${formatDate(approvedAt)}`
+              {isApproved 
+                ? `Godkjent ${formatDate(brief.approvedAt)}${hasDocument ? ' – dokument generert' : ''}`
+                : `Basert på foreslått brief fra ${formatDate(approvedAt)}`
               }
             </p>
           </div>
         </div>
-        {brief.status === 'godkjent' && (
+        {isApproved && (
           <Button variant="outline" onClick={handleReopen} disabled={reopening}>
             {reopening ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ArrowLeft className="h-4 w-4 mr-2" />}
             Gjenåpne for redigering
