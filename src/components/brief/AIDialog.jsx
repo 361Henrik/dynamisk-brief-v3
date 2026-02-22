@@ -415,6 +415,11 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
     return null;
   })();
 
+  const handleDismissIntro = (startConvo) => {
+    localStorage.setItem('briefIntroSeen', 'true');
+    setShowIntroPanel(false);
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* Progress sidebar */}
@@ -426,6 +431,56 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
 
       {/* Main chat area */}
       <div className="lg:col-span-2 order-1 lg:order-2 space-y-4">
+        {/* Intro / Help Panel */}
+        {showIntroPanel && dialogEntries.length === 0 && (
+          <Card className="border-[#002C6C]/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center text-lg font-semibold text-[#002C6C]">
+                <Info className="h-5 w-5 mr-2 flex-shrink-0" />
+                Velkommen til det dynamiske intervjuet
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm text-gray-700">
+              <p>
+                Dette intervjuet veileder deg gjennom prosessen med å samle all nødvendig informasjon for en kommunikasjonsbrief. AI-en stiller spørsmål – dine svar blir grunnlaget for briefutkastet.
+              </p>
+
+              <div>
+                <p className="font-medium text-[#002C6C] mb-1">Slik fungerer det:</p>
+                <ul className="list-disc list-inside space-y-0.5 text-gray-600">
+                  <li>Du får ett fokusert spørsmål om gangen</li>
+                  <li>Svarene dine lagres automatisk</li>
+                  <li>Systemet guider deg gjennom alle nødvendige seksjoner</li>
+                  <li>Når alt er dekket, kan du generere et komplett briefutkast</li>
+                </ul>
+              </div>
+
+              <div>
+                <p className="font-medium text-[#002C6C] mb-1">Viktig å vite:</p>
+                <ul className="list-disc list-inside space-y-0.5 text-gray-600">
+                  <li>Ingen bekreftelse per seksjon er nødvendig</li>
+                  <li>Alt kan redigeres og justeres i briefutkastet etterpå</li>
+                  <li>Det finnes ingen «feil» svar – bare svar så godt du kan</li>
+                </ul>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-xs text-gray-500">
+                Intervju → Svar fanges opp → Neste spørsmål → … → Generer brief
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" size="sm" onClick={() => handleDismissIntro(false)} className="text-gray-600 border-gray-300">
+                  Skjul
+                </Button>
+                <Button size="sm" onClick={() => handleDismissIntro(true)} className="bg-[#002C6C] hover:bg-[#001a45]">
+                  Start intervju
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Chat Messages */}
         <Card className="h-[450px] overflow-hidden flex flex-col">
           <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
