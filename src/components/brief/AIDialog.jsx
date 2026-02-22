@@ -65,6 +65,13 @@ const detectActiveSection = (content, confirmedPoints = []) => {
   );
 };
 
+// Compute the first missing sectionKey given a list of confirmedPoints
+function getFirstMissingSectionKey(confirmedPoints = []) {
+  const confirmedKeys = new Set(confirmedPoints.map(p => p.sectionKey).filter(Boolean));
+  const first = BRIEF_SECTIONS.find(s => !confirmedKeys.has(s.key));
+  return first ? first.key : null;
+}
+
 export default function AIDialog({ brief, sources = [], onBack, onContinue, userName = '' }) {
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
@@ -73,6 +80,11 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
   // Race-condition guard: holds latest confirmedPoints before react-query refresh completes
   const pendingPointsRef = useRef([]);
   const messagesEndRef = useRef(null);
+
+  // Deterministic section tracker – advances after each user answer
+  const [currentSectionKey, setCurrentSectionKey] = useState(() =>
+    getFirstMissingSectionKey(brief?.confirmedPoints)
+  );
 
   const { data: dialogEntries = [], isLoading } = useQuery({
     queryKey: ['dialogEntries', brief.id],
