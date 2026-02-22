@@ -493,29 +493,18 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
   const handleApprove = async () => {
     setApproving(true);
     try {
-      // First save current sections as approved snapshot
-      const now = new Date().toISOString();
-      const approvedSnapshot = {};
-      for (const key of Object.keys(sections)) {
-        approvedSnapshot[key] = {
-          content: sections[key]?.content || '',
-          notes: sections[key]?.notes || '',
-          metadata: sections[key]?.metadata
-        };
+      // Save current sections snapshot before calling backend (no status/approvedAt changes)
+      if (hasChanges) {
+        await base44.entities.Brief.update(brief.id, {
+          proposedBrief: {
+            ...brief.proposedBrief,
+            sections,
+            updatedAt: new Date().toISOString()
+          }
+        });
       }
 
-      await base44.entities.Brief.update(brief.id, {
-        proposedBrief: {
-          sections,
-          status: 'approved',
-          updatedAt: now,
-          approvedAt: now,
-          approvedSnapshot: approvedSnapshot,
-          editedAfterApproval: false
-        }
-      });
-
-      // Call backend to generate DOCX and set status=godkjent atomically
+      // Backend owns ALL status transitions: generates DOCX, uploads, then atomically sets status+approvedAt+generatedDocumentUrl
       const response = await base44.functions.invoke('approveBrief', { briefId: brief.id });
       if (response.data?.error) {
         throw new Error(response.data.error);

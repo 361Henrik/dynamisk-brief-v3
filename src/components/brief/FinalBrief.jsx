@@ -75,7 +75,12 @@ export default function FinalBrief({ brief, onBack }) {
       await updateBriefMutation.mutateAsync({
         status: 'utkast',
         approvedAt: null,
-        generatedDocumentUrl: null
+        generatedDocumentUrl: null,
+        proposedBrief: {
+          ...brief.proposedBrief,
+          status: 'draft',
+          editedAfterApproval: false
+        }
       });
       toast.success('Briefen er gjenåpnet for redigering.');
     } catch (error) {

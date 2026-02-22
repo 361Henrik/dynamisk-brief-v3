@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, AlignmentType, Header, Footer, PageNumber, NumberFormat } from 'npm:docx@9.5.0';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, AlignmentType, Header, Footer, PageNumber } from 'npm:docx@9.5.0';
 
 const SECTION_CONFIG = [
   { key: 'prosjektinformasjon', label: 'Prosjektinformasjon', number: 1 },
@@ -25,7 +25,6 @@ function formatDate(isoString) {
 function buildDocxDocument(brief, sections) {
   const now = new Date().toISOString();
 
-  // Build metadata paragraphs
   const metaParagraphs = [
     new Paragraph({
       children: [new TextRun({ text: 'KOMMUNIKASJONSBRIEF', bold: true, size: 36, color: '002C6C', font: 'Calibri' })],
@@ -72,26 +71,22 @@ function buildDocxDocument(brief, sections) {
       ],
       spacing: { after: 400 }
     }),
-    // Divider
     new Paragraph({
       border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: '002C6C' } },
       spacing: { after: 400 }
     })
   ];
 
-  // Build section paragraphs
   const sectionParagraphs = [];
   for (const sectionDef of SECTION_CONFIG) {
     const content = sections[sectionDef.key]?.content || 'Ingen informasjon lagt til.';
 
-    // Section heading
     sectionParagraphs.push(new Paragraph({
       children: [new TextRun({ text: `${sectionDef.number}. ${sectionDef.label}`, bold: true, size: 24, color: '002C6C', font: 'Calibri' })],
       heading: HeadingLevel.HEADING_2,
       spacing: { before: 300, after: 150 }
     }));
 
-    // Section content – split by newlines for proper paragraph rendering
     const lines = content.split('\n');
     for (const line of lines) {
       sectionParagraphs.push(new Paragraph({
@@ -100,11 +95,10 @@ function buildDocxDocument(brief, sections) {
       }));
     }
 
-    // Spacer after section
     sectionParagraphs.push(new Paragraph({ spacing: { after: 200 } }));
   }
 
-  const doc = new Document({
+  return new Document({
     sections: [{
       properties: {
         page: {
@@ -133,8 +127,6 @@ function buildDocxDocument(brief, sections) {
       children: [...metaParagraphs, ...sectionParagraphs]
     }]
   });
-
-  return doc;
 }
 
 Deno.serve(async (req) => {
@@ -150,43 +142,50 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'briefId is required' }, { status: 400 });
     }
 
-    // 1. Fetch brief
+    // Step 1: Fetch brief
     const brief = await base44.entities.Brief.get(briefId);
     if (!brief) {
       return Response.json({ error: 'Brief not found' }, { status: 404 });
     }
 
-    // 2. Validate status
-    if (brief.status === 'godkjent') {
-      return Response.json({ error: 'Brief is already approved' }, { status: 400 });
+    // Step 2: Validate status === "utkast"
+    if (brief.status !== 'utkast') {
+      return Response.json({ error: 'Brief must be in utkast status to approve' }, { status: 400 });
     }
 
-    // 3. Validate sections exist
-    const sections = brief.proposedBrief?.approvedSnapshot || brief.proposedBrief?.sections || {};
+    // Step 3: Generate DOCX from proposedBrief.sections
+    const sections = brief.proposedBrief?.sections || {};
     if (Object.keys(sections).length === 0) {
       return Response.json({ error: 'No brief sections to generate document from' }, { status: 400 });
     }
 
-    // 4. Generate DOCX
     const doc = buildDocxDocument(brief, sections);
     const buffer = await Packer.toBuffer(doc);
 
-    // 5. Upload via UploadPrivateFile
+    // Step 4: Upload DOCX using UploadPrivateFile
     const fileName = `brief_${brief.id}_${Date.now()}.docx`;
     const file = new File([buffer], fileName, { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
     const uploadResult = await base44.asServiceRole.integrations.Core.UploadPrivateFile({ file });
-    const fileUri = uploadResult.file_uri;
 
+    // Step 5: Receive file_uri
+    const fileUri = uploadResult.file_uri;
     if (!fileUri) {
       return Response.json({ error: 'File upload failed – no file_uri returned' }, { status: 500 });
     }
 
-    // 6. Update brief – ONLY after successful generation + upload
+    // Step 6: ONE SINGLE Brief.update – atomic status transition
     const now = new Date().toISOString();
     await base44.asServiceRole.entities.Brief.update(briefId, {
       status: 'godkjent',
       approvedAt: now,
-      generatedDocumentUrl: fileUri
+      generatedDocumentUrl: fileUri,
+      proposedBrief: {
+        ...brief.proposedBrief,
+        status: 'approved',
+        approvedAt: now,
+        approvedSnapshot: sections,
+        editedAfterApproval: false
+      }
     });
 
     return Response.json({ success: true, generatedDocumentUrl: fileUri, approvedAt: now });
