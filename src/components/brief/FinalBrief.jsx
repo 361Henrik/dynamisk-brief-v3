@@ -230,7 +230,8 @@ ${content}
         </CardHeader>
         <CardContent className="space-y-6">
           {SECTION_CONFIG.map(section => {
-            const sectionContent = sections[section.key]?.content;
+            const rawContent = sections[section.key]?.content;
+            const sectionContent = rawContent ? rawContent.replace(/\\n/g, '\n') : rawContent;
             
             return (
               <section key={section.key}>
