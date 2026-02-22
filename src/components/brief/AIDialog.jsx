@@ -6,12 +6,11 @@ import {
   Loader2, 
   ArrowLeft,
   ArrowRight,
-  Bot,
   User,
   MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+
 import { Card, CardContent } from '@/components/ui/card';
 import ReactMarkdown from 'react-markdown';
 import InterviewProgress, { 
