@@ -180,7 +180,9 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
     ).join('\n\n');
 
     const { known, missing } = buildContextSummary();
-    const sectionsToCollect = BRIEF_SECTIONS.map(s => `- ${s.label}: ${s.description}`).join('\n');
+
+    // Determine the target section for the first question
+    const targetSection = BRIEF_SECTIONS.find(s => s.key === currentSectionKey) || BRIEF_SECTIONS[0];
 
     const prompt = `Du er en kommunikasjonsrådgiver for GS1 Norway som hjelper fageksperter med å lage kommunikasjonsbriefs gjennom et strukturert intervju.
 
@@ -194,9 +196,6 @@ Tone: ${brief.rammer?.tone || 'Ikke spesifisert'}
 KILDEMATERIALE:
 ${sourceContext || 'Ingen kilder lastet opp'}
 
-SEKSJONER SOM MÅ FYLLES UT FOR BRIEFEN:
-${sectionsToCollect}
-
 Start samtalen med denne strukturen:
 
 **Dette vet vi så langt:**
@@ -207,27 +206,22 @@ ${missing.map(m => `• ${m}`).join('\n')}
 
 ---
 
-Still deretter ETT fokusert spørsmål for å begynne å samle informasjon om "${missing[0] || 'Hovedbudskap'}".
+Still deretter ETT fokusert spørsmål om BARE denne seksjonen:
+Seksjon: "${targetSection.label}"
+Beskrivelse: "${targetSection.description}"
 
-VIKTIG – SPØRSMÅLSFORMAT (følg dette alltid):
-1. Start med ÉN tydelig hovedspørsmål i fet skrift. Dette er det eneste brukeren MÅ svare på.
-2. Legg til beroligende linje rett etter spørsmålet:
-   "Svar fritt – du trenger ikke dekke alt."
-3. Deretter valgfri støtte, innledet med:
-   "For å hjelpe deg å svare, kan du tenke på:"
-   – etterfulgt av kulepunkter med veiledning (ikke obligatoriske underspørsmål)
+VIKTIGE REGLER:
+- Still KUN ETT hovedspørsmål om denne ene seksjonen.
+- IKKE still oppfølgingsspørsmål.
+- IKKE spør om andre seksjoner.
+- Brukeren svarer én gang per seksjon. Systemet går automatisk videre til neste seksjon etterpå.
 
-Eksempelformat:
-**Hva er det viktigste budskapet vi ønsker å kommunisere?**
+SPØRSMÅLSFORMAT:
+1. Start med ÉN tydelig hovedspørsmål i fet skrift.
+2. Legg til: "Svar fritt – du trenger ikke dekke alt."
+3. Deretter valgfri støtte, innledet med: "For å hjelpe deg å svare, kan du tenke på:" – etterfulgt av kulepunkter.
 
-Svar fritt – du trenger ikke dekke alt.
-
-For å hjelpe deg å svare, kan du tenke på:
-• Hva er kjerneinnholdet eller hovedideen?
-• Hvilken handling ønsker vi at målgruppen skal gjøre?
-• Hvorfor er dette viktig for målgruppen akkurat nå?
-
-Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.`;
+Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
 
     try {
       const response = await base44.integrations.Core.InvokeLLM({ prompt });
@@ -274,31 +268,21 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
       inputMethod
     });
 
-    // --- Deterministic confirmedPoints capture ---
-    // Determine active section from latest assistant message before this user answer
+    // --- Deterministic capture: save answer for currentSectionKey ---
     const effectivePointsBefore = getEffectiveConfirmedPoints();
-    const activeSectionForCapture = (() => {
-      for (let i = dialogEntries.length - 1; i >= 0; i--) {
-        const e = dialogEntries[i];
-        if (e.role === 'assistant') {
-          const section = detectActiveSection(e.content, effectivePointsBefore);
-          return section || null;
-        }
-      }
-      return null;
-    })();
+    const capturedSection = BRIEF_SECTIONS.find(s => s.key === currentSectionKey);
 
-    if (activeSectionForCapture) {
+    if (capturedSection) {
       const newSummary = message.trim().substring(0, 500);
       const newPoint = {
-        sectionKey: activeSectionForCapture.key,
-        topic: activeSectionForCapture.label,
+        sectionKey: capturedSection.key,
+        topic: capturedSection.label,
         summary: newSummary,
         confirmedAt: new Date().toISOString()
       };
 
       const currentPoints = effectivePointsBefore;
-      const existingIndex = currentPoints.findIndex(p => p.sectionKey === activeSectionForCapture.key);
+      const existingIndex = currentPoints.findIndex(p => p.sectionKey === capturedSection.key);
       let updatedConfirmedPoints;
       if (existingIndex > -1) {
         updatedConfirmedPoints = [
@@ -310,26 +294,39 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
         updatedConfirmedPoints = [...currentPoints, newPoint];
       }
 
-      // Immediately update pendingPointsRef for race-condition safety
       pendingPointsRef.current = updatedConfirmedPoints;
       await updateBriefMutation.mutateAsync({ confirmedPoints: updatedConfirmedPoints });
+
+      // Advance to next missing section
+      const nextKey = getFirstMissingSectionKey(updatedConfirmedPoints);
+      setCurrentSectionKey(nextKey);
     }
 
     // Use effective confirmed points (includes just-captured point)
     const effectivePoints = getEffectiveConfirmedPoints();
+
+    // Check if all sections are now covered
+    const nextSectionKey = getFirstMissingSectionKey(effectivePoints);
+
+    if (!nextSectionKey) {
+      // All sections covered – tell user they can generate
+      const completionMessage = 'Alle seksjoner er nå dekket! Du kan nå klikke «Generer brief» for å lage et komplett briefutkast basert på svarene dine.';
+      await addEntryMutation.mutateAsync({
+        role: 'assistant',
+        content: completionMessage
+      });
+      pendingPointsRef.current = [];
+      setIsProcessing(false);
+      return;
+    }
 
     // Build conversation history
     const history = [...dialogEntries, { role: 'user', content: message }]
       .map(e => `${e.role === 'assistant' ? 'Rådgiver' : 'Fagekspert'}: ${e.content}`)
       .join('\n\n');
 
-    // Get remaining sections using effective points
-    const remainingSections = BRIEF_SECTIONS.filter(section => {
-      return !effectivePoints.some(p => 
-        p.sectionKey === section.key || 
-        p.topic?.toLowerCase().includes(section.key.replace('_', ' '))
-      );
-    });
+    // Get the next target section
+    const nextSection = BRIEF_SECTIONS.find(s => s.key === nextSectionKey);
 
     const prompt = `Du er en kommunikasjonsrådgiver for GS1 Norway. Fortsett det strukturerte intervjuet.
 
@@ -339,34 +336,29 @@ Målgruppe: ${brief.rammer?.targetAudience || 'Ikke spesifisert'}
 Mål: ${brief.rammer?.objectives || 'Ikke spesifisert'}
 
 ALLEREDE BEKREFTET (${effectivePoints.length}/${BRIEF_SECTIONS.length}):
-${effectivePoints.map(p => `✓ ${p.sectionKey || p.topic}: ${p.summary}`).join('\n') || 'Ingen seksjoner bekreftet ennå'}
-
-GJENSTÅENDE SEKSJONER:
-${remainingSections.map(s => `• ${s.label}: ${s.description}`).join('\n') || 'Alle seksjoner er bekreftet!'}
+${effectivePoints.map(p => `✓ ${p.sectionKey}: ${p.summary}`).join('\n')}
 
 SAMTALEHISTORIKK:
 ${history}
 
 INSTRUKSJONER:
-1. Still ETT fokusert hovedspørsmål om den mest relevante ubesvarte seksjonen.
-2. Be ALDRI om bekreftelse eller validering av brukerens svar. Din rolle er kun å samle informasjon.
-3. Ikke oppsummer for godkjenning – bare gå videre til neste spørsmål.
-4. Still maks TO oppfølgingsspørsmål per seksjon før du går videre til neste manglende seksjon.
-5. Flytt alltid videre til neste manglende seksjon etter tilstrekkelig informasjon.
-6. Ikke still flere hovedspørsmål i samme svar.
-7. Når alle seksjoner er dekket, si at brukeren kan generere briefen.
+Gi en kort kvittering på brukerens svar (1 setning maks), og still deretter ETT fokusert spørsmål om BARE denne seksjonen:
+Seksjon: "${nextSection.label}"
+Beskrivelse: "${nextSection.description}"
 
-VIKTIG – SPØRSMÅLSFORMAT (følg dette alltid når du stiller spørsmål):
-1. Start med ÉN tydelig hovedspørsmål i fet skrift. Dette er det eneste brukeren MÅ svare på.
-2. Legg til beroligende linje rett etter spørsmålet:
-   "Svar fritt – du trenger ikke dekke alt."
-3. Deretter valgfri støtte, innledet med:
-   "For å hjelpe deg å svare, kan du tenke på:"
-   – etterfulgt av kulepunkter med veiledning (ikke obligatoriske underspørsmål)
+VIKTIGE REGLER:
+- Still KUN ETT hovedspørsmål om denne ene seksjonen.
+- IKKE still oppfølgingsspørsmål.
+- IKKE spør om andre seksjoner.
+- IKKE be om bekreftelse eller validering av tidligere svar.
+- Brukeren svarer én gang per seksjon. Systemet går automatisk videre til neste seksjon etterpå.
 
-ALDRI stable flere likeverdige spørsmål i samme avsnitt. Hovedspørsmålet kommer alltid først.
+SPØRSMÅLSFORMAT:
+1. Start med ÉN tydelig hovedspørsmål i fet skrift.
+2. Legg til: "Svar fritt – du trenger ikke dekke alt."
+3. Deretter valgfri støtte, innledet med: "For å hjelpe deg å svare, kan du tenke på:" – etterfulgt av kulepunkter.
 
-Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.`;
+Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
 
     try {
       const response = await base44.integrations.Core.InvokeLLM({ prompt });
@@ -379,7 +371,6 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
       console.error('Failed to get AI response:', error);
     }
 
-    // Clear pending points after query invalidation has been triggered
     pendingPointsRef.current = [];
     setIsProcessing(false);
   };
