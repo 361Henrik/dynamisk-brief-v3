@@ -6,111 +6,19 @@ import {
   Loader2, 
   ArrowLeft,
   ArrowRight,
-  CheckCircle2,
-  XCircle,
   Bot,
   User,
-  HelpCircle,
-  ClipboardList,
-  MessageSquare,
-  AlertTriangle
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import ReactMarkdown from 'react-markdown';
 import InterviewProgress, { 
   BRIEF_SECTIONS, 
   areAllSectionsConfirmed,
   getConfirmedSectionsCount 
 } from './InterviewProgress';
-import StuckRecovery from './StuckRecovery';
-
-// Try multiple strategies to parse a confirmation from AI response
-function parseConfirmation(response) {
-  if (!response) return null;
-
-  // Strategy 1: Strict original format  **[BEKREFT: key]** Topic: Summary
-  const strict = response.match(/\*\*\[BEKREFT:\s*(\w+)\]\*\*\s*([^:\n]+):\s*(.+)/s);
-  if (strict) {
-    const key = strict[1].trim().toLowerCase();
-    if (BRIEF_SECTIONS.some(s => s.key === key)) {
-      return { sectionKey: key, topic: strict[2].trim(), summary: strict[3].trim() };
-    }
-  }
-
-  // Strategy 2: Relaxed — [BEKREFT: key] anywhere, with or without bold
-  const relaxed = response.match(/\[BEKREFT:\s*(\w+)\]\s*\**\s*([^:\n]*?):\s*(.+)/si);
-  if (relaxed) {
-    const key = relaxed[1].trim().toLowerCase();
-    if (BRIEF_SECTIONS.some(s => s.key === key)) {
-      return { sectionKey: key, topic: relaxed[2].trim() || BRIEF_SECTIONS.find(s => s.key === key)?.label || key, summary: relaxed[3].trim() };
-    }
-  }
-
-  // Strategy 3: Just [BEKREFT: key] with summary on next line or same line
-  const minimal = response.match(/\[BEKREFT:\s*(\w+)\]\s*[:\-–]?\s*(.+)/si);
-  if (minimal) {
-    const key = minimal[1].trim().toLowerCase();
-    const section = BRIEF_SECTIONS.find(s => s.key === key);
-    if (section) {
-      return { sectionKey: key, topic: section.label, summary: minimal[2].replace(/^\*+|\*+$/g, '').trim() };
-    }
-  }
-
-  // Strategy 4: Contains BEKREFT keyword + a valid section key somewhere
-  const bekreftIdx = response.toLowerCase().indexOf('bekreft');
-  if (bekreftIdx !== -1) {
-    for (const section of BRIEF_SECTIONS) {
-      if (response.toLowerCase().includes(section.key)) {
-        // Extract everything after the section key mention as summary
-        const afterKey = response.substring(response.toLowerCase().indexOf(section.key) + section.key.length);
-        const summaryText = afterKey.replace(/^[\s:\]\*\-–]+/, '').split('\n')[0].trim();
-        if (summaryText.length > 10) {
-          return { sectionKey: section.key, topic: section.label, summary: summaryText };
-        }
-      }
-    }
-  }
-
-  return null;
-}
-
-// Check if AI message looks like it's trying to summarize/confirm (even if parsing failed)
-function looksLikeConfirmation(content) {
-  if (!content) return false;
-  const lower = content.toLowerCase();
-  return (
-    lower.includes('bekreft') ||
-    lower.includes('oppsummering') ||
-    (lower.includes('oppsummert') && lower.includes(':')) ||
-    /\[bekreft/i.test(content)
-  );
-}
-
-// Determine AI message type based on content heuristics
-const getMessageType = (entry) => {
-  if (entry.clarifyConfirm?.isConfirmationRequest) {
-    return 'summary';
-  }
-  const content = entry.content || '';
-  if (looksLikeConfirmation(content)) {
-    return 'summary';
-  }
-  // Check if message contains a question (ends with ? or has bold question line)
-  const hasQuestion = content.includes('?') || /\*\*[^*]+\?\*\*/.test(content);
-  if (hasQuestion) {
-    return 'question';
-  }
-  return 'context';
-};
-
 // Static mapping: interview section → brief template sections (UI display only)
 const SECTION_TO_TEMPLATE_MAP = {
   hovedbudskap: 'Budskap, tone og stil + GS1-tilbudet og verdiforslag',
@@ -161,10 +69,7 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  // Loop guard: { [sectionKey]: { count: number, confirmedAtStart: number } }
-  const [sectionRepeatCounts, setSectionRepeatCounts] = useState({});
-  // Local overlay of confirmed points used to immediately reflect skip/confirm in the next LLM prompt
-  // without waiting for query invalidation. Cleared on each re-render from brief prop.
+  // Race-condition guard: holds latest confirmedPoints before react-query refresh completes
   const pendingPointsRef = useRef([]);
   const messagesEndRef = useRef(null);
 
@@ -316,14 +221,21 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
     setIsProcessing(false);
   };
 
-  // Merge server confirmedPoints with any pending local additions (skip/confirm that hasn't round-tripped yet)
+  // Merge server confirmedPoints with any pending local additions not yet refreshed by react-query
   const getEffectiveConfirmedPoints = () => {
     const base = confirmedPoints;
     const pending = pendingPointsRef.current;
     if (pending.length === 0) return base;
-    // Deduplicate by sectionKey
-    const baseKeys = new Set(base.map(p => p.sectionKey));
-    const merged = [...base, ...pending.filter(p => !baseKeys.has(p.sectionKey))];
+    // Deduplicate by sectionKey, pending wins over base
+    const merged = [...base];
+    for (const p of pending) {
+      const idx = merged.findIndex(m => m.sectionKey === p.sectionKey);
+      if (idx > -1) {
+        merged[idx] = p; // overwrite with latest
+      } else {
+        merged.push(p);
+      }
+    }
     return merged;
   };
 
@@ -340,7 +252,48 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
       inputMethod
     });
 
-    // Use effective confirmed points (includes pending skip/confirm)
+    // --- Deterministic confirmedPoints capture ---
+    // Determine active section from latest assistant message before this user answer
+    const effectivePointsBefore = getEffectiveConfirmedPoints();
+    const activeSectionForCapture = (() => {
+      for (let i = dialogEntries.length - 1; i >= 0; i--) {
+        const e = dialogEntries[i];
+        if (e.role === 'assistant') {
+          const section = detectActiveSection(e.content, effectivePointsBefore);
+          return section || null;
+        }
+      }
+      return null;
+    })();
+
+    if (activeSectionForCapture) {
+      const newSummary = message.trim().substring(0, 500);
+      const newPoint = {
+        sectionKey: activeSectionForCapture.key,
+        topic: activeSectionForCapture.label,
+        summary: newSummary,
+        confirmedAt: new Date().toISOString()
+      };
+
+      const currentPoints = effectivePointsBefore;
+      const existingIndex = currentPoints.findIndex(p => p.sectionKey === activeSectionForCapture.key);
+      let updatedConfirmedPoints;
+      if (existingIndex > -1) {
+        updatedConfirmedPoints = [
+          ...currentPoints.slice(0, existingIndex),
+          newPoint,
+          ...currentPoints.slice(existingIndex + 1)
+        ];
+      } else {
+        updatedConfirmedPoints = [...currentPoints, newPoint];
+      }
+
+      // Immediately update pendingPointsRef for race-condition safety
+      pendingPointsRef.current = updatedConfirmedPoints;
+      await updateBriefMutation.mutateAsync({ confirmedPoints: updatedConfirmedPoints });
+    }
+
+    // Use effective confirmed points (includes just-captured point)
     const effectivePoints = getEffectiveConfirmedPoints();
 
     // Build conversation history
@@ -373,15 +326,13 @@ SAMTALEHISTORIKK:
 ${history}
 
 INSTRUKSJONER:
-1. Hvis brukerens svar gir nok informasjon til å fylle ut en seksjon, oppsummer og be om bekreftelse med dette formatet:
-
-**[BEKREFT: seksjonsnøkkel]** Seksjonsnavn: Oppsummering
-
-Eksempel: **[BEKREFT: hovedbudskap]** Hovedbudskap: Bedrifter bør ta i bruk GS1-standarder for å oppnå sporbarhet.
-
-2. Hvis svaret ikke er tilstrekkelig, still et oppfølgingsspørsmål.
-3. Fokuser på én seksjon om gangen.
-4. Når alle seksjoner er bekreftet, gratulerer brukeren og si at de kan generere briefen.
+1. Still ETT fokusert hovedspørsmål om den mest relevante ubesvarte seksjonen.
+2. Be ALDRI om bekreftelse eller validering av brukerens svar. Din rolle er kun å samle informasjon.
+3. Ikke oppsummer for godkjenning – bare gå videre til neste spørsmål.
+4. Still maks TO oppfølgingsspørsmål per seksjon før du går videre til neste manglende seksjon.
+5. Flytt alltid videre til neste manglende seksjon etter tilstrekkelig informasjon.
+6. Ikke still flere hovedspørsmål i samme svar.
+7. Når alle seksjoner er dekket, si at brukeren kan generere briefen.
 
 VIKTIG – SPØRSMÅLSFORMAT (følg dette alltid når du stiller spørsmål):
 1. Start med ÉN tydelig hovedspørsmål i fet skrift. Dette er det eneste brukeren MÅ svare på.
@@ -393,58 +344,15 @@ VIKTIG – SPØRSMÅLSFORMAT (følg dette alltid når du stiller spørsmål):
 
 ALDRI stable flere likeverdige spørsmål i samme avsnitt. Hovedspørsmålet kommer alltid først.
 
-Gyldige seksjonsnøkler: ${BRIEF_SECTIONS.map(s => s.key).join(', ')}
-
 Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.`;
 
     try {
       const response = await base44.integrations.Core.InvokeLLM({ prompt });
       
-      // Use multi-strategy parser
-      const parsed = parseConfirmation(response);
-      
-      const entryData = {
+      await addEntryMutation.mutateAsync({
         role: 'assistant',
         content: response
-      };
-
-      if (parsed) {
-        entryData.clarifyConfirm = {
-          isConfirmationRequest: true,
-          sectionKey: parsed.sectionKey,
-          topic: parsed.topic,
-          summary: parsed.summary,
-          status: 'pending'
-        };
-        // Reset loop count for this section since we got a valid confirmation
-        setSectionRepeatCounts(prev => {
-          const next = { ...prev };
-          delete next[parsed.sectionKey];
-          return next;
-        });
-      } else {
-        // Only track repeat counts for QUESTION-type messages (not summaries or context)
-        const responseType = getMessageType({ content: response });
-        if (responseType === 'question') {
-          const detectedSection = detectActiveSection(response, effectivePoints);
-          if (detectedSection) {
-            setSectionRepeatCounts(prev => {
-              const existing = prev[detectedSection.key];
-              const currentConfirmedCount = effectivePoints.length;
-              if (existing) {
-                // If confirmedPoints grew since we started counting, reset — it's a new topic cycle
-                if (currentConfirmedCount > existing.confirmedAtStart) {
-                  return { ...prev, [detectedSection.key]: { count: 1, confirmedAtStart: currentConfirmedCount } };
-                }
-                return { ...prev, [detectedSection.key]: { count: existing.count + 1, confirmedAtStart: existing.confirmedAtStart } };
-              }
-              return { ...prev, [detectedSection.key]: { count: 1, confirmedAtStart: currentConfirmedCount } };
-            });
-          }
-        }
-      }
-
-      await addEntryMutation.mutateAsync(entryData);
+      });
     } catch (error) {
       console.error('Failed to get AI response:', error);
     }
@@ -589,13 +497,18 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
   const canProceed = areAllSectionsConfirmed(confirmedPoints);
   const confirmedCount = getConfirmedSectionsCount(confirmedPoints);
 
-  // Derive active section from the most recent assistant QUESTION message
+  // Derive active section from the most recent assistant message
   const derivedActiveSectionKey = (() => {
     for (let i = dialogEntries.length - 1; i >= 0; i--) {
       const e = dialogEntries[i];
-      if (e.role === 'assistant' && getMessageType(e) === 'question') {
+      if (e.role === 'assistant') {
         const section = detectActiveSection(e.content, confirmedPoints);
-        return section?.key || null;
+        if (section) return section.key;
+        // Fallback: first missing section
+        const firstMissing = BRIEF_SECTIONS.find(s =>
+          !confirmedPoints.some(p => p.sectionKey === s.key)
+        );
+        return firstMissing?.key || null;
       }
     }
     return null;
@@ -622,9 +535,8 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
             ) : (
               <>
                 {dialogEntries.map((entry) => {
-                  const messageType = entry.role === 'assistant' ? getMessageType(entry) : null;
-                  const activeSection = (entry.role === 'assistant' && messageType === 'question') 
-                    ? detectActiveSection(entry.content, confirmedPoints) 
+                  const activeSection = entry.role === 'assistant'
+                    ? detectActiveSection(entry.content, confirmedPoints)
                     : null;
                   
                   return (
@@ -635,35 +547,23 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                     <div className={`max-w-[85%] ${entry.role === 'user' ? 'order-2' : ''}`}>
                       <div className="flex items-center space-x-2 mb-1">
                         {entry.role === 'assistant' ? (
-                          messageType === 'summary' ? (
-                            <ClipboardList className="h-4 w-4 text-amber-600" />
-                          ) : messageType === 'question' ? (
-                            <MessageSquare className="h-4 w-4 text-blue-600" />
-                          ) : (
-                            <Bot className="h-4 w-4 text-gray-500" />
-                          )
+                          <MessageSquare className="h-4 w-4 text-blue-600" />
                         ) : (
                           <User className="h-4 w-4 text-gray-600" />
                         )}
                         <span className="text-xs text-gray-500">
-                          {entry.role === 'assistant' 
-                            ? (messageType === 'summary' ? 'Bekreft oppsummering' : 'Dynamisk brief')
-                            : (userName || 'Deg')}
+                          {entry.role === 'assistant' ? 'Dynamisk brief' : (userName || 'Deg')}
                         </span>
                       </div>
                       <div
                         className={`rounded-lg p-3 ${
                           entry.role === 'user'
                             ? 'bg-[#002C6C] text-white'
-                            : messageType === 'summary'
-                              ? 'bg-amber-50 border-2 border-dashed border-amber-300 text-gray-900'
-                              : messageType === 'question'
-                                ? 'bg-[#002C6C]/5 border border-[#002C6C]/20 text-gray-900'
-                                : 'bg-gray-100 text-gray-900'
+                            : 'bg-[#002C6C]/5 border border-[#002C6C]/20 text-gray-900'
                         }`}
                       >
-                        {/* Section label + template placement for question messages */}
-                        {activeSection && messageType === 'question' && (
+                        {/* Section label + template placement for assistant messages */}
+                        {activeSection && (
                           <div className="mb-3">
                             <div className="text-xs font-semibold text-[#002C6C] uppercase tracking-wide">
                               {activeSection.label}
@@ -681,89 +581,6 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
                           <p className="text-sm whitespace-pre-wrap">{entry.content}</p>
                         )}
                       </div>
-
-                      {/* Confirm/Reject buttons or confirmed state */}
-                      {entry.clarifyConfirm?.isConfirmationRequest && (
-                        entry.clarifyConfirm?.status === 'pending' ? (
-                          <div className="flex items-center space-x-2 mt-2">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-green-600 border-green-300 hover:bg-green-50"
-                                    onClick={() => handleConfirm(entry, true)}
-                                  >
-                                    <CheckCircle2 className="h-4 w-4 mr-1" />
-                                    Bekreft
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p className="text-sm">Dette blir låst og brukt i briefen</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-red-600 border-red-300 hover:bg-red-50"
-                              onClick={() => {
-                                setInput(entry.clarifyConfirm.summary);
-                                textareaRef.current?.focus();
-                                handleConfirm(entry, false);
-                              }}
-                            >
-                              <XCircle className="h-4 w-4 mr-1" />
-                              Korriger
-                            </Button>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button className="text-gray-400 hover:text-gray-600">
-                                    <HelpCircle className="h-4 w-4" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className="max-w-xs">
-                                  <p className="text-sm">
-                                    <strong>Hva skjer når jeg bekrefter?</strong><br/>
-                                    Punktet blir låst og brukes direkte i den ferdige briefen. 
-                                    Velg "Korriger" hvis du vil endre noe.
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        ) : entry.clarifyConfirm?.status === 'confirmed' ? (
-                          <div className="flex items-center space-x-2 mt-2 text-green-600">
-                            <CheckCircle2 className="h-4 w-4" />
-                            <span className="text-sm font-medium">Bekreftet</span>
-                          </div>
-                        ) : null
-                      )}
-
-                      {/* Manual confirm fallback: message looks like confirmation but parsing failed */}
-                      {entry.role === 'assistant' && !entry.clarifyConfirm && looksLikeConfirmation(entry.content) && (() => {
-                        const fallbackSection = detectActiveSection(entry.content, confirmedPoints);
-                        return fallbackSection && !confirmedPoints.some(p => p.sectionKey === fallbackSection.key);
-                      })() && (
-                        <div className="flex items-center gap-2 mt-2 p-2 bg-amber-50 rounded border border-amber-200">
-                          <AlertTriangle className="h-3.5 w-3.5 text-amber-600 flex-shrink-0" />
-                          <span className="text-xs text-amber-700">Bekreftelse ikke gjenkjent automatisk.</span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-green-700 border-green-300 hover:bg-green-50 text-xs ml-auto h-7"
-                            onClick={() => {
-                              const section = detectActiveSection(entry.content, confirmedPoints);
-                              if (section) handleManualConfirm(entry, section.key);
-                            }}
-                          >
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Bekreft manuelt
-                          </Button>
-                        </div>
-                      )}
                     </div>
                   </div>
                   );
@@ -781,26 +598,6 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
               </>
             )}
           </CardContent>
-
-          {/* Loop guard: stuck recovery UI */}
-          {(() => {
-            const stuckKey = Object.entries(sectionRepeatCounts).find(([key, val]) => 
-              val.count >= 3 && !confirmedPoints.some(p => p.sectionKey === key)
-            );
-            if (!stuckKey) return null;
-            const [sectionKey] = stuckKey;
-            const section = BRIEF_SECTIONS.find(s => s.key === sectionKey);
-            if (!section) return null;
-            // Find the last assistant message for manual confirm
-            const lastAssistant = [...dialogEntries].reverse().find(e => e.role === 'assistant');
-            return (
-              <StuckRecovery
-                sectionLabel={section.label}
-                onManualConfirm={() => handleManualConfirm(lastAssistant, sectionKey)}
-                onSkip={() => handleSkipSection(sectionKey)}
-              />
-            );
-          })()}
 
           {/* Input Area */}
           <div className="border-t border-[#B1B3B3] p-4">
@@ -833,30 +630,32 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende – ikke chatbot-aktig.
           <div className="flex items-center gap-3">
             {!canProceed && (
               <span className="text-sm text-gray-500">
-                {confirmedCount}/{BRIEF_SECTIONS.length} seksjoner bekreftet
+                {confirmedCount}/{BRIEF_SECTIONS.length} seksjoner dekket
               </span>
             )}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    <Button
-                      onClick={onContinue}
-                      disabled={!canProceed}
-                      className="bg-[#002C6C] hover:bg-[#001a45]"
-                    >
-                      Generer brief
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </span>
-                </TooltipTrigger>
-                {!canProceed && (
-                  <TooltipContent>
-                    <p className="text-sm">Bekreft alle {BRIEF_SECTIONS.length} seksjoner for å fortsette</p>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
+            <Button
+              onClick={async () => {
+                // Auto-fill any missing sections with placeholder before proceeding
+                const existingKeys = new Set((brief.confirmedPoints || []).map(p => p.sectionKey));
+                const missingSections = BRIEF_SECTIONS.filter(s => !existingKeys.has(s.key));
+                if (missingSections.length > 0) {
+                  const placeholders = missingSections.map(s => ({
+                    sectionKey: s.key,
+                    topic: s.label,
+                    summary: 'Ikke oppgitt',
+                    confirmedAt: new Date().toISOString()
+                  }));
+                  await updateBriefMutation.mutateAsync({
+                    confirmedPoints: [...(brief.confirmedPoints || []), ...placeholders]
+                  });
+                }
+                onContinue();
+              }}
+              className="bg-[#002C6C] hover:bg-[#001a45]"
+            >
+              Generer brief
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
           </div>
         </div>
       </div>
