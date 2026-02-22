@@ -66,12 +66,48 @@ export default function FinalBrief({ brief, onBack }) {
     }
   });
 
-  const handleApprove = async () => {
-    await updateBriefMutation.mutateAsync({
-      status: 'godkjent',
-      approvedAt: new Date().toISOString()
-    });
-    toast.success('Briefen er fullført!');
+  const [reopening, setReopening] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleReopen = async () => {
+    setReopening(true);
+    try {
+      await updateBriefMutation.mutateAsync({
+        status: 'utkast',
+        approvedAt: null,
+        generatedDocumentUrl: null
+      });
+      toast.success('Briefen er gjenåpnet for redigering.');
+    } catch (error) {
+      console.error('Reopen error:', error);
+      toast.error('Kunne ikke gjenåpne briefen.');
+    }
+    setReopening(false);
+  };
+
+  const handleDownloadSignedUrl = async () => {
+    if (!brief.generatedDocumentUrl) {
+      toast.error('Ingen dokument tilgjengelig for nedlasting.');
+      return;
+    }
+    setDownloading(true);
+    try {
+      const result = await base44.integrations.Core.CreateFileSignedUrl({
+        file_uri: brief.generatedDocumentUrl,
+        expires_in: 300
+      });
+      const a = document.createElement('a');
+      a.href = result.signed_url;
+      a.download = `${brief.title || 'brief'}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast.success('Dokument lastet ned');
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Kunne ikke laste ned dokumentet.');
+    }
+    setDownloading(false);
   };
 
   const handleExportWord = async () => {
@@ -223,9 +259,15 @@ ${content}
             </CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
+            {brief.generatedDocumentUrl && (
+              <Button variant="outline" size="sm" onClick={handleDownloadSignedUrl} disabled={downloading}>
+                {downloading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
+                Last ned Word
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={handleExportWord} disabled={exporting}>
               {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
-              Word
+              Eksporter Word
             </Button>
             <Button variant="outline" size="sm" onClick={handleCopyAll}>
               {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
@@ -282,10 +324,10 @@ ${content}
             </p>
           </div>
         </div>
-        {brief.status !== 'godkjent' && (
-          <Button onClick={handleApprove} className="bg-green-600 hover:bg-green-700">
-            <CheckCircle2 className="h-4 w-4 mr-2" />
-            Fullfør brief
+        {brief.status === 'godkjent' && (
+          <Button variant="outline" onClick={handleReopen} disabled={reopening}>
+            {reopening ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ArrowLeft className="h-4 w-4 mr-2" />}
+            Gjenåpne for redigering
           </Button>
         )}
       </div>
