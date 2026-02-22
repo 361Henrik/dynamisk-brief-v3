@@ -488,12 +488,13 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
     setSaving(false);
   };
 
+  const [approving, setApproving] = useState(false);
+
   const handleApprove = async () => {
-    setSaving(true);
+    setApproving(true);
     try {
+      // First save current sections as approved snapshot
       const now = new Date().toISOString();
-      
-      // Create approved snapshot
       const approvedSnapshot = {};
       for (const key of Object.keys(sections)) {
         approvedSnapshot[key] = {
@@ -509,19 +510,26 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
           status: 'approved',
           updatedAt: now,
           approvedAt: now,
-          approvedSnapshot: approvedSnapshot, // Freeze content
+          approvedSnapshot: approvedSnapshot,
           editedAfterApproval: false
         }
       });
+
+      // Call backend to generate DOCX and set status=godkjent atomically
+      const response = await base44.functions.invoke('approveBrief', { briefId: brief.id });
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
+
       queryClient.invalidateQueries({ queryKey: ['brief', brief.id] });
       setHasChanges(false);
       setEditedAfterApproval(false);
-      toast.success('Foreslått brief godkjent!');
+      toast.success('Brief godkjent og dokument generert!');
     } catch (error) {
       console.error('Approve error:', error);
-      toast.error('Kunne ikke godkjenne briefen.');
+      toast.error('Kunne ikke godkjenne briefen: ' + (error.message || 'Ukjent feil'));
     }
-    setSaving(false);
+    setApproving(false);
   };
 
   const handleContinue = async () => {
@@ -692,15 +700,20 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
           {hasSections && (!isApproved || editedAfterApproval) && (
             <Button 
               onClick={handleApprove} 
-              disabled={saving}
+              disabled={saving || approving}
               className="bg-green-600 hover:bg-green-700"
             >
-              {saving ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              {approving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Genererer dokument...
+                </>
               ) : (
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Godkjenn foreslått brief
+                </>
               )}
-              Godkjenn foreslått brief
             </Button>
           )}
 
