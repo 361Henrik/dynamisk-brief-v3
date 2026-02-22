@@ -69,6 +69,7 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showIntroPanel, setShowIntroPanel] = useState(false);
   // Race-condition guard: holds latest confirmedPoints before react-query refresh completes
   const pendingPointsRef = useRef([]);
   const messagesEndRef = useRef(null);
