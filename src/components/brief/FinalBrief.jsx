@@ -222,10 +222,6 @@ ${content}
                 Last ned Word
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={handleExportWord} disabled={exporting}>
-              {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
-              Eksporter Word
-            </Button>
             <Button variant="outline" size="sm" onClick={handleCopyAll}>
               {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
               {copied ? 'Kopiert' : 'Kopier alt'}
