@@ -207,7 +207,9 @@ Returner alt relevant tekstinnhold fra siden, samt sidetittelen hvis tilgjengeli
           console.log('ExtractDataFromUploadedFile result status:', result?.status);
           
           if (result?.status === 'success' && result?.output?.full_text) {
-            extractedText = result.output.full_text;
+            const { text: cappedText, truncated } = capText(result.output.full_text);
+            extractedText = cappedText;
+            if (truncated) console.log(`PDF text truncated to ${MAX_EXTRACTED_CHARS} chars`);
             extractionStatus = 'success';
             
             // Generate summary
