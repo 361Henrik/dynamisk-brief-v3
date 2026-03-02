@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { 
   FileText, 
   Link as LinkIcon, 
   FileWarning, 
-  Download,
   HelpCircle,
   CheckCircle2,
   XCircle,
@@ -15,8 +14,10 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import OnboardingModal from '@/components/onboarding/OnboardingModal';
 
-function HelpInstructionsContent({ onOpenGuide }) {
+function HelpInstructionsContent() {
+  const [guideOpen, setGuideOpen] = useState(false);
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
