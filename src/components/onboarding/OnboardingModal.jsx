@@ -77,16 +77,16 @@ const SLIDES = [
   },
 ];
 
-const STORAGE_KEY = 'briefTourSeen';
+const STORAGE_KEY = 'briefEditorGuideSeen';
 
-export function useOnboarding() {
+export function useOnboarding(currentPageName) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem(STORAGE_KEY) !== 'true') {
+    if (currentPageName === 'BriefEditor' && localStorage.getItem(STORAGE_KEY) !== 'true') {
       setOpen(true);
     }
-  }, []);
+  }, [currentPageName]);
 
   const dismiss = () => {
     localStorage.setItem(STORAGE_KEY, 'true');

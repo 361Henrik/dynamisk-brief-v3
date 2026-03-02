@@ -18,7 +18,8 @@ import {
   PanelLeftClose,
   PanelLeft,
   HelpCircle,
-  ShieldCheck
+  ShieldCheck,
+  BookMarked
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -33,7 +34,7 @@ const FLOW_STEPS = [
 
 const STEP_ORDER = ['source_material', 'rammer', 'dialog', 'proposed', 'final'];
 
-export default function SidePanel({ currentPageName, collapsed, onToggleCollapse, briefCurrentStep }) {
+export default function SidePanel({ currentPageName, collapsed, onToggleCollapse, briefCurrentStep, onOpenGuide }) {
   const { isAdmin } = useAuth();
 
   const { data: briefTemplate } = useQuery({
