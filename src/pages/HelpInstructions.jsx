@@ -324,6 +324,7 @@ function HelpInstructionsContent() {
 }
 
 export default function HelpInstructions() {
+
   return (
     <RequireAuth>
       <HelpInstructionsContent />
