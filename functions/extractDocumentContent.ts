@@ -220,16 +220,12 @@ Returner alt relevant tekstinnhold fra siden, samt sidetittelen hvis tilgjengeli
             extractionError = result?.details || 'Kunne ikke trekke ut tekst fra PDF-filen';
             console.log('PDF extraction failed:', extractionError);
           }
-        } else if (isDocx || isPptx || isXlsx) {
-          // Office formats - NOT supported in V1
-          extractionError = 'Denne filtypen støttes ikke i versjon 1. Last opp PDF, bruk URL, eller lim inn tekst.';
-          extractionStatus = 'failed';
-          console.log('Unsupported format');
         } else {
-          // Unknown format
-          extractionError = 'Denne filtypen støttes ikke i versjon 1. Last opp PDF, bruk URL, eller lim inn tekst.';
+          // DOCX, PPTX, XLSX, and all other unsupported formats
+          const ext = fileUrlLower.split('.').pop()?.toUpperCase() || 'ukjent';
+          extractionError = `Filtype ikke støttet (${ext}). Last opp PDF eller lim inn tekst.`;
           extractionStatus = 'failed';
-          console.log('Unknown file format');
+          console.log('Unsupported file format:', ext);
         }
       }
     } catch (extractionErr) {
