@@ -35,7 +35,7 @@ function HelpInstructionsContent() {
           <p className="text-sm text-[#454545] mt-0.5">Bruk guiden for en rask gjennomgang av flyten.</p>
         </div>
         <Button
-          onClick={() => setGuideOpen(true)}
+          onClick={openGuide}
           className="bg-[#002C6C] hover:bg-[#001a45] text-white flex-shrink-0"
           size="sm"
         >
