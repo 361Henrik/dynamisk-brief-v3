@@ -79,7 +79,7 @@ function HelpInstructionsContent({ onOpenGuide }) {
               <div>
                 <h4 className="font-medium text-[#454545]">Dynamisk intervju</h4>
                 <p className="text-sm text-[#888B8D]">
-                  AI-en stiller deg spørsmål for å fylle inn manglende informasjon. Svar må bekreftes for å bli brukt i briefen.
+                  Applikasjonen stiller deg spørsmål for å fylle inn manglende informasjon – ett spørsmål per seksjon.
                 </p>
               </div>
             </div>
@@ -123,7 +123,7 @@ function HelpInstructionsContent({ onOpenGuide }) {
         <CardContent className="space-y-4">
           <p className="text-[#888B8D]">
             Kildemateriale er dokumenter og lenker du legger til som grunnlag for å lage en brief. 
-            AI-en leser og analyserer dette innholdet for å forstå konteksten og hjelpe deg med å 
+            Applikasjonen leser og analyserer dette innholdet for å forstå konteksten og hjelpe deg med å 
             utforme kommunikasjonen.
           </p>
           <div className="bg-[#002C6C]/5 border border-[#002C6C]/20 rounded-lg p-4">
@@ -131,8 +131,8 @@ function HelpInstructionsContent({ onOpenGuide }) {
             <ol className="list-decimal list-inside space-y-1 text-sm text-[#002C6C]">
               <li>Du laster opp filer eller legger til URL-er</li>
               <li>Systemet henter ut tekst automatisk</li>
-              <li>Teksten brukes som kontekst for AI-dialogen</li>
-              <li>AI-en genererer briefen basert på dette</li>
+              <li>Teksten brukes som kontekst i intervjuet</li>
+              <li>Applikasjonen genererer briefen basert på dette</li>
             </ol>
           </div>
         </CardContent>
@@ -143,10 +143,10 @@ function HelpInstructionsContent({ onOpenGuide }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-green-600" />
-            Støttede formater i V1
+            Støttede formater
           </CardTitle>
           <CardDescription>
-            Disse formatene fungerer for tekstuttrekk og AI-kontekst
+            Disse formatene fungerer for tekstuttrekk
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -176,7 +176,7 @@ function HelpInstructionsContent({ onOpenGuide }) {
                 <span className="font-medium text-green-900">Tekst</span>
               </div>
               <p className="text-sm text-green-800">
-                Lim inn tekst direkte i dialogen med AI.
+                Lim inn tekst direkte i kildemateriale-steget.
               </p>
             </div>
           </div>
@@ -188,7 +188,7 @@ function HelpInstructionsContent({ onOpenGuide }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <XCircle className="h-5 w-5 text-red-500" />
-            Formater som IKKE støttes i V1
+            Formater som ikke støttes
           </CardTitle>
           <CardDescription>
             Disse formatene kan ikke brukes som kildemateriale
@@ -221,10 +221,10 @@ function HelpInstructionsContent({ onOpenGuide }) {
               Hvorfor støttes ikke disse formatene?
             </h4>
             <p className="text-sm text-amber-800">
-              Word-, Excel- og PowerPoint-filer har kompleks struktur som gjør det teknisk 
-              krevende å hente ut tekst pålitelig. I V1 prioriterer vi formater som gir 
-              konsistent og forutsigbar tekstuttrekking. Dette er en teknisk begrensning, 
-              ikke en brukerfeil.
+            Word-, Excel- og PowerPoint-filer har kompleks struktur som gjør det teknisk 
+            krevende å hente ut tekst pålitelig. Vi prioriterer formater som gir 
+            konsistent og forutsigbar tekstuttrekking. Dette er en teknisk begrensning, 
+            ikke en brukerfeil.
             </p>
             <p className="text-sm text-amber-800 mt-2 font-medium">
               Løsning: Lagre dokumentet som PDF før du laster det opp.
@@ -248,7 +248,7 @@ function HelpInstructionsContent({ onOpenGuide }) {
                 📥 Input (kildemateriale)
               </h4>
               <p className="text-sm text-[#888B8D] mb-3">
-                Filer og lenker du gir til AI-en som grunnlag.
+                Filer og lenker du gir som grunnlag for briefen.
               </p>
               <div className="space-y-1 text-sm">
                 <div className="flex items-center gap-2 text-green-600">
@@ -310,7 +310,7 @@ function HelpInstructionsContent({ onOpenGuide }) {
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-              <span>Du kan også lime inn tekst direkte i AI-dialogen</span>
+              <span>Du kan også lime inn tekst direkte i kildemateriale-steget</span>
             </li>
           </ul>
         </CardContent>

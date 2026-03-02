@@ -122,36 +122,33 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
 
       {/* Navigation */}
       <nav className="p-3 space-y-1">
-        {navItems.map((item) => (
-          <Link
-            key={item.page}
-            to={createPageUrl(item.page)}
-            className={cn(
-              "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-              isCurrentPage(item.page)
-                ? "bg-[#002C6C]/10 text-[#002C6C] font-semibold"
-                : "text-[#454545] hover:bg-[#F4F4F4]"
-            )}
-          >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
-            <span>{item.name}</span>
-          </Link>
-        ))}
-
+        {navItems.map((item) =>
+          item.onClick ? (
+            <button
+              key={item.name}
+              onClick={item.onClick}
+              className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-[#002C6C] hover:bg-[#002C6C]/10"
+            >
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              <span>{item.name}</span>
+            </button>
+          ) : (
+            <Link
+              key={item.page}
+              to={createPageUrl(item.page)}
+              className={cn(
+                "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                isCurrentPage(item.page)
+                  ? "bg-[#002C6C]/10 text-[#002C6C] font-semibold"
+                  : "text-[#454545] hover:bg-[#F4F4F4]"
+              )}
+            >
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              <span>{item.name}</span>
+            </Link>
+          )
+        )}
       </nav>
-
-      {/* Guide Section – only in BriefEditor */}
-      {isInBriefEditor && onOpenGuide && (
-        <div className="p-4 border-t border-[#B1B3B3]">
-          <button
-            onClick={onOpenGuide}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#002C6C] bg-[#002C6C]/8 hover:bg-[#002C6C]/15 transition-colors"
-          >
-            <BookMarked className="h-4 w-4 flex-shrink-0" />
-            <span>Slik fungerer det</span>
-          </button>
-        </div>
-      )}
 
       {/* Briefmal Section */}
       <div className="p-4 border-t border-[#B1B3B3]">
