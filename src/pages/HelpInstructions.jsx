@@ -319,6 +319,7 @@ function HelpInstructionsContent() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }
 
