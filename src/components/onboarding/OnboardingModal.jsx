@@ -5,18 +5,18 @@ import { ChevronRight, ChevronLeft, Sparkles, FileText, MessageSquare, Pencil, R
 
 const SLIDES = [
   {
-    title: 'Velkommen til Dynamisk Brief – Versjon 1',
+    title: 'Slik bruker du GS1 Norway Dynamisk Brief',
     bullets: [
       { icon: Sparkles,      text: 'En rask og strukturert flyt fra kildemateriale til ferdig kommunikasjonsbrief' },
-      { icon: Zap,           text: 'V1-fokus: tydelige rammer, AI-assistert intervju og redigerbart utkast' },
-      { icon: Rocket,        text: 'V2/V3 kommer: team-samarbeid, mer avansert tilpasning og maler' },
+      { icon: Zap,           text: 'Tydelige rammer, strukturert intervju og redigerbart utkast' },
+      { icon: FileText,      text: 'Fem steg: Kildemateriale → Rammer → Intervju → Foreslått brief → Ferdig brief' },
     ],
     proTip: 'Gi korte svar – du kan redigere alt senere.'
   },
   {
     title: 'Steg 1: Kildemateriale',
     bullets: [
-      { icon: FileText,      text: 'Last opp PDF eller lim inn tekst – Word/DOCX støttes ikke i V1' },
+      { icon: FileText,      text: 'Last opp PDF eller lim inn tekst – Word/DOCX støttes ikke' },
       { icon: FileText,      text: 'Maks 5 filer, maks 10 MB per fil' },
       { icon: FileText,      text: 'Veldig lange dokumenter trunkeres automatisk til 100 000 tegn' },
     ],
@@ -25,7 +25,7 @@ const SLIDES = [
   {
     title: 'Hva kildematerialet brukes til',
     bullets: [
-      { icon: MessageSquare, text: 'Gir AI bedre kontekst → mer treffsikre intervjuspørsmål' },
+      { icon: MessageSquare, text: 'Gir applikasjonen bedre kontekst → mer treffsikre intervjuspørsmål' },
       { icon: Zap,           text: 'Gjør det mulig å generere et raskere førsteutkast i steg 4' },
       { icon: Pencil,        text: 'Du har full kontroll: alt kan redigeres i steg 4 uansett' },
     ],
@@ -35,14 +35,14 @@ const SLIDES = [
     title: 'Steg 2: Rammer',
     bullets: [
       { icon: Target,        text: 'Sett tema, målgruppe, kanaler og frist for prosjektet' },
-      { icon: Target,        text: 'Rammene strukturerer briefen og styrer AI-intervjuet' },
+      { icon: Target,        text: 'Rammene strukturerer briefen og styrer intervjuet' },
     ],
     proTip: 'Hold deg til én tydelig målgruppe – det gir et mer presist resultat.'
   },
   {
     title: 'Steg 3: Dynamisk intervju',
     bullets: [
-      { icon: MessageSquare, text: 'AI stiller ett spørsmål per seksjon og går automatisk videre' },
+      { icon: MessageSquare, text: 'Applikasjonen stiller ett spørsmål per seksjon og går automatisk videre' },
       { icon: MessageSquare, text: 'Svar fritt – det finnes ingen "riktige" svar' },
       { icon: Pencil,        text: 'Alle svar lagres og brukes i utkastet i steg 4' },
     ],
@@ -113,11 +113,8 @@ export default function OnboardingModal({ open, onDismiss }) {
       <DialogContent className="max-w-lg p-0 overflow-hidden rounded-2xl">
         {/* Header */}
         <div className="bg-[#002C6C] px-8 pt-8 pb-6 text-white">
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="h-4 w-4 text-[#F26334]" />
-            <span className="text-xs font-semibold uppercase tracking-widest text-[#F26334]">Versjon 1</span>
-          </div>
           <h2 className="text-xl font-bold leading-snug">{current.title}</h2>
+          <p className="text-xs text-blue-200 mt-1">v1</p>
         </div>
 
         {/* Body */}

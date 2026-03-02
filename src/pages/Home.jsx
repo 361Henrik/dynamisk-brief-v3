@@ -1,4 +1,3 @@
-import OnboardingModal, { useOnboarding } from '@/components/onboarding/OnboardingModal';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -19,7 +18,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 function HomeContent() {
   const { user } = useAuth();
-  const { open: tourOpen, dismiss: dismissTour, replay: replayTour } = useOnboarding();
 
   const { data: briefs = [], isLoading } = useQuery({
     queryKey: ['briefs', 'recent'],
@@ -35,8 +33,6 @@ function HomeContent() {
 
   return (
     <div className="space-y-8">
-      <OnboardingModal open={tourOpen} onDismiss={dismissTour} />
-
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-[#002C6C] to-[#003d94] rounded-2xl p-8 text-white">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
@@ -52,14 +48,6 @@ function HomeContent() {
               Start ny brief
             </Button>
           </Link>
-          <Button
-            size="lg"
-            variant="ghost"
-            onClick={replayTour}
-            className="text-white border border-white/30 hover:bg-white/10"
-          >
-            Hvordan dette fungerer
-          </Button>
         </div>
       </div>
 
