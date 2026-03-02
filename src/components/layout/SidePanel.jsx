@@ -139,6 +139,19 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
 
       </nav>
 
+      {/* Guide Section – only in BriefEditor */}
+      {isInBriefEditor && onOpenGuide && (
+        <div className="p-4 border-t border-[#B1B3B3]">
+          <button
+            onClick={onOpenGuide}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#002C6C] bg-[#002C6C]/8 hover:bg-[#002C6C]/15 transition-colors"
+          >
+            <BookMarked className="h-4 w-4 flex-shrink-0" />
+            <span>Slik fungerer det</span>
+          </button>
+        </div>
+      )}
+
       {/* Briefmal Section */}
       <div className="p-4 border-t border-[#B1B3B3]">
         <div className="flex items-center space-x-2 mb-2">
