@@ -35,20 +35,32 @@ function HomeContent() {
 
   return (
     <div className="space-y-8">
+      <OnboardingModal open={tourOpen} onDismiss={dismissTour} />
+
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-[#002C6C] to-[#003d94] rounded-2xl p-8 text-white">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
           Velkommen{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}!
         </h1>
-        <p className="text-blue-100 mb-6 max-w-xl">
+        <p className="text-blue-100 mb-4 max-w-xl">
           Bruk Dynamisk Brief til å lage komplette, kvalitetssikrede kommunikasjonsbriefs for kommunikasjonsavdelingen.
         </p>
-        <Link to={createPageUrl('NewBrief')}>
-          <Button size="lg" variant="secondary" className="bg-white text-[#002C6C] hover:bg-[#F4F4F4]">
-            <PlusCircle className="h-5 w-5 mr-2" />
-            Start ny brief
+        <div className="flex flex-wrap gap-3">
+          <Link to={createPageUrl('NewBrief')}>
+            <Button size="lg" variant="secondary" className="bg-white text-[#002C6C] hover:bg-[#F4F4F4]">
+              <PlusCircle className="h-5 w-5 mr-2" />
+              Start ny brief
+            </Button>
+          </Link>
+          <Button
+            size="lg"
+            variant="ghost"
+            onClick={replayTour}
+            className="text-white border border-white/30 hover:bg-white/10"
+          >
+            Hvordan dette fungerer
           </Button>
-        </Link>
+        </div>
       </div>
 
       {/* Stats Cards */}
