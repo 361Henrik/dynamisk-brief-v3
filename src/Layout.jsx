@@ -25,6 +25,9 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
   const { user, isAdmin, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { open: tourOpen, dismiss: dismissTour, replay: replayTour } = useOnboarding(currentPageName);
+  const { open: guideOpen, openGuide, closeGuide } = useGuide();
+  const isOpen = tourOpen || guideOpen;
+  const handleDismiss = () => { dismissTour(); closeGuide(); };
   const [sidePanelCollapsed, setSidePanelCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('sidePanelCollapsed') === 'true';
