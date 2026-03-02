@@ -159,8 +159,10 @@ Returner alt relevant tekstinnhold fra siden, samt sidetittelen hvis tilgjengeli
         });
         
         if (result?.full_text) {
-          extractedText = result.full_text;
-          extractionStatus = 'success';
+        const { text: cappedText, truncated } = capText(result.full_text);
+        extractedText = cappedText;
+        if (truncated) console.log(`URL text truncated to ${MAX_EXTRACTED_CHARS} chars`);
+        extractionStatus = 'success';
           
           // Capture URL metadata
           urlMetadata = {
