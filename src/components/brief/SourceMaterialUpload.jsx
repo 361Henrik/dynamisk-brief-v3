@@ -40,6 +40,10 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
   const hasAtLeastOneSource = sources.length > 0;
   const hasPendingSources = sources.some(s => s.extractionStatus === 'pending');
   const allSourcesReady = hasAtLeastOneSource && sources.every(s => s.extractionStatus === 'success');
+  const successfulSources = sources.filter(s => s.extractionStatus === 'success');
+  const hasSuccessfulSources = successfulSources.length > 0;
+  const totalExtractedChars = successfulSources.reduce((sum, s) => sum + (s.extractedText?.length || 0), 0);
+  const sourceFormats = [...new Set(successfulSources.map(s => s.sourceType === 'file' ? 'PDF' : s.sourceType === 'url' ? 'URL' : 'Tekst'))].join(' / ');
 
   // Auto-refresh when there are pending sources
   useEffect(() => {
