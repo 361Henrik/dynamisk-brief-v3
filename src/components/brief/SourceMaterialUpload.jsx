@@ -198,13 +198,13 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
               <div className="text-sm text-[#002C6C] font-medium">Hva brukes kildematerialet til?</div>
             </div>
             <ul className="text-xs text-[#002C6C]/80 space-y-1 pl-6 list-disc">
-              <li>Hjelper intervjuet stille mer relevante og presise spørsmål</li>
-              <li>Gir AI-en grunnlag for å lage et raskere og bedre briefutkast</li>
-              <li>Du kan redigere alt i briefutkastet etterpå</li>
-              <li>For lange dokumenter brukes kun de viktigste delene</li>
+              <li>Gir AI bedre kontekst for å stille mer treffsikre spørsmål</li>
+              <li>Hjelper oss å lage et raskere førsteutkast til foreslått brief</li>
+              <li>Du kan redigere alt i steg 4</li>
+              <li>Ved lange dokumenter bruker vi bare deler av innholdet</li>
             </ul>
             <p className="text-xs text-[#002C6C]/60 pl-6">
-              Støttet: PDF (maks {MAX_FILE_SIZE_MB} MB, opptil {MAX_PDFS} filer), URL og tekst. Word/DOCX støttes ikke.
+              Støttet: PDF (maks {MAX_FILE_SIZE_MB} MB, opptil {MAX_PDFS} filer) og tekst. Word/DOCX støttes ikke.
             </p>
           </div>
         </CardHeader>
