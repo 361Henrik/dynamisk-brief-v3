@@ -317,12 +317,10 @@ function HelpInstructionsContent() {
         </CardContent>
       </Card>
     </div>
-    </>
   );
 }
 
 export default function HelpInstructions() {
-
   return (
     <RequireAuth>
       <HelpInstructionsContent />
