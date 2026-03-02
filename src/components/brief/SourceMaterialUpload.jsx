@@ -353,6 +353,24 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
               </div>
             </div>
           )}
+
+          {/* Post-upload confirmation panel */}
+          {hasSuccessfulSources && !hasPendingSources && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                <span className="text-sm font-medium text-green-800">Kilder lastet inn</span>
+              </div>
+              <div className="text-xs text-green-700 space-y-1 pl-6">
+                <p>Antall kilder: {successfulSources.length}</p>
+                <p>Format: {sourceFormats}</p>
+                <p>Status: Klar til intervju og briefutkast</p>
+                {totalExtractedChars > 0 && (
+                  <p>Tekstmengde brukt: ~{totalExtractedChars.toLocaleString('nb-NO')} tegn (maks 100 000)</p>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
