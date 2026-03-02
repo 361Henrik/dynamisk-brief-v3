@@ -10,12 +10,13 @@ import {
   XCircle,
   Info,
   ArrowRight,
-  Type
+  BookMarked
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
-function HelpInstructionsContent() {
+function HelpInstructionsContent({ onOpenGuide }) {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
@@ -24,6 +25,22 @@ function HelpInstructionsContent() {
         <p className="text-[#888B8D] mt-1">
           Alt du trenger å vite om hvordan Dynamisk Brief fungerer
         </p>
+      </div>
+
+      {/* Guide CTA */}
+      <div className="bg-[#002C6C]/5 border border-[#002C6C]/20 rounded-xl p-5 flex items-center justify-between gap-4">
+        <div>
+          <h3 className="font-semibold text-[#002C6C]">Kom i gang</h3>
+          <p className="text-sm text-[#454545] mt-0.5">Bruk guiden for en rask gjennomgang av flyten.</p>
+        </div>
+        <Button
+          onClick={onOpenGuide}
+          className="bg-[#002C6C] hover:bg-[#001a45] text-white flex-shrink-0"
+          size="sm"
+        >
+          <BookMarked className="h-4 w-4 mr-2" />
+          Åpne guide
+        </Button>
       </div>
 
       {/* How the Flow Works */}

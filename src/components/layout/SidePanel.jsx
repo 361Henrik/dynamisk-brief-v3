@@ -49,6 +49,7 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
   });
 
   const navItems = [
+    { name: 'Slik fungerer det', icon: BookMarked, onClick: onOpenGuide },
     { name: 'Oversikt Briefs', page: 'Home', icon: Home },
     ...(isAdmin ? [{ name: 'Temaer', page: 'AdminThemes', icon: ShieldCheck }] : []),
     { name: 'Dynamisk brief', page: 'NewBrief', icon: FileText },
