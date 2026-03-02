@@ -10,7 +10,7 @@ import {
   Type,
   Loader2, 
   Plus,
-  HelpCircle,
+  CheckCircle2,
   Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
