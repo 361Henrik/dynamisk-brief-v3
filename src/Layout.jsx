@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // GS1 brand colors: #002C6C (blue), #F26334 (orange), #454545 (dark gray), #888B8D (medium gray), #B1B3B3 (light gray), #F4F4F4 (bg)
+import OnboardingModal, { useOnboarding } from '@/components/onboarding/OnboardingModal';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { AuthProvider, useAuth } from '@/components/auth/AuthProvider';
@@ -22,6 +23,7 @@ import {
 function NavigationContent({ currentPageName, children, briefCurrentStep }) {
   const { user, isAdmin, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { open: tourOpen, dismiss: dismissTour, replay: replayTour } = useOnboarding(currentPageName);
   const [sidePanelCollapsed, setSidePanelCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('sidePanelCollapsed') === 'true';
@@ -39,6 +41,8 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
 
   return (
     <div className="min-h-screen bg-[#F4F4F4] flex">
+      <OnboardingModal open={tourOpen} onDismiss={dismissTour} />
+
       {/* Desktop Side Panel */}
       <div className="hidden md:flex h-screen sticky top-0">
         <SidePanel 
@@ -46,6 +50,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
           collapsed={sidePanelCollapsed}
           onToggleCollapse={() => setSidePanelCollapsed(!sidePanelCollapsed)}
           briefCurrentStep={briefCurrentStep}
+          onOpenGuide={replayTour}
         />
       </div>
 
@@ -117,6 +122,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                 collapsed={false}
                 onToggleCollapse={() => setMobileMenuOpen(false)}
                 briefCurrentStep={briefCurrentStep}
+                onOpenGuide={replayTour}
               />
             </div>
           </div>
