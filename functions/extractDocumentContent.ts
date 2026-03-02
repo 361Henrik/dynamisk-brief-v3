@@ -14,6 +14,14 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
  * - No document can remain stuck in 'pending'
  */
 
+const MAX_EXTRACTED_CHARS = 100_000;
+
+// Truncate text to the character cap
+function capText(text) {
+  if (!text || text.length <= MAX_EXTRACTED_CHARS) return { text, truncated: false };
+  return { text: text.substring(0, MAX_EXTRACTED_CHARS), truncated: true };
+}
+
 // Helper to extract domain from URL
 function extractDomain(url) {
   try {
