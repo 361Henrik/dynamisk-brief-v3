@@ -20,8 +20,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner';
 import SourceItemCard from './SourceItemCard';
 
-const MAX_PDFS = 10;
+const MAX_PDFS = 5;
 const MAX_URLS = 5;
+const MAX_FILE_SIZE_MB = 10;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 export default function SourceMaterialUpload({ briefId, sources = [], onSourcesChange, onContinue }) {
   const queryClient = useQueryClient();
@@ -81,7 +83,7 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
 
     const remainingSlots = MAX_PDFS - pdfCount;
     if (files.length > remainingSlots) {
-      toast.error(`Du kan laste opp maks ${remainingSlots} flere PDF-filer`);
+      toast.error(`Du kan maksimalt ha ${MAX_PDFS} PDF-filer per brief. Fjern noen for å laste opp flere.`);
       return;
     }
 
@@ -90,7 +92,11 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
     for (const file of files) {
       const fileName = file.name.toLowerCase();
       if (!fileName.endsWith('.pdf')) {
-        toast.error(`${file.name}: Kun PDF-filer støttes. Lagre dokumentet som PDF og prøv igjen.`);
+        toast.error(`Filtype ikke støttet: "${file.name}". Last opp PDF eller lim inn tekst.`);
+        continue;
+      }
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        toast.error(`Filen "${file.name}" er for stor (maks ${MAX_FILE_SIZE_MB} MB). Reduser størrelsen og prøv igjen.`);
         continue;
       }
 
@@ -186,23 +192,20 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
           </CardDescription>
           
           {/* Helper text */}
-          <div className="mt-3 p-3 bg-[#002C6C]/5 border border-[#002C6C]/20 rounded-lg">
-          <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 text-[#002C6C] mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-[#002C6C]">
-              <p><strong>Støttet i V1:</strong> PDF, URL og lim inn tekst.</p>
-              <p className="text-xs mt-1 text-[#002C6C]/70">
-                Word/Excel/PowerPoint støttes ikke som kildemateriale i V1.
-              </p>
-              <Link 
-                to={createPageUrl('HelpInstructions')} 
-                className="inline-flex items-center gap-1 text-xs mt-1 text-[#002C6C] hover:underline"
-              >
-                  <HelpCircle className="h-3 w-3" />
-                  Les mer
-                </Link>
-              </div>
+          <div className="mt-3 p-3 bg-[#002C6C]/5 border border-[#002C6C]/20 rounded-lg space-y-2">
+            <div className="flex items-start gap-2">
+              <Info className="h-4 w-4 text-[#002C6C] mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-[#002C6C] font-medium">Hva brukes kildematerialet til?</div>
             </div>
+            <ul className="text-xs text-[#002C6C]/80 space-y-1 pl-6 list-disc">
+              <li>Hjelper intervjuet stille mer relevante og presise spørsmål</li>
+              <li>Gir AI-en grunnlag for å lage et raskere og bedre briefutkast</li>
+              <li>Du kan redigere alt i briefutkastet etterpå</li>
+              <li>For lange dokumenter brukes kun de viktigste delene</li>
+            </ul>
+            <p className="text-xs text-[#002C6C]/60 pl-6">
+              Støttet: PDF (maks {MAX_FILE_SIZE_MB} MB, opptil {MAX_PDFS} filer), URL og tekst. Word/DOCX støttes ikke.
+            </p>
           </div>
         </CardHeader>
 
@@ -283,7 +286,7 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">
                       Klikk for å laste opp PDF
                     </span>
-                    <span className="text-xs text-gray-500 mt-1">Maks 10 MB per fil</span>
+                    <span className="text-xs text-gray-500 mt-1">Kun PDF · Maks {MAX_FILE_SIZE_MB} MB · Opptil {MAX_PDFS} filer</span>
                   </div>
                 )}
                 <input
