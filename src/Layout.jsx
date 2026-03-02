@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 // GS1 brand colors: #002C6C (blue), #F26334 (orange), #454545 (dark gray), #888B8D (medium gray), #B1B3B3 (light gray), #F4F4F4 (bg)
 import OnboardingModal, { useOnboarding } from '@/components/onboarding/OnboardingModal';
+import { GuideProvider, useGuide } from '@/components/onboarding/GuideContext';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { AuthProvider, useAuth } from '@/components/auth/AuthProvider';
