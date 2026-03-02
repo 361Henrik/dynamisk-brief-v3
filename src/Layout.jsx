@@ -144,9 +144,11 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
 export default function Layout({ children, currentPageName, briefCurrentStep }) {
   return (
     <AuthProvider>
-      <NavigationContent currentPageName={currentPageName} briefCurrentStep={briefCurrentStep}>
-        {children}
-      </NavigationContent>
+      <GuideProvider>
+        <NavigationContent currentPageName={currentPageName} briefCurrentStep={briefCurrentStep}>
+          {children}
+        </NavigationContent>
+      </GuideProvider>
     </AuthProvider>
   );
 }
