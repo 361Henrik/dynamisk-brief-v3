@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { 
   FileText, 
@@ -14,13 +14,11 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import OnboardingModal from '@/components/onboarding/OnboardingModal';
+import { useGuide } from '@/components/onboarding/GuideContext';
 
 function HelpInstructionsContent() {
-  const [guideOpen, setGuideOpen] = useState(false);
+  const { openGuide } = useGuide();
   return (
-    <>
-    <OnboardingModal open={guideOpen} onDismiss={() => setGuideOpen(false)} />
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div>
