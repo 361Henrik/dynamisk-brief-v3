@@ -204,51 +204,64 @@ function BriefEditorContent() {
 
       {/* Step Content */}
       {currentStep === 'source_material' && (
-        <SourceMaterialUpload
-          briefId={briefId}
-          sources={sources}
-          onSourcesChange={refetchSources}
-          onContinue={() => handleUpdateStep('rammer')}
-        />
+        <>
+          <SourceMaterialUpload
+            briefId={briefId}
+            sources={sources}
+            onSourcesChange={refetchSources}
+            onContinue={() => handleUpdateStep('rammer')}
+          />
+          <FeedbackBox pageContext="BriefEditor" stepContext="source_material" briefId={briefId} />
+        </>
       )}
 
       {currentStep === 'rammer' && (
-        <RammerForm
-          brief={brief}
-          onBack={() => handleUpdateStep('source_material')}
-          onContinue={() => {
-            refetchBrief();
-          }}
-        />
+        <>
+          <RammerForm
+            brief={brief}
+            onBack={() => handleUpdateStep('source_material')}
+            onContinue={() => { refetchBrief(); }}
+          />
+          <FeedbackBox pageContext="BriefEditor" stepContext="rammer" briefId={briefId} />
+        </>
       )}
 
       {currentStep === 'dialog' && (
-        <AIDialog
-          brief={brief}
-          sources={sources}
-          userName={currentUser?.full_name}
-          onBack={() => handleUpdateStep('rammer')}
-          onContinue={() => handleUpdateStep('proposed')}
-        />
+        <>
+          <AIDialog
+            brief={brief}
+            sources={sources}
+            userName={currentUser?.full_name}
+            onBack={() => handleUpdateStep('rammer')}
+            onContinue={() => handleUpdateStep('proposed')}
+          />
+          <FeedbackBox pageContext="BriefEditor" stepContext="dialog" briefId={briefId} />
+        </>
       )}
 
       {currentStep === 'proposed' && (
-        <ProposedBrief
-          brief={brief}
-          sources={sources}
-          dialogEntries={dialogEntries}
-          onBack={() => handleUpdateStep('dialog')}
-          onContinue={() => handleUpdateStep('final')}
-        />
+        <>
+          <ProposedBrief
+            brief={brief}
+            sources={sources}
+            dialogEntries={dialogEntries}
+            onBack={() => handleUpdateStep('dialog')}
+            onContinue={() => handleUpdateStep('final')}
+          />
+          <FeedbackBox pageContext="BriefEditor" stepContext="proposed" briefId={briefId} />
+        </>
       )}
 
       {currentStep === 'final' && (
-        <FinalBrief
-          brief={brief}
-          sources={sources}
-          dialogEntries={dialogEntries}
-          onBack={() => handleUpdateStep('proposed')}
-        />
+        <>
+          <FinalBrief
+            brief={brief}
+            sources={sources}
+            dialogEntries={dialogEntries}
+            onBack={() => handleUpdateStep('proposed')}
+          />
+          <FeedbackBox pageContext="BriefEditor" stepContext="final" briefId={briefId} />
+        </>
       )}
 
       <DeleteBriefDialog
