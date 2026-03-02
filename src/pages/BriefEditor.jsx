@@ -21,6 +21,7 @@ import AIDialog from '@/components/brief/AIDialog';
 import ProposedBrief from '@/components/brief/ProposedBrief';
 import FinalBrief from '@/components/brief/FinalBrief';
 import DeleteBriefDialog from '@/components/brief/DeleteBriefDialog';
+import FeedbackBox from '@/components/feedback/FeedbackBox';
 import { toast } from 'sonner';
 
 function BriefEditorContent() {
