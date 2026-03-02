@@ -1,20 +1,80 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, ChevronLeft, Sparkles, FileText, MessageSquare, Pencil, Rocket } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Sparkles, FileText, MessageSquare, Pencil, Rocket, Target, Zap, Download, BookOpen } from 'lucide-react';
 
 const SLIDES = [
   {
     title: 'Velkommen til Dynamisk Brief – Versjon 1',
     bullets: [
-      { icon: FileText,      text: 'Generer raskt et førsteutkast basert på kildemateriale og dine svar' },
-      { icon: MessageSquare, text: 'Strukturert intervju som guider deg gjennom briefprosessen' },
-      { icon: Pencil,        text: 'Rediger og finjuster i steg 4 før godkjenning' },
-      { icon: FileText,      text: 'Kildemateriale i V1: kun PDF eller lim inn tekst (ikke Word/DOCX)' },
+      { icon: Sparkles,      text: 'En rask og strukturert flyt fra kildemateriale til ferdig kommunikasjonsbrief' },
+      { icon: Zap,           text: 'V1-fokus: tydelige rammer, AI-assistert intervju og redigerbart utkast' },
+      { icon: Rocket,        text: 'V2/V3 kommer: team-samarbeid, mer avansert tilpasning og maler' },
     ],
-    future: 'I fremtidige versjoner kommer mer avansert tilpasning og team-samarbeid.',
-    proTip: 'Jo bedre kildemateriale, jo mer presis blir AI-ens assistanse!'
-  }
+    proTip: 'Gi korte svar – du kan redigere alt senere.'
+  },
+  {
+    title: 'Steg 1: Kildemateriale',
+    bullets: [
+      { icon: FileText,      text: 'Last opp PDF eller lim inn tekst – Word/DOCX støttes ikke i V1' },
+      { icon: FileText,      text: 'Maks 5 filer, maks 10 MB per fil' },
+      { icon: FileText,      text: 'Veldig lange dokumenter trunkeres automatisk til 100 000 tegn' },
+    ],
+    proTip: 'Lim inn bare de viktigste avsnittene for best resultat.'
+  },
+  {
+    title: 'Hva kildematerialet brukes til',
+    bullets: [
+      { icon: MessageSquare, text: 'Gir AI bedre kontekst → mer treffsikre intervjuspørsmål' },
+      { icon: Zap,           text: 'Gjør det mulig å generere et raskere førsteutkast i steg 4' },
+      { icon: Pencil,        text: 'Du har full kontroll: alt kan redigeres i steg 4 uansett' },
+    ],
+    proTip: 'Jo mer presise kilder, jo mindre etterarbeid.'
+  },
+  {
+    title: 'Steg 2: Rammer',
+    bullets: [
+      { icon: Target,        text: 'Sett tema, målgruppe, kanaler og frist for prosjektet' },
+      { icon: Target,        text: 'Rammene strukturerer briefen og styrer AI-intervjuet' },
+    ],
+    proTip: 'Hold deg til én tydelig målgruppe – det gir et mer presist resultat.'
+  },
+  {
+    title: 'Steg 3: Dynamisk intervju',
+    bullets: [
+      { icon: MessageSquare, text: 'AI stiller ett spørsmål per seksjon og går automatisk videre' },
+      { icon: MessageSquare, text: 'Svar fritt – det finnes ingen "riktige" svar' },
+      { icon: Pencil,        text: 'Alle svar lagres og brukes i utkastet i steg 4' },
+    ],
+    proTip: 'Stikkord holder – du trenger ikke fullstendige setninger.'
+  },
+  {
+    title: 'Steg 4: Foreslått brief',
+    bullets: [
+      { icon: Zap,           text: 'Trykk "Generer utkast" for å lage et komplett briefutkast basert på intervjuet' },
+      { icon: Pencil,        text: 'Rediger hver seksjon direkte i redigeringsfeltet' },
+      { icon: Target,        text: 'Finjuster og fyll hull før du godkjenner' },
+    ],
+    proTip: 'Se etter hull i innholdet – fyll dem inn før du godkjenner.'
+  },
+  {
+    title: 'Steg 5: Ferdig brief',
+    bullets: [
+      { icon: Download,      text: 'Godkjenn for å generere og laste ned Word-dokument' },
+      { icon: Pencil,        text: 'Kopier alt til utklippstavlen med ett klikk' },
+      { icon: Rocket,        text: 'Gjenåpne og rediger ved behov – godkjenn på nytt for nytt Word-dokument' },
+    ],
+    proTip: 'Godkjenn først når det føles sendeklart.'
+  },
+  {
+    title: 'Briefmal: hva skjer når du laster opp ny?',
+    bullets: [
+      { icon: BookOpen,      text: 'Ny briefmal erstatter gjeldende mal for fremtidige briefs' },
+      { icon: BookOpen,      text: 'Malen påvirker struktur og overskrifter i det genererte utkastet' },
+      { icon: Target,        text: 'Eksisterende briefs påvirkes ikke – kun nye briefs bruker ny mal' },
+    ],
+    proTip: 'Oppdater malen før du starter nye briefer for best konsistens.'
+  },
 ];
 
 const STORAGE_KEY = 'briefTourSeen';
