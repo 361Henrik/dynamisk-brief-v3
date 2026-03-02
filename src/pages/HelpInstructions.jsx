@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useGuide } from '@/components/onboarding/GuideContext';
+import { useGuide } from '@/components/onboarding/GuideContext.jsx';
 
 function HelpInstructionsContent() {
   const { openGuide } = useGuide();
