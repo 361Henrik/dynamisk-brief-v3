@@ -19,6 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 function HomeContent() {
   const { user } = useAuth();
+  const { open: tourOpen, dismiss: dismissTour, replay: replayTour } = useOnboarding();
 
   const { data: briefs = [], isLoading } = useQuery({
     queryKey: ['briefs', 'recent'],
