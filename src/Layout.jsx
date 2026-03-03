@@ -51,7 +51,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
           collapsed={sidePanelCollapsed}
           onToggleCollapse={() => setSidePanelCollapsed(!sidePanelCollapsed)}
           briefCurrentStep={briefCurrentStep}
-          onOpenGuide={replayTour}
+          onOpenGuide={openGuide}
         />
       </div>
 
