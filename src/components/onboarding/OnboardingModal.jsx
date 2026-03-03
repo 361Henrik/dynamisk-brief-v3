@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, Sparkles, FileText, MessageSquare, Pencil, Rocket, Target, Zap, Download, BookOpen } from 'lucide-react';
@@ -144,11 +144,11 @@ export default function OnboardingModal({ open, onDismiss }) {
               </div>
             )}
             {isLast ? (
-              <Button size="sm" onClick={handleDismiss} className="bg-[#002C6C] hover:bg-[#001a45] text-white">
+              <Button size="sm" onClick={handleDismiss} className="bg-[#002C6C] hover:bg-[#002C6C]/80 text-white">
                 Start
               </Button>
             ) : (
-              <Button size="sm" onClick={() => setSlide(s => s + 1)} className="bg-[#002C6C] hover:bg-[#001a45] text-white">
+              <Button size="sm" onClick={() => setSlide(s => s + 1)} className="bg-[#002C6C] hover:bg-[#002C6C]/80 text-white">
                 Neste <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             )}
