@@ -69,7 +69,7 @@ function HomeContent() {
             <CardTitle className="text-3xl text-[#F26334]">{isLoading ? '-' : draftCount}</CardTitle>
           </CardHeader>
           <CardContent>
-            <Clock className="h-5 w-5 text-orange-400" />
+            <Clock className="h-5 w-5 text-[#F26334]" />
           </CardContent>
         </Card>
         
