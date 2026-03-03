@@ -36,7 +36,7 @@ export default function BriefStepper({ currentStep }) {
                 </div>
                 <span className={`
                   text-xs mt-2 text-center hidden sm:block
-                  ${isCurrent ? 'font-medium text-[#002C6C]' : 'text-gray-500'}
+                  ${isCurrent ? 'font-medium text-[#F26334]' : 'text-gray-500'}
                 `}>
                   {step.label}
                 </span>
