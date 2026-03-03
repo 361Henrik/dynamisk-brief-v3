@@ -72,50 +72,14 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
     return 'upcoming';
   };
 
-  if (collapsed) {
-    return (
-      <div className="w-16 bg-white border-r border-[#B1B3B3] flex flex-col items-center py-4 space-y-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onToggleCollapse}
-          className="mb-4"
-        >
-          <PanelLeft className="h-5 w-5" />
-        </Button>
-        {navItems.map((item) => (
-          <Link
-            key={item.page}
-            to={createPageUrl(item.page)}
-            className={cn(
-              "p-2 rounded-lg transition-colors",
-              isCurrentPage(item.page)
-                ? "bg-[#002C6C]/10 text-[#002C6C]"
-                : "text-[#454545] hover:bg-[#F4F4F4]"
-            )}
-            title={item.name}
-          >
-            <item.icon className="h-5 w-5" />
-          </Link>
-        ))}
-
-      </div>
-    );
-  }
-
   return (
     <div className="w-72 bg-white border-r border-[#B1B3B3] flex flex-col h-full overflow-y-auto">
       {/* Header */}
-      <div className="p-4 border-b border-[#B1B3B3] flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-[#002C6C] rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">GS1</span>
-          </div>
-          <span className="font-semibold text-[#454545]">Dynamisk Brief</span>
+      <div className="p-4 border-b border-[#B1B3B3] flex items-center space-x-2">
+        <div className="w-8 h-8 bg-[#002C6C] rounded-lg flex items-center justify-center">
+          <span className="text-white font-bold text-sm">GS1</span>
         </div>
-        <Button variant="ghost" size="icon" onClick={onToggleCollapse}>
-          <PanelLeftClose className="h-5 w-5" />
-        </Button>
+        <span className="font-semibold text-[#454545]">Dynamisk Brief</span>
       </div>
 
       {/* Navigation */}

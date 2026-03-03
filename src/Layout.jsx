@@ -40,8 +40,6 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
       <div className="hidden md:flex h-screen sticky top-0">
         <SidePanel 
           currentPageName={currentPageName} 
-          collapsed={sidePanelCollapsed}
-          onToggleCollapse={() => setSidePanelCollapsed(!sidePanelCollapsed)}
           briefCurrentStep={briefCurrentStep}
           onOpenGuide={openGuide}
         />
