@@ -246,8 +246,8 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
                   key={step.key} 
                   className={cn(
                     "flex items-center space-x-2 py-1.5 px-2 rounded text-sm transition-colors",
-                    status === 'current' && "bg-[#002C6C]/10 text-[#002C6C] font-medium",
-                    status === 'completed' && "text-green-700",
+                    status === 'current' && "bg-[#F26334]/10 text-[#F26334] font-medium",
+                    status === 'completed' && "text-[#002C6C]",
                     status === 'upcoming' && "text-[#B1B3B3]"
                   )}
                 >
