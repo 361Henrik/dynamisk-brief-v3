@@ -42,7 +42,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
 
   return (
     <div className="min-h-screen bg-[#F4F4F4] flex">
-      <OnboardingModal open={isOpen} onDismiss={handleDismiss} />
+      <OnboardingModal open={isOpen} onDismiss={closeGuide} />
 
       {/* Desktop Side Panel */}
       <div className="hidden md:flex h-screen sticky top-0">
