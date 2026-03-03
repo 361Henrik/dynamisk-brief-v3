@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 // GS1 brand colors: #002C6C (blue), #F26334 (orange), #454545 (dark gray), #888B8D (medium gray), #B1B3B3 (light gray), #F4F4F4 (bg)
 import OnboardingModal from '@/components/onboarding/OnboardingModal';
 import { GuideProvider, useGuide } from '@/components/onboarding/GuideContext.jsx';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { AuthProvider, useAuth } from '@/components/auth/AuthProvider';
 import SidePanel from '@/components/layout/SidePanel';
