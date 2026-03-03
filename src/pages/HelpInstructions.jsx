@@ -36,7 +36,7 @@ function HelpInstructionsContent() {
         </div>
         <Button
           onClick={openGuide}
-          className="bg-[#002C6C] hover:bg-[#001a45] text-white flex-shrink-0"
+          className="bg-[#002C6C] hover:bg-[#002C6C]/80 text-white flex-shrink-0"
           size="sm"
         >
           <BookMarked className="h-4 w-4 mr-2" />
