@@ -152,31 +152,31 @@ function HelpInstructionsContent() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+            <div className="border rounded-lg p-4 bg-[#002C6C]/5 border-[#002C6C]/20">
               <div className="flex items-center gap-2 mb-2">
-                <FileText className="h-5 w-5 text-green-600" />
-                <span className="font-medium text-green-900">PDF</span>
-                <Badge className="bg-green-100 text-green-700">Anbefalt</Badge>
+                <FileText className="h-5 w-5 text-[#002C6C]" />
+                <span className="font-medium text-[#002C6C]">PDF</span>
+                <Badge className="bg-[#002C6C]/10 text-[#002C6C]">Anbefalt</Badge>
               </div>
-              <p className="text-sm text-green-800">
+              <p className="text-sm text-[#454545]">
                 PDF-filer støttes fullt ut. Tekst hentes automatisk.
               </p>
             </div>
-            <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+            <div className="border rounded-lg p-4 bg-[#002C6C]/5 border-[#002C6C]/20">
               <div className="flex items-center gap-2 mb-2">
-                <LinkIcon className="h-5 w-5 text-green-600" />
-                <span className="font-medium text-green-900">URL</span>
+                <LinkIcon className="h-5 w-5 text-[#002C6C]" />
+                <span className="font-medium text-[#002C6C]">URL</span>
               </div>
-              <p className="text-sm text-green-800">
+              <p className="text-sm text-[#454545]">
                 Lenker til nettsider. Innhold hentes automatisk.
               </p>
             </div>
-            <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+            <div className="border rounded-lg p-4 bg-[#002C6C]/5 border-[#002C6C]/20">
               <div className="flex items-center gap-2 mb-2">
-                <FileText className="h-5 w-5 text-green-600" />
-                <span className="font-medium text-green-900">Tekst</span>
+                <FileText className="h-5 w-5 text-[#002C6C]" />
+                <span className="font-medium text-[#002C6C]">Tekst</span>
               </div>
-              <p className="text-sm text-green-800">
+              <p className="text-sm text-[#454545]">
                 Lim inn tekst direkte i kildemateriale-steget.
               </p>
             </div>
@@ -252,10 +252,10 @@ function HelpInstructionsContent() {
                 Filer og lenker du gir som grunnlag for briefen.
               </p>
               <div className="space-y-1 text-sm">
-                <div className="flex items-center gap-2 text-green-600">
+                <div className="flex items-center gap-2 text-[#002C6C]">
                   <CheckCircle2 className="h-4 w-4" /> PDF
                 </div>
-                <div className="flex items-center gap-2 text-green-600">
+                <div className="flex items-center gap-2 text-[#002C6C]">
                   <CheckCircle2 className="h-4 w-4" /> URL
                 </div>
                 <div className="flex items-center gap-2 text-red-500">
@@ -271,7 +271,7 @@ function HelpInstructionsContent() {
                 Den ferdige briefen du laster ned.
               </p>
               <div className="space-y-1 text-sm">
-                <div className="flex items-center gap-2 text-green-600">
+                <div className="flex items-center gap-2 text-[#002C6C]">
                   <CheckCircle2 className="h-4 w-4" /> Word (.docx) – støttet!
                 </div>
               </div>
@@ -298,19 +298,19 @@ function HelpInstructionsContent() {
         <CardContent>
           <ul className="space-y-2 text-sm text-[#888B8D]">
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-[#002C6C] mt-0.5 flex-shrink-0" />
               <span>Bruk PDF for dokumenter – det gir mest pålitelig tekstuttrekk</span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-[#002C6C] mt-0.5 flex-shrink-0" />
               <span>Har du et Word-dokument? Lagre det som PDF først (Fil → Lagre som → PDF)</span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-[#002C6C] mt-0.5 flex-shrink-0" />
               <span>URL-er fungerer best for artikler og nettsider med tydelig tekstinnhold</span>
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-[#002C6C] mt-0.5 flex-shrink-0" />
               <span>Du kan også lime inn tekst direkte i kildemateriale-steget</span>
             </li>
           </ul>
