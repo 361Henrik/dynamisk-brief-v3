@@ -25,12 +25,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
   const { user, isAdmin, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { open: isOpen, openGuide, closeGuide } = useGuide();
-  const [sidePanelCollapsed, setSidePanelCollapsed] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('sidePanelCollapsed') === 'true';
-    }
-    return false;
-  });
+
   // Dark mode removed - light mode only
   useEffect(() => {
     document.documentElement.classList.remove('dark');

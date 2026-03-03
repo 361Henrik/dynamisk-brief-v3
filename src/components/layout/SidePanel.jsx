@@ -15,8 +15,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  PanelLeftClose,
-  PanelLeft,
   HelpCircle,
   ShieldCheck,
   BookMarked
