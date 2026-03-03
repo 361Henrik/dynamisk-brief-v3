@@ -110,8 +110,6 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
             <div className="w-72 h-full bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
               <SidePanel 
                 currentPageName={currentPageName} 
-                collapsed={false}
-                onToggleCollapse={() => setMobileMenuOpen(false)}
                 briefCurrentStep={briefCurrentStep}
                 onOpenGuide={openGuide}
               />
