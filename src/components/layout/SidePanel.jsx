@@ -128,7 +128,7 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
             <div>
               <div className="flex items-start space-x-2 mb-3">
                 {briefTemplate.extractionStatus === 'success' ? (
-                  <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
+                  <CheckCircle2 className="h-4 w-4 text-[#002C6C] mt-0.5" />
                 ) : briefTemplate.extractionStatus === 'pending' ? (
                   <Loader2 className="h-4 w-4 text-yellow-600 animate-spin mt-0.5" />
                 ) : (

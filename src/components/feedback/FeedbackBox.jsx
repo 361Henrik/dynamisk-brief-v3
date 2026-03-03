@@ -53,9 +53,17 @@ export default function FeedbackBox({ pageContext, stepContext, briefId }) {
       if (email.trim()) payload.submittedEmail = email.trim();
       if (category === 'bug' && severity) payload.severity = severity;
 
-      await base44.entities.Feedback.create(payload);
+      const res = await base44.functions.invoke('submitFeedback', payload);
+      const result = res.data;
 
-      toast.success('Takk for din tilbakemelding! Vi setter stor pris på innspillet.');
+      if (result?.stored && result?.emailed) {
+        toast.success('Takk! Tilbakemeldingen er sendt.');
+      } else if (result?.stored) {
+        toast.success('Takk! Tilbakemeldingen er lagret, men e-post kunne ikke sendes.');
+      } else {
+        toast.error('Klarte ikke å lagre tilbakemelding. Prøv igjen.');
+      }
+
       setCategory('');
       setMessage('');
       setSeverity('');

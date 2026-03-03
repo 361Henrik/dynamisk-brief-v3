@@ -76,10 +76,10 @@ function HomeContent() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Godkjente</CardDescription>
-            <CardTitle className="text-3xl text-green-600">{isLoading ? '-' : approvedCount}</CardTitle>
+            <CardTitle className="text-3xl text-[#002C6C]">{isLoading ? '-' : approvedCount}</CardTitle>
           </CardHeader>
           <CardContent>
-            <CheckCircle2 className="h-5 w-5 text-green-400" />
+            <CheckCircle2 className="h-5 w-5 text-[#002C6C]" />
           </CardContent>
         </Card>
       </div>
@@ -123,7 +123,7 @@ function HomeContent() {
                 >
                   <div className="flex items-center space-x-3">
                     <div className={`w-2 h-2 rounded-full ${
-                      brief.status === 'godkjent' ? 'bg-green-500' : 'bg-[#F26334]'
+                      brief.status === 'godkjent' ? 'bg-[#002C6C]' : 'bg-[#F26334]'
                     }`} />
                     <div>
                       <p className="font-medium text-gray-900">{brief.title}</p>
@@ -133,7 +133,7 @@ function HomeContent() {
                   <div className="flex items-center space-x-3">
                     <span className={`text-xs px-2 py-1 rounded-full ${
                       brief.status === 'godkjent' 
-                        ? 'bg-green-100 text-green-700' 
+                        ? 'bg-[#002C6C]/10 text-[#002C6C]' 
                         : 'bg-[#F26334]/10 text-[#F26334]'
                     }`}>
                       {brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}
