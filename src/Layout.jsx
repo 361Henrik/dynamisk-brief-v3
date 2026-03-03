@@ -123,7 +123,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                 collapsed={false}
                 onToggleCollapse={() => setMobileMenuOpen(false)}
                 briefCurrentStep={briefCurrentStep}
-                onOpenGuide={replayTour}
+                onOpenGuide={openGuide}
               />
             </div>
           </div>
