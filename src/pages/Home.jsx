@@ -34,7 +34,7 @@ function HomeContent() {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-[#002C6C] to-[#003d94] rounded-2xl p-8 text-white">
+      <div className="bg-[#002C6C] rounded-2xl p-8 text-white">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
           Velkommen{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}!
         </h1>
