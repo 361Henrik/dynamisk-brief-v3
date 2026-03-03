@@ -123,7 +123,7 @@ function HomeContent() {
                 >
                   <div className="flex items-center space-x-3">
                     <div className={`w-2 h-2 rounded-full ${
-                      brief.status === 'godkjent' ? 'bg-green-500' : 'bg-orange-500'
+                      brief.status === 'godkjent' ? 'bg-green-500' : 'bg-[#F26334]'
                     }`} />
                     <div>
                       <p className="font-medium text-gray-900">{brief.title}</p>
