@@ -134,7 +134,7 @@ function HomeContent() {
                     <span className={`text-xs px-2 py-1 rounded-full ${
                       brief.status === 'godkjent' 
                         ? 'bg-green-100 text-green-700' 
-                        : 'bg-orange-100 text-orange-700'
+                        : 'bg-[#F26334]/10 text-[#F26334]'
                     }`}>
                       {brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}
                     </span>
