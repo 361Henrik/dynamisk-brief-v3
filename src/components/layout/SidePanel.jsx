@@ -32,7 +32,7 @@ const FLOW_STEPS = [
 
 const STEP_ORDER = ['source_material', 'rammer', 'dialog', 'proposed', 'final'];
 
-export default function SidePanel({ currentPageName, collapsed, onToggleCollapse, briefCurrentStep, onOpenGuide }) {
+export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGuide }) {
   const { isAdmin } = useAuth();
 
   const { data: briefTemplate } = useQuery({

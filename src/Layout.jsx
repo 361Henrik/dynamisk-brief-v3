@@ -31,9 +31,6 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
     document.documentElement.classList.remove('dark');
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('sidePanelCollapsed', sidePanelCollapsed);
-  }, [sidePanelCollapsed]);
 
   return (
     <div className="min-h-screen bg-[#F4F4F4] flex">
