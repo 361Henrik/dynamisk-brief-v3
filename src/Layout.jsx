@@ -141,7 +141,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
 export default function Layout({ children, currentPageName, briefCurrentStep }) {
   return (
     <AuthProvider>
-      <GuideProvider>
+      <GuideProvider currentPageName={currentPageName}>
         <NavigationContent currentPageName={currentPageName} briefCurrentStep={briefCurrentStep}>
           {children}
         </NavigationContent>
