@@ -25,7 +25,7 @@ export default function BriefStepper({ currentStep }) {
                 <div className={`
                   w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors
                   ${isCompleted ? 'bg-[#002C6C] border-[#002C6C] text-white' : ''}
-                  ${isCurrent ? 'border-[#002C6C] text-[#002C6C] bg-[#002C6C]/10' : ''}
+                  ${isCurrent ? 'border-[#F26334] bg-[#F26334] text-white' : ''}
                   ${!isCompleted && !isCurrent ? 'border-gray-300 text-gray-400' : ''}
                 `}>
                   {isCompleted ? (
