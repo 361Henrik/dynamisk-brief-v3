@@ -253,8 +253,8 @@ export default function SidePanel({ currentPageName, collapsed, onToggleCollapse
                 >
                   <div className={cn(
                     "w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0",
-                    status === 'current' && "bg-[#002C6C] text-white",
-                    status === 'completed' && "bg-green-600 text-white",
+                    status === 'current' && "bg-[#F26334] text-white",
+                    status === 'completed' && "bg-[#002C6C] text-white",
                     status === 'upcoming' && "bg-[#B1B3B3] text-white"
                   )}>
                     {status === 'completed' ? (
