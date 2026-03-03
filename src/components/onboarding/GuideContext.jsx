@@ -1,11 +1,28 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const GuideContext = createContext({ openGuide: () => {} });
+const GuideContext = createContext({ open: false, openGuide: () => {}, closeGuide: () => {} });
 
-export function GuideProvider({ children }) {
+const STORAGE_KEY = 'briefEditorGuideSeen';
+
+export function GuideProvider({ children, currentPageName }) {
   const [open, setOpen] = useState(false);
+
+  // Auto-open only when first entering BriefEditor
+  useEffect(() => {
+    if (currentPageName === 'BriefEditor' && localStorage.getItem(STORAGE_KEY) !== 'true') {
+      setOpen(true);
+    }
+  }, [currentPageName]);
+
+  const openGuide = () => setOpen(true);
+
+  const closeGuide = () => {
+    localStorage.setItem(STORAGE_KEY, 'true');
+    setOpen(false);
+  };
+
   return (
-    <GuideContext.Provider value={{ open, openGuide: () => setOpen(true), closeGuide: () => setOpen(false) }}>
+    <GuideContext.Provider value={{ open, openGuide, closeGuide }}>
       {children}
     </GuideContext.Provider>
   );
