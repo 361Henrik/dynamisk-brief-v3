@@ -77,27 +77,6 @@ const SLIDES = [
   },
 ];
 
-const STORAGE_KEY = 'briefEditorGuideSeen';
-
-export function useOnboarding(currentPageName) {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (currentPageName === 'BriefEditor' && localStorage.getItem(STORAGE_KEY) !== 'true') {
-      setOpen(true);
-    }
-  }, [currentPageName]);
-
-  const dismiss = () => {
-    localStorage.setItem(STORAGE_KEY, 'true');
-    setOpen(false);
-  };
-
-  const replay = () => setOpen(true);
-
-  return { open, dismiss, replay };
-}
-
 export default function OnboardingModal({ open, onDismiss }) {
   const [slide, setSlide] = useState(0);
   const current = SLIDES[slide];
