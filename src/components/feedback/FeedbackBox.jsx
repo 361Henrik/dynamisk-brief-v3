@@ -80,7 +80,7 @@ export default function FeedbackBox({ pageContext, stepContext, briefId }) {
       <button
         type="button"
         onClick={toggle}
-        className="flex items-center gap-1.5 text-xs text-[#888B8D] hover:text-[#002C6C] transition-colors"
+        className="flex items-center gap-1.5 text-xs text-gs1-medium-gray hover:text-gs1-blue transition-colors"
       >
         <MessageSquarePlus className="h-3.5 w-3.5" />
         Gi tilbakemelding
@@ -89,8 +89,8 @@ export default function FeedbackBox({ pageContext, stepContext, briefId }) {
 
       {/* Collapsible form */}
       {open && (
-        <form onSubmit={handleSubmit} className="mt-3 p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
-          <p className="text-xs font-medium text-[#454545]">Din tilbakemelding hjelper oss å forbedre!</p>
+        <form onSubmit={handleSubmit} className="mt-3 p-4 border border-gs1-border rounded-lg bg-gs1-light-gray space-y-3">
+          <p className="text-xs font-medium text-gs1-dark-gray">Din tilbakemelding hjelper oss å forbedre!</p>
 
           {/* Category */}
           <div className="flex flex-wrap gap-2">
@@ -101,8 +101,8 @@ export default function FeedbackBox({ pageContext, stepContext, briefId }) {
                 onClick={() => { setCategory(c.value); if (c.value !== 'bug') setSeverity(''); }}
                 className={`px-3 py-1 rounded-full text-xs border transition-colors ${
                   category === c.value
-                    ? 'bg-[#002C6C] text-white border-[#002C6C]'
-                    : 'bg-white text-[#454545] border-gray-300 hover:border-[#002C6C]'
+                    ? 'bg-gs1-blue text-white border-gs1-blue'
+                    : 'bg-white text-gs1-dark-gray border-gs1-border hover:border-gs1-blue'
                 }`}
               >
                 {c.label}
@@ -113,7 +113,7 @@ export default function FeedbackBox({ pageContext, stepContext, briefId }) {
           {/* Severity (bug only) */}
           {category === 'bug' && (
             <div className="flex flex-wrap gap-2">
-              <span className="text-xs text-[#888B8D] self-center">Alvorlighetsgrad:</span>
+              <span className="text-xs text-gs1-medium-gray self-center">Alvorlighetsgrad:</span>
               {SEVERITIES.map(s => (
                 <button
                   key={s.value}
@@ -122,7 +122,7 @@ export default function FeedbackBox({ pageContext, stepContext, briefId }) {
                   className={`px-2.5 py-0.5 rounded-full text-xs border transition-colors ${
                     severity === s.value
                       ? 'bg-red-600 text-white border-red-600'
-                      : 'bg-white text-[#454545] border-gray-300 hover:border-red-400'
+                      : 'bg-white text-gs1-dark-gray border-gs1-border hover:border-red-400'
                   }`}
                 >
                   {s.label}
@@ -155,7 +155,7 @@ export default function FeedbackBox({ pageContext, stepContext, briefId }) {
               type="submit"
               size="sm"
               disabled={!category || !message.trim() || submitting}
-              className="bg-[#002C6C] hover:bg-[#001a45] text-white"
+              className="bg-gs1-blue hover:bg-gs1-blue/90 text-white"
             >
               {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : null}
               Send inn

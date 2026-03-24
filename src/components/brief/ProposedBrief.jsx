@@ -93,12 +93,12 @@ function ProposedSection({
   return (
     <Card className="mb-4">
       <CardHeader 
-        className="cursor-pointer hover:bg-[#F4F4F4] transition-colors py-3"
+        className="cursor-pointer hover:bg-gs1-light-gray transition-colors py-3"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-7 h-7 rounded-full bg-[#002C6C]/10 flex items-center justify-center text-sm font-semibold text-[#002C6C]">
+            <div className="w-7 h-7 rounded-full bg-gs1-blue/10 flex items-center justify-center text-sm font-semibold text-gs1-blue">
               {number}
             </div>
             <CardTitle className="text-base font-medium">{label}</CardTitle>
@@ -115,11 +115,11 @@ function ProposedSection({
               </Badge>
             )}
           </div>
-          {expanded ? <ChevronUp className="h-5 w-5 text-gray-400" /> : <ChevronDown className="h-5 w-5 text-gray-400" />}
+          {expanded ? <ChevronUp className="h-5 w-5 text-gs1-medium-gray" /> : <ChevronDown className="h-5 w-5 text-gs1-medium-gray" />}
         </div>
         {/* Metadata line */}
         {metadata?.lastEditedAt && (
-          <p className="text-xs text-[#888B8D] mt-1 ml-10">
+          <p className="text-xs text-gs1-medium-gray mt-1 ml-10">
             Endret {metadata.lastEditedBy === 'user' ? 'av deg' : 'av AI'} · {formatTimestamp(metadata.lastEditedAt)}
           </p>
         )}
@@ -135,7 +135,7 @@ function ProposedSection({
                   value={localContent}
                   onChange={(e) => setLocalContent(e.target.value)}
                   placeholder={`Skriv innhold for ${label.toLowerCase()}...`}
-                  className="min-h-[150px] resize-y border-[#002C6C]/30 focus:border-[#002C6C]"
+                  className="min-h-[150px] resize-y border-gs1-blue/30 focus:border-gs1-blue"
                   autoFocus
                 />
                 <div className="flex justify-end space-x-2">
@@ -150,8 +150,8 @@ function ProposedSection({
               </div>
             ) : (
               <div className="relative group">
-                <div className="bg-[#F4F4F4] rounded-lg p-4 min-h-[100px] whitespace-pre-wrap text-sm text-[#454545]">
-                  {content || <span className="text-gray-400 italic">Ingen innhold ennå...</span>}
+                <div className="bg-gs1-light-gray rounded-lg p-4 min-h-[100px] whitespace-pre-wrap text-sm text-gs1-dark-gray">
+                  {content || <span className="text-gs1-border italic">Ingen innhold ennå...</span>}
                 </div>
                 <Button
                   variant="outline"
@@ -173,7 +173,7 @@ function ProposedSection({
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowNotes(!showNotes)}
-                className="text-gray-500 hover:text-gray-700 -ml-2"
+                className="text-gs1-medium-gray hover:text-gs1-dark-gray -ml-2"
               >
                 <MessageSquare className="h-4 w-4 mr-1" />
                 {showNotes ? 'Skjul notater' : 'Legg til notater'}
@@ -203,7 +203,7 @@ function ProposedSection({
                 size="sm"
                 onClick={() => onUpdateWithFeedback(sectionKey, localNotes)}
                 disabled={isUpdating || !localNotes?.trim()}
-                className="text-[#002C6C] border-[#002C6C]/30 hover:bg-[#002C6C]/5"
+                className="text-gs1-blue border-gs1-blue/30 hover:bg-gs1-blue/5"
               >
                 {isUpdating ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -557,14 +557,14 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-[#454545]">Foreslått brief</h2>
-          <p className="text-sm text-[#888B8D] mt-1">
+          <h2 className="text-xl font-semibold text-gs1-dark-gray">Foreslått brief</h2>
+          <p className="text-sm text-gs1-medium-gray mt-1">
             Rediger og tilpass innholdet før endelig godkjenning
           </p>
         </div>
         <div className="flex items-center space-x-2">
           {isApproved && (
-            <Badge className="bg-[#002C6C]/10 text-[#002C6C]">
+            <Badge className="bg-gs1-blue/10 text-gs1-blue">
               <CheckCircle2 className="h-3 w-3 mr-1" />
               Godkjent
             </Badge>
@@ -579,14 +579,14 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
       {!hasSections && (
         <Card className="border-dashed">
           <CardContent className="py-12 text-center">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <FileText className="h-12 w-12 mx-auto mb-4 text-gs1-border" />
+            <h3 className="text-lg font-medium text-gs1-dark-gray mb-2">
               Generer foreslått brief
             </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+            <p className="text-gs1-medium-gray mb-6 max-w-md mx-auto">
               Basert på kildematerialet, intervjuet og rammene vil AI generere et utkast til kommunikasjonsbriefet.
             </p>
-            <Button onClick={generateProposedBrief} disabled={generating} className="bg-[#002C6C] hover:bg-[#001a45]">
+            <Button onClick={generateProposedBrief} disabled={generating} className="bg-gs1-blue hover:bg-gs1-blue/90">
               {generating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -667,7 +667,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
       )}
 
       {/* Navigation */}
-      <div className="flex items-center justify-between pt-6 border-t border-[#B1B3B3]">
+      <div className="flex items-center justify-between pt-6 border-t border-gs1-border">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Tilbake til intervju
@@ -690,7 +690,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
             <Button 
               onClick={handleApprove} 
               disabled={saving || approving}
-              className="bg-[#002C6C] hover:bg-[#001a45] text-white"
+              className="bg-gs1-blue hover:bg-gs1-blue/90 text-white"
             >
               {approving ? (
                 <>
@@ -711,7 +711,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
             onClick={handleContinue} 
             disabled={!hasSections || saving}
             variant={isApproved ? "default" : "outline"}
-            className={isApproved ? "bg-[#002C6C] hover:bg-[#001a45]" : ""}
+            className={isApproved ? "bg-gs1-blue hover:bg-gs1-blue/90" : ""}
           >
             Gå til ferdig brief
             <ArrowRight className="h-4 w-4 ml-2" />

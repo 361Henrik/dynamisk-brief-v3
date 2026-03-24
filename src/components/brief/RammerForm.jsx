@@ -112,7 +112,7 @@ export default function RammerForm({ brief, onBack, onContinue }) {
           {/* Målgruppe */}
           <div className="space-y-2">
             <Label htmlFor="targetAudience" className="flex items-center space-x-2">
-              <Users className="h-4 w-4 text-gray-500" />
+              <Users className="h-4 w-4 text-gs1-medium-gray" />
               <span>Målgruppe *</span>
             </Label>
             <Textarea
@@ -127,7 +127,7 @@ export default function RammerForm({ brief, onBack, onContinue }) {
           {/* Mål */}
           <div className="space-y-2">
             <Label htmlFor="objectives" className="flex items-center space-x-2">
-              <Target className="h-4 w-4 text-gray-500" />
+              <Target className="h-4 w-4 text-gs1-medium-gray" />
               <span>Mål *</span>
             </Label>
             <Textarea
@@ -142,7 +142,7 @@ export default function RammerForm({ brief, onBack, onContinue }) {
           {/* Kanaler */}
           <div className="space-y-2">
             <Label className="flex items-center space-x-2">
-              <Radio className="h-4 w-4 text-gray-500" />
+              <Radio className="h-4 w-4 text-gs1-medium-gray" />
               <span>Kanaler *</span>
             </Label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -164,7 +164,7 @@ export default function RammerForm({ brief, onBack, onContinue }) {
           {/* Tone */}
           <div className="space-y-2">
             <Label htmlFor="tone" className="flex items-center space-x-2">
-              <MessageSquare className="h-4 w-4 text-gray-500" />
+              <MessageSquare className="h-4 w-4 text-gs1-medium-gray" />
               <span>Tone</span>
             </Label>
             <Input
@@ -178,7 +178,7 @@ export default function RammerForm({ brief, onBack, onContinue }) {
           {/* Leveranser */}
           <div className="space-y-2">
             <Label className="flex items-center space-x-2">
-              <Package className="h-4 w-4 text-gray-500" />
+              <Package className="h-4 w-4 text-gs1-medium-gray" />
               <span>Ønskede leveranser</span>
             </Label>
             <div className="grid grid-cols-2 gap-2">
@@ -201,7 +201,7 @@ export default function RammerForm({ brief, onBack, onContinue }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="deadline" className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4 text-gray-500" />
+                <Calendar className="h-4 w-4 text-gs1-medium-gray" />
                 <span>Tidsfrist for leveranse</span>
               </Label>
               <Input
@@ -213,7 +213,7 @@ export default function RammerForm({ brief, onBack, onContinue }) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="activationDate" className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4 text-gray-500" />
+                <Calendar className="h-4 w-4 text-gs1-medium-gray" />
                 <span>Aktiveringstidspunkt</span>
               </Label>
               <Input
@@ -236,7 +236,7 @@ export default function RammerForm({ brief, onBack, onContinue }) {
         <Button
           onClick={handleSubmit}
           disabled={!isValid || updateBriefMutation.isPending}
-          className="bg-[#002C6C] hover:bg-[#001a45]"
+          className="bg-gs1-blue hover:bg-gs1-blue/90"
         >
           {updateBriefMutation.isPending ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -247,7 +247,7 @@ export default function RammerForm({ brief, onBack, onContinue }) {
       </div>
 
       {!isValid && (
-        <p className="text-center text-sm text-gray-500">
+        <p className="text-center text-sm text-gs1-medium-gray">
           Fyll ut målgruppe, mål og velg minst én kanal for å fortsette
         </p>
       )}

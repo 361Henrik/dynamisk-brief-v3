@@ -72,27 +72,27 @@ export default function FastModeForm({ theme, onBack }) {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Badge className="bg-[#F26334]/10 text-[#F26334] border-[#F26334]/20">
+            <Badge className="bg-gs1-orange/10 text-gs1-orange border-gs1-orange/20">
               <Zap className="h-3 w-3 mr-1" />
               Hurtigmodus
             </Badge>
-            <span className="text-sm text-[#888B8D]">Tema: <strong>{theme.name}</strong></span>
+            <span className="text-sm text-gs1-medium-gray">Tema: <strong>{theme.name}</strong></span>
           </div>
-          <h2 className="text-xl font-semibold text-[#454545]">Fyll inn det du vet</h2>
-          <p className="text-sm text-[#888B8D] mt-1">
+          <h2 className="text-xl font-semibold text-gs1-dark-gray">Fyll inn det du vet</h2>
+          <p className="text-sm text-gs1-medium-gray mt-1">
             Skriv inn informasjon der du har den. AI vil automatisk stille spørsmål om det som mangler ({SECTIONS.length - filledCount} gjenstår).
           </p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-[#002C6C]">{filledCount}/{SECTIONS.length}</div>
-          <div className="text-xs text-[#888B8D]">seksjoner fylt</div>
+          <div className="text-2xl font-bold text-gs1-blue">{filledCount}/{SECTIONS.length}</div>
+          <div className="text-xs text-gs1-medium-gray">seksjoner fylt</div>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="w-full bg-[#F4F4F4] rounded-full h-2">
+      <div className="w-full bg-gs1-light-gray rounded-full h-2">
         <div
-          className="bg-[#002C6C] h-2 rounded-full transition-all duration-300"
+          className="bg-gs1-blue h-2 rounded-full transition-all duration-300"
           style={{ width: `${(filledCount / SECTIONS.length) * 100}%` }}
         />
       </div>
@@ -105,31 +105,31 @@ export default function FastModeForm({ theme, onBack }) {
         return (
           <Card
             key={section.key}
-            className={`border transition-colors ${isFilled ? 'border-[#002C6C]/30 bg-[#002C6C]/[0.02]' : ''}`}
+            className={`border transition-colors ${isFilled ? 'border-gs1-blue/30 bg-gs1-blue/[0.02]' : ''}`}
           >
             <CardHeader
-              className="py-3 cursor-pointer hover:bg-[#F4F4F4] transition-colors"
+              className="py-3 cursor-pointer hover:bg-gs1-light-gray transition-colors"
               onClick={() => toggle(section.key)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-colors ${
-                    isFilled ? 'bg-[#002C6C] text-white' : 'bg-[#002C6C]/10 text-[#002C6C]'
+                    isFilled ? 'bg-gs1-blue text-white' : 'bg-gs1-blue/10 text-gs1-blue'
                   }`}>
                     {isFilled ? '✓' : idx + 1}
                   </div>
                   <div>
                     <CardTitle className="text-sm font-medium">{section.label}</CardTitle>
-                    <p className="text-xs text-[#888B8D] mt-0.5">{section.description}</p>
+                    <p className="text-xs text-gs1-medium-gray mt-0.5">{section.description}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {!isFilled && (
-                    <Badge variant="outline" className="text-xs text-[#888B8D]">
+                    <Badge variant="outline" className="text-xs text-gs1-medium-gray">
                       AI fyller inn
                     </Badge>
                   )}
-                  {isExpanded ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
+                  {isExpanded ? <ChevronUp className="h-4 w-4 text-gs1-medium-gray" /> : <ChevronDown className="h-4 w-4 text-gs1-medium-gray" />}
                 </div>
               </div>
             </CardHeader>
@@ -150,7 +150,7 @@ export default function FastModeForm({ theme, onBack }) {
       })}
 
       {/* Actions */}
-      <div className="flex justify-between items-center pt-2 border-t border-[#B1B3B3]">
+      <div className="flex justify-between items-center pt-2 border-t border-gs1-border">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Tilbake
@@ -158,7 +158,7 @@ export default function FastModeForm({ theme, onBack }) {
         <Button
           onClick={handleSubmit}
           disabled={submitting}
-          className="bg-[#002C6C] hover:bg-[#001a45]"
+          className="bg-gs1-blue hover:bg-gs1-blue/90"
         >
           {submitting ? (
             <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Oppretter brief...</>

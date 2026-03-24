@@ -170,11 +170,11 @@ ${content}
       <div className="space-y-6">
         <Card className="border-dashed">
           <CardContent className="py-12 text-center">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <FileText className="h-12 w-12 mx-auto mb-4 text-gs1-border" />
+            <h3 className="text-lg font-medium text-gs1-dark-gray mb-2">
               Ingen brief tilgjengelig
             </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">
+            <p className="text-gs1-medium-gray mb-6">
               Fullfør og godkjenn den foreslåtte briefen først.
             </p>
             <Button variant="outline" onClick={onBack}>
@@ -218,13 +218,13 @@ ${content}
             
             return (
               <section key={section.key}>
-                <h3 className="text-base font-semibold text-[#454545] mb-2 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-[#002C6C]/10 flex items-center justify-center text-xs font-semibold text-[#002C6C]">
+                <h3 className="text-base font-semibold text-gs1-dark-gray mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-gs1-blue/10 flex items-center justify-center text-xs font-semibold text-gs1-blue">
                     {section.number}
                   </span>
                   {section.label}
                 </h3>
-                <div className={`whitespace-pre-wrap pl-8 ${sectionContent ? 'text-[#454545]' : 'text-[#B1B3B3] italic'}`}>
+                <div className={`whitespace-pre-wrap pl-8 ${sectionContent ? 'text-gs1-dark-gray' : 'text-gs1-border italic'}`}>
                   {sectionContent || 'Ingen informasjon lagt til.'}
                 </div>
               </section>
@@ -241,19 +241,19 @@ ${content}
       <div className={`p-4 rounded-lg flex items-center justify-between ${
         isApproved 
           ? 'bg-green-50 border border-green-200' 
-          : 'bg-[#002C6C]/5 border border-[#002C6C]/20'
+          : 'bg-gs1-blue/5 border border-gs1-blue/20'
       }`}>
         <div className="flex items-center space-x-3">
           {isApproved ? (
             <CheckCircle2 className="h-5 w-5 text-green-600" />
           ) : (
-            <FileText className="h-5 w-5 text-[#002C6C]" />
+            <FileText className="h-5 w-5 text-gs1-blue" />
           )}
           <div>
-            <p className="font-medium text-[#454545]">
+            <p className="font-medium text-gs1-dark-gray">
               {isApproved ? 'Fullført brief' : 'Ferdig brief'}
             </p>
-            <p className="text-sm text-[#888B8D]">
+            <p className="text-sm text-gs1-medium-gray">
               {isApproved 
                 ? `Godkjent ${formatDate(brief.approvedAt)}${hasDocument ? ' – dokument generert' : ''}`
                 : `Basert på foreslått brief fra ${formatDate(approvedAt)}`
@@ -270,39 +270,39 @@ ${content}
       </div>
 
       {/* Metadata Summary */}
-      <Card className="bg-[#F4F4F4]">
+      <Card className="bg-gs1-light-gray">
         <CardContent className="py-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-gray-400" />
+              <Target className="h-4 w-4 text-gs1-medium-gray" />
               <div>
-                <p className="text-xs text-[#888B8D]">Tema</p>
-                <p className="font-medium text-[#454545]">{brief.themeName}</p>
+                <p className="text-xs text-gs1-medium-gray">Tema</p>
+                <p className="font-medium text-gs1-dark-gray">{brief.themeName}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-gray-400" />
+              <Users className="h-4 w-4 text-gs1-medium-gray" />
               <div>
-                <p className="text-xs text-[#888B8D]">Målgruppe</p>
-                <p className="font-medium text-[#454545] truncate max-w-[150px]">
+                <p className="text-xs text-gs1-medium-gray">Målgruppe</p>
+                <p className="font-medium text-gs1-dark-gray truncate max-w-[150px]">
                   {brief.rammer?.targetAudience || 'Ikke spesifisert'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-gray-400" />
+              <FileText className="h-4 w-4 text-gs1-medium-gray" />
               <div>
-                <p className="text-xs text-[#888B8D]">Kanaler</p>
-                <p className="font-medium text-[#454545]">
+                <p className="text-xs text-gs1-medium-gray">Kanaler</p>
+                <p className="font-medium text-gs1-dark-gray">
                   {brief.rammer?.channels?.join(', ') || 'Ikke spesifisert'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-gray-400" />
+              <Clock className="h-4 w-4 text-gs1-medium-gray" />
               <div>
-                <p className="text-xs text-[#888B8D]">Frist</p>
-                <p className="font-medium text-[#454545]">
+                <p className="text-xs text-gs1-medium-gray">Frist</p>
+                <p className="font-medium text-gs1-dark-gray">
                   {brief.rammer?.deadline || 'Ikke spesifisert'}
                 </p>
               </div>
@@ -316,38 +316,38 @@ ${content}
 
       {/* Source Materials */}
       {sources.length > 0 && (
-        <Card className="border-[#002C6C]/20">
-          <CardHeader
-            className="py-3 cursor-pointer hover:bg-[#F4F4F4] transition-colors"
+        <Card className="border-gs1-blue/20">
+         <CardHeader
+          className="py-3 cursor-pointer hover:bg-gs1-light-gray transition-colors"
             onClick={() => setShowSources(!showSources)}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-[#002C6C]" />
-                <CardTitle className="text-sm font-medium text-[#454545]">
+                <FileText className="h-4 w-4 text-gs1-blue" />
+                <CardTitle className="text-sm font-medium text-gs1-dark-gray">
                   Kildemateriale brukt i denne briefen
                 </CardTitle>
                 <Badge variant="outline" className="text-xs">{sources.length}</Badge>
               </div>
               {showSources
-                ? <ChevronUp className="h-4 w-4 text-gray-400" />
-                : <ChevronDown className="h-4 w-4 text-gray-400" />}
+                ? <ChevronUp className="h-4 w-4 text-gs1-medium-gray" />
+                : <ChevronDown className="h-4 w-4 text-gs1-medium-gray" />}
             </div>
           </CardHeader>
           {showSources && (
             <CardContent className="pt-0">
-              <p className="text-xs text-[#888B8D] mb-3">
+              <p className="text-xs text-gs1-medium-gray mb-3">
                 Disse kildene ble lagt til grunn for briefen og kan brukes som referanse i produksjonen.
               </p>
               <div className="space-y-2">
                 {sources.map((source, idx) => (
-                  <div key={source.id || idx} className="flex items-start gap-3 p-3 bg-[#F4F4F4] rounded-lg">
-                    <div className="w-7 h-7 rounded bg-[#002C6C]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <FileText className="h-4 w-4 text-[#002C6C]" />
+                  <div key={source.id || idx} className="flex items-start gap-3 p-3 bg-gs1-light-gray rounded-lg">
+                    <div className="w-7 h-7 rounded bg-gs1-blue/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <FileText className="h-4 w-4 text-gs1-blue" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-[#454545] truncate">
+                        <p className="text-sm font-medium text-gs1-dark-gray truncate">
                           {source.fileName || source.fileUrl || 'Tekst-notat'}
                         </p>
                         <Badge variant="outline" className="text-xs flex-shrink-0">
@@ -357,7 +357,7 @@ ${content}
                       {source.extractionSummary?.bullets?.length > 0 && (
                         <ul className="mt-1 space-y-0.5">
                           {source.extractionSummary.bullets.slice(0, 3).map((b, i) => (
-                            <li key={i} className="text-xs text-[#888B8D] flex items-start gap-1">
+                            <li key={i} className="text-xs text-gs1-medium-gray flex items-start gap-1">
                               <span className="w-1 h-1 rounded-full bg-gray-400 mt-1.5 flex-shrink-0" />
                               {b}
                             </li>
@@ -369,7 +369,7 @@ ${content}
                           href={source.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-[#002C6C] hover:underline mt-1 block truncate"
+                          className="text-xs text-gs1-blue hover:underline mt-1 block truncate"
                         >
                           {source.fileUrl}
                         </a>
@@ -385,7 +385,7 @@ ${content}
 
       {/* Helper text for editing */}
       <div className="text-center py-2">
-        <p className="text-sm text-[#888B8D]">
+        <p className="text-sm text-gs1-medium-gray">
           For å gjøre endringer, gå tilbake til Foreslått brief.
         </p>
       </div>

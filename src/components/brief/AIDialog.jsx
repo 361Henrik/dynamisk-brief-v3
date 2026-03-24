@@ -374,21 +374,21 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
       <div className="lg:col-span-2 order-1 lg:order-2 space-y-4">
         {/* Intro / Help Panel */}
         {showIntroPanel && dialogEntries.length === 0 && (
-          <Card className="border-[#002C6C]/20">
+          <Card className="border-gs1-blue/20">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center text-lg font-semibold text-[#002C6C]">
+              <CardTitle className="flex items-center text-lg font-semibold text-gs1-blue">
                 <Info className="h-5 w-5 mr-2 flex-shrink-0" />
                 Velkommen til det dynamiske intervjuet
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-sm text-gray-700">
+            <CardContent className="space-y-4 text-sm text-gs1-dark-gray">
               <p>
                 Dette intervjuet veileder deg gjennom prosessen med å samle all nødvendig informasjon for en kommunikasjonsbrief. AI-en stiller spørsmål – dine svar blir grunnlaget for briefutkastet.
               </p>
 
               <div>
-                <p className="font-medium text-[#002C6C] mb-1">Slik fungerer det:</p>
-                <ul className="list-disc list-inside space-y-0.5 text-gray-600">
+                <p className="font-medium text-gs1-blue mb-1">Slik fungerer det:</p>
+                <ul className="list-disc list-inside space-y-0.5 text-gs1-medium-gray">
                   <li>Du får ett fokusert spørsmål om gangen</li>
                   <li>Svarene dine lagres automatisk</li>
                   <li>Systemet guider deg gjennom alle nødvendige seksjoner</li>
@@ -397,23 +397,23 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
               </div>
 
               <div>
-                <p className="font-medium text-[#002C6C] mb-1">Viktig å vite:</p>
-                <ul className="list-disc list-inside space-y-0.5 text-gray-600">
+                <p className="font-medium text-gs1-blue mb-1">Viktig å vite:</p>
+                <ul className="list-disc list-inside space-y-0.5 text-gs1-medium-gray">
                   <li>Ingen bekreftelse per seksjon er nødvendig</li>
                   <li>Alt kan redigeres og justeres i briefutkastet etterpå</li>
                   <li>Det finnes ingen «feil» svar – bare svar så godt du kan</li>
                 </ul>
               </div>
 
-              <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2 text-xs text-gray-500">
+              <div className="bg-gs1-light-gray border border-gs1-border rounded-md px-3 py-2 text-xs text-gs1-medium-gray">
                 Intervju → Svar fanges opp → Neste spørsmål → … → Generer brief
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" onClick={() => handleDismissIntro(false)} className="text-gray-600 border-gray-300">
+                <Button variant="outline" size="sm" onClick={() => handleDismissIntro(false)} className="text-gs1-medium-gray border-gs1-border">
                   Skjul
                 </Button>
-                <Button size="sm" onClick={() => handleDismissIntro(true)} className="bg-[#002C6C] hover:bg-[#001a45]">
+                <Button size="sm" onClick={() => handleDismissIntro(true)} className="bg-gs1-blue hover:bg-gs1-blue/90">
                   Start intervju
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
@@ -427,7 +427,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
           <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
-                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-gs1-medium-gray" />
               </div>
             ) : (
               <>
@@ -440,25 +440,25 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
                     <div className={`max-w-[85%] ${entry.role === 'user' ? 'order-2' : ''}`}>
                       <div className="flex items-center space-x-2 mb-1">
                         {entry.role === 'assistant' ? (
-                          <MessageSquare className="h-4 w-4 text-blue-600" />
+                          <MessageSquare className="h-4 w-4 text-gs1-blue" />
                         ) : (
-                          <User className="h-4 w-4 text-gray-600" />
+                          <User className="h-4 w-4 text-gs1-medium-gray" />
                         )}
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gs1-medium-gray">
                           {entry.role === 'assistant' ? 'Dynamisk brief' : (userName || 'Deg')}
                         </span>
                       </div>
                       <div
                         className={`rounded-lg p-3 ${
                           entry.role === 'user'
-                            ? 'bg-[#002C6C] text-white'
-                            : 'bg-[#002C6C]/5 border border-[#002C6C]/20 text-gray-900'
+                            ? 'bg-gs1-blue text-white'
+                            : 'bg-gs1-blue/5 border border-gs1-blue/20 text-gs1-dark-gray'
                         }`}
                       >
                         {/* Section label for assistant messages */}
                         {entry.role === 'assistant' && currentSectionObj && (
                           <div className="mb-3">
-                            <div className="text-xs font-semibold text-[#002C6C] uppercase tracking-wide">
+                            <div className="text-xs font-semibold text-gs1-blue uppercase tracking-wide">
                               {currentSectionObj.label}
                             </div>
                           </div>
@@ -478,8 +478,8 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
                 
                 {isProcessing && (
                   <div className="flex justify-start">
-                    <div className="bg-gray-100 rounded-lg p-3">
-                      <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+                    <div className="bg-gs1-light-gray rounded-lg p-3">
+                      <Loader2 className="h-5 w-5 animate-spin text-gs1-medium-gray" />
                     </div>
                   </div>
                 )}
@@ -490,7 +490,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
           </CardContent>
 
           {/* Input Area */}
-          <div className="border-t border-[#B1B3B3] p-4">
+          <div className="border-t border-gs1-border p-4">
             <div className="flex space-x-2">
               <textarea
                 ref={textareaRef}
@@ -498,7 +498,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Skriv svaret ditt her – eller bruk tale-til-tekst via PC/Mac-mikrofonen."
-                className="flex-1 min-h-[120px] max-h-[240px] resize-none overflow-y-auto rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 min-h-[120px] max-h-[240px] resize-none overflow-y-auto rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-gs1-medium-gray focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isProcessing}
               />
               <Button
@@ -513,13 +513,13 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
 
         {/* Navigation */}
         <div className="flex justify-between items-center">
-          <Button variant="outline" onClick={onBack} className="border-gray-300 text-gray-700 hover:bg-gray-100">
+          <Button variant="outline" onClick={onBack} className="border-gs1-border text-gs1-dark-gray hover:bg-gs1-light-gray">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Tilbake til rammer
           </Button>
           <div className="flex items-center gap-3">
             {!canProceed && (
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gs1-medium-gray">
                 {confirmedCount}/{BRIEF_SECTIONS.length} seksjoner dekket
               </span>
             )}
@@ -541,7 +541,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
                 }
                 onContinue();
               }}
-              className="bg-[#002C6C] hover:bg-[#001a45]"
+              className="bg-gs1-blue hover:bg-gs1-blue/90"
             >
               Generer brief
               <ArrowRight className="h-4 w-4 ml-2" />

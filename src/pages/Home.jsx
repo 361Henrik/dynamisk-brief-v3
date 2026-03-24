@@ -34,7 +34,7 @@ function HomeContent() {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="bg-[#002C6C] rounded-2xl p-8 text-white">
+      <div className="bg-gs1-blue rounded-2xl p-8 text-white">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">
           Velkommen{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}!
         </h1>
@@ -43,7 +43,7 @@ function HomeContent() {
         </p>
         <div className="flex flex-wrap gap-3">
           <Link to={createPageUrl('NewBrief')}>
-            <Button size="lg" variant="secondary" className="bg-white text-[#002C6C] hover:bg-[#F4F4F4]">
+            <Button size="lg" variant="secondary" className="bg-white text-gs1-blue hover:bg-gs1-light-gray">
               <PlusCircle className="h-5 w-5 mr-2" />
               Start ny brief
             </Button>
@@ -56,7 +56,7 @@ function HomeContent() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Totalt antall briefs</CardDescription>
-            <CardTitle className="text-3xl">{isLoading ? '-' : briefs.length}</CardTitle>
+            <CardTitle className="text-3xl text-gs1-dark-gray">{isLoading ? '-' : briefs.length}</CardTitle>
           </CardHeader>
           <CardContent>
             <FileText className="h-5 w-5 text-gray-400" />
@@ -66,20 +66,20 @@ function HomeContent() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Under arbeid</CardDescription>
-            <CardTitle className="text-3xl text-[#F26334]">{isLoading ? '-' : draftCount}</CardTitle>
+            <CardTitle className="text-3xl text-gs1-orange">{isLoading ? '-' : draftCount}</CardTitle>
           </CardHeader>
           <CardContent>
-            <Clock className="h-5 w-5 text-[#F26334]" />
+            <Clock className="h-5 w-5 text-gs1-orange" />
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Godkjente</CardDescription>
-            <CardTitle className="text-3xl text-[#002C6C]">{isLoading ? '-' : approvedCount}</CardTitle>
+            <CardTitle className="text-3xl text-gs1-blue">{isLoading ? '-' : approvedCount}</CardTitle>
           </CardHeader>
           <CardContent>
-            <CheckCircle2 className="h-5 w-5 text-[#002C6C]" />
+            <CheckCircle2 className="h-5 w-5 text-gs1-blue" />
           </CardContent>
         </Card>
       </div>
@@ -101,12 +101,12 @@ function HomeContent() {
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+              <Loader2 className="h-6 w-6 animate-spin text-gs1-medium-gray" />
             </div>
           ) : briefs.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p>Du har ingen briefs ennå.</p>
+              <FileText className="h-12 w-12 mx-auto mb-3 text-gs1-border" />
+              <p className="text-gs1-medium-gray">Du har ingen briefs ennå.</p>
               <Link to={createPageUrl('NewBrief')}>
                 <Button variant="link" className="mt-2">
                   Opprett din første brief
@@ -114,31 +114,31 @@ function HomeContent() {
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-gs1-border">
               {briefs.map((brief) => (
                 <Link
                   key={brief.id}
                   to={createPageUrl('BriefEditor') + `?id=${brief.id}`}
-                  className="flex items-center justify-between py-3 hover:bg-gray-50 -mx-4 px-4 rounded-lg transition-colors"
+                  className="flex items-center justify-between py-3 hover:bg-gs1-light-gray -mx-4 px-4 rounded-lg transition-colors"
                 >
                   <div className="flex items-center space-x-3">
                     <div className={`w-2 h-2 rounded-full ${
                       brief.status === 'godkjent' ? 'bg-[#002C6C]' : 'bg-[#F26334]'
                     }`} />
                     <div>
-                      <p className="font-medium text-gray-900">{brief.title}</p>
-                      <p className="text-sm text-gray-500">{brief.themeName || 'Ukjent tema'}</p>
+                      <p className="font-medium text-gs1-dark-gray">{brief.title}</p>
+                      <p className="text-sm text-gs1-medium-gray">{brief.themeName || 'Ukjent tema'}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
                     <span className={`text-xs px-2 py-1 rounded-full ${
                       brief.status === 'godkjent' 
-                        ? 'bg-[#002C6C]/10 text-[#002C6C]' 
-                        : 'bg-[#F26334]/10 text-[#F26334]'
+                        ? 'bg-gs1-blue/10 text-gs1-blue' 
+                        : 'bg-gs1-orange/10 text-gs1-orange'
                     }`}>
                       {brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}
                     </span>
-                    <ArrowRight className="h-4 w-4 text-gray-400" />
+                    <ArrowRight className="h-4 w-4 text-gs1-medium-gray" />
                   </div>
                 </Link>
               ))}

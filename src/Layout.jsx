@@ -48,7 +48,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
       {/* Main Area */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Header */}
-        <header className="bg-white border-b border-[#B1B3B3] sticky top-0 z-50">
+        <header className="bg-white border-b border-gs1-border sticky top-0 z-50">
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-14">
               {/* Mobile Logo */}
@@ -56,7 +56,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                 <div className="w-8 h-8 bg-[#002C6C] rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">GS1</span>
                 </div>
-                <span className="font-semibold text-[#454545]">Dynamisk Brief</span>
+                <span className="font-semibold text-gs1-dark-gray">Dynamisk Brief</span>
               </Link>
 
               {/* Desktop spacer */}
@@ -72,15 +72,15 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                           {user?.full_name?.charAt(0) || user?.email?.charAt(0) || '?'}
                         </span>
                       </div>
-                      <span className="hidden sm:block text-sm text-[#454545]">{user?.full_name || user?.email}</span>
-                      <ChevronDown className="h-3 w-3 text-[#888B8D]" />
+                      <span className="hidden sm:block text-sm text-gs1-dark-gray">{user?.full_name || user?.email}</span>
+                      <ChevronDown className="h-3 w-3 text-gs1-medium-gray" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="px-3 py-2">
-                      <p className="text-sm font-medium text-[#454545]">{user?.full_name || 'Bruker'}</p>
-                      <p className="text-xs text-[#888B8D]">{user?.email}</p>
-                      <p className="text-xs text-[#002C6C] capitalize mt-1">{user?.role || 'fagperson'}</p>
+                      <p className="text-sm font-medium text-gs1-dark-gray">{user?.full_name || 'Bruker'}</p>
+                      <p className="text-xs text-gs1-medium-gray">{user?.email}</p>
+                      <p className="text-xs text-gs1-blue capitalize mt-1">{user?.role || 'fagperson'}</p>
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer">
@@ -118,7 +118,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 text-[#454545]">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 text-gs1-dark-gray">
           {children}
         </main>
       </div>

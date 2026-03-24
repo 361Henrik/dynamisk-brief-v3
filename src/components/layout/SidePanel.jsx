@@ -153,14 +153,14 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
                 <div className="border-t border-[#B1B3B3] pt-2">
                   <p className="text-xs font-medium text-[#454545] mb-2">Hovedkategorier:</p>
                   <ul className="text-xs text-[#888B8D] space-y-1">
-                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Prosjektinformasjon</li>
-                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Bakgrunn og situasjonsbeskrivelse</li>
-                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Mål og suksesskriterier</li>
-                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Målgrupper</li>
-                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />GS1-tilbudet og verdiforslag</li>
-                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Budskap, tone og stil</li>
-                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Leveranser og kanaler</li>
-                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gray-400 rounded-full" />Praktiske rammer og godkjenning</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gs1-medium-gray rounded-full" />Prosjektinformasjon</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gs1-medium-gray rounded-full" />Bakgrunn og situasjonsbeskrivelse</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gs1-medium-gray rounded-full" />Mål og suksesskriterier</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gs1-medium-gray rounded-full" />Målgrupper</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gs1-medium-gray rounded-full" />GS1-tilbudet og verdiforslag</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gs1-medium-gray rounded-full" />Budskap, tone og stil</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gs1-medium-gray rounded-full" />Leveranser og kanaler</li>
+                    <li className="flex items-center gap-1.5"><span className="w-1 h-1 bg-gs1-medium-gray rounded-full" />Praktiske rammer og godkjenning</li>
                   </ul>
                 </div>
               )}

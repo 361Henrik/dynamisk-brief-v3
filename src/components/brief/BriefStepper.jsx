@@ -24,9 +24,9 @@ export default function BriefStepper({ currentStep }) {
               <div className="flex flex-col items-center">
                 <div className={`
                   w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors
-                  ${isCompleted ? 'bg-[#002C6C] border-[#002C6C] text-white' : ''}
-                  ${isCurrent ? 'border-[#F26334] bg-[#F26334] text-white' : ''}
-                  ${!isCompleted && !isCurrent ? 'border-gray-300 text-gray-400' : ''}
+                  ${isCompleted ? 'bg-gs1-blue border-gs1-blue text-white' : ''}
+                  ${isCurrent ? 'border-gs1-orange bg-gs1-orange text-white' : ''}
+                  ${!isCompleted && !isCurrent ? 'border-gs1-border text-gs1-medium-gray' : ''}
                 `}>
                   {isCompleted ? (
                     <CheckCircle2 className="h-5 w-5" />
@@ -36,7 +36,7 @@ export default function BriefStepper({ currentStep }) {
                 </div>
                 <span className={`
                   text-xs mt-2 text-center hidden sm:block
-                  ${isCurrent ? 'font-medium text-[#F26334]' : 'text-gray-500'}
+                  ${isCurrent ? 'font-medium text-gs1-orange' : 'text-gs1-medium-gray'}
                 `}>
                   {step.label}
                 </span>
@@ -45,7 +45,7 @@ export default function BriefStepper({ currentStep }) {
               {index < STEPS.length - 1 && (
                 <div className={`
                   flex-1 h-0.5 mx-2
-                  ${index < currentIndex ? 'bg-[#002C6C]' : 'bg-gray-200'}
+                  ${index < currentIndex ? 'bg-gs1-blue' : 'bg-gs1-border'}
                 `} />
               )}
             </React.Fragment>
