@@ -23,7 +23,7 @@ import FastModeForm from '@/components/brief/FastModeForm';
 
 function NewBriefContent() {
   const navigate = useNavigate();
-  const [step, setStep] = useState('select_theme'); // 'select_theme' | 'select_mode' | 'fast_mode'
+  const [step, setStep] = useState('select_theme');
   const [selectedTheme, setSelectedTheme] = useState(null);
 
   const { data: themes = [], isLoading: themesLoading } = useQuery({
@@ -150,13 +150,65 @@ function NewBriefContent() {
     );
   }
 
+  // Theme selection
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
       <div className="text-center">
         <h1 className="text-2xl font-bold text-gray-900">Start ny brief</h1>
         <p className="text-gray-500 mt-2">Velg et tema for å komme i gang</p>
       </div>
+
+      {themesLoading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        </div>
+      ) : themes.length === 0 ? (
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Tags className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-lg font-medium text-gray-900 mb-1">Ingen temaer ennå</h3>
+              <p className="text-gray-500 mb-4">Opprett ditt første tema for å komme i gang.</p>
+            </CardContent>
+          </Card>
+          <CreateThemeModal />
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {themes.map((theme) => (
+            <Card
+              key={theme.id}
+              className="cursor-pointer hover:border-[#002C6C] hover:shadow-md transition-all"
+              onClick={() => handleSelectTheme(theme)}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <FileText className="h-6 w-6 text-[#002C6C]" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-[#454545] text-lg">{theme.name}</h3>
+                      {theme.description && (
+                        <p className="text-[#888B8D] mt-1 text-sm">{theme.description}</p>
+                      )}
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon">
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          <CreateThemeModal />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function NewBrief() {
   return (
     <RequireAuth>
       <NewBriefContent />
