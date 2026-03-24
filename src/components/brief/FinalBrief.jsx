@@ -42,29 +42,12 @@ function formatDate(isoString) {
   });
 }
 
-export default function FinalBrief({ brief, onBack }) {
+export default function FinalBrief({ brief, sources = [], onBack }) {
   const queryClient = useQueryClient();
   const { isAdmin } = useAuth();
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
-
-  // Source of truth: approvedSnapshot (set by approveBrief backend), fallback to proposedBrief.sections
-  const proposedBrief = brief?.proposedBrief;
-  const sections = proposedBrief?.approvedSnapshot || proposedBrief?.sections || {};
-  const approvedAt = brief?.approvedAt || proposedBrief?.approvedAt;
-  const hasSections = Object.keys(sections).length > 0;
-  const isApproved = brief?.status === 'godkjent';
-  const hasDocument = !!brief?.generatedDocumentUrl;
-
-  const updateBriefMutation = useMutation({
-    mutationFn: async (data) => {
-      await base44.entities.Brief.update(brief.id, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['brief', brief.id] });
-    }
-  });
-
+  const [showSources, setShowSources] = useState(false);
   const [reopening, setReopening] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
@@ -330,6 +313,75 @@ ${content}
 
       {/* Brief Content - from approved Step 4 */}
       {renderBriefContent()}
+
+      {/* Source Materials */}
+      {sources.length > 0 && (
+        <Card className="border-[#002C6C]/20">
+          <CardHeader
+            className="py-3 cursor-pointer hover:bg-[#F4F4F4] transition-colors"
+            onClick={() => setShowSources(!showSources)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-[#002C6C]" />
+                <CardTitle className="text-sm font-medium text-[#454545]">
+                  Kildemateriale brukt i denne briefen
+                </CardTitle>
+                <Badge variant="outline" className="text-xs">{sources.length}</Badge>
+              </div>
+              {showSources
+                ? <ChevronUp className="h-4 w-4 text-gray-400" />
+                : <ChevronDown className="h-4 w-4 text-gray-400" />}
+            </div>
+          </CardHeader>
+          {showSources && (
+            <CardContent className="pt-0">
+              <p className="text-xs text-[#888B8D] mb-3">
+                Disse kildene ble lagt til grunn for briefen og kan brukes som referanse i produksjonen.
+              </p>
+              <div className="space-y-2">
+                {sources.map((source, idx) => (
+                  <div key={source.id || idx} className="flex items-start gap-3 p-3 bg-[#F4F4F4] rounded-lg">
+                    <div className="w-7 h-7 rounded bg-[#002C6C]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <FileText className="h-4 w-4 text-[#002C6C]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-[#454545] truncate">
+                          {source.fileName || source.fileUrl || 'Tekst-notat'}
+                        </p>
+                        <Badge variant="outline" className="text-xs flex-shrink-0">
+                          {source.sourceType === 'file' ? 'Fil' : source.sourceType === 'url' ? 'URL' : 'Tekst'}
+                        </Badge>
+                      </div>
+                      {source.extractionSummary?.bullets?.length > 0 && (
+                        <ul className="mt-1 space-y-0.5">
+                          {source.extractionSummary.bullets.slice(0, 3).map((b, i) => (
+                            <li key={i} className="text-xs text-[#888B8D] flex items-start gap-1">
+                              <span className="w-1 h-1 rounded-full bg-gray-400 mt-1.5 flex-shrink-0" />
+                              {b}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {source.fileUrl && source.sourceType === 'url' && (
+                        <a
+                          href={source.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-[#002C6C] hover:underline mt-1 block truncate"
+                        >
+                          {source.fileUrl}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      )}
 
       {/* Helper text for editing */}
       <div className="text-center py-2">
