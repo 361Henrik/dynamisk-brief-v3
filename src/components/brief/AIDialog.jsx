@@ -19,53 +19,6 @@ import InterviewProgress, {
   areAllSectionsConfirmed,
   getConfirmedSectionsCount 
 } from './InterviewProgress';
-// Static mapping: interview section → brief template sections (UI display only)
-const SECTION_TO_TEMPLATE_MAP = {
-  hovedbudskap: 'Budskap, tone og stil + GS1-tilbudet og verdiforslag',
-  malgruppe_innsikt: 'Målgrupper',
-  nokkelpunkter: 'Budskap, tone og stil + GS1-tilbudet og verdiforslag',
-  eksempler: 'Bakgrunn og situasjonsbeskrivelse + GS1-tilbudet og verdiforslag',
-  call_to_action: 'Mål og suksesskriterier + Budskap, tone og stil'
-};
-
-// Detect which section an AI question is targeting based on content keywords
-const detectActiveSection = (content, confirmedPoints = []) => {
-  if (!content) return null;
-  const lowerContent = content.toLowerCase();
-  
-  // Check each section for keyword matches
-  const sectionKeywords = {
-    hovedbudskap: ['hovedbudskap', 'kjernebudskap', 'viktigste budskap', 'kommunisere'],
-    malgruppe_innsikt: ['målgruppe', 'målgruppeinnsikt', 'hvem er', 'kjenner du', 'deres behov'],
-    nokkelpunkter: ['nøkkelpunkt', 'konkrete punkt', 'viktige punkt', 'detaljer'],
-    eksempler: ['eksempel', 'case', 'illustrer', 'konkret historie', 'erfaring'],
-    call_to_action: ['call to action', 'handling', 'ønsker du at', 'neste steg', 'gjøre etterpå']
-  };
-  
-  for (const section of BRIEF_SECTIONS) {
-    // Skip already confirmed sections
-    const isConfirmed = confirmedPoints.some(p => 
-      p.sectionKey === section.key || 
-      p.topic?.toLowerCase().includes(section.key.replace('_', ' '))
-    );
-    if (isConfirmed) continue;
-    
-    const keywords = sectionKeywords[section.key] || [];
-    if (keywords.some(kw => lowerContent.includes(kw))) {
-      return section;
-    }
-  }
-  
-  // Default to first unconfirmed section
-  return BRIEF_SECTIONS.find(section => 
-    !confirmedPoints.some(p => 
-      p.sectionKey === section.key || 
-      p.topic?.toLowerCase().includes(section.key.replace('_', ' '))
-    )
-  );
-};
-
-// Compute the first missing sectionKey given a list of confirmedPoints
 function getFirstMissingSectionKey(confirmedPoints = []) {
   const confirmedKeys = new Set(confirmedPoints.map(p => p.sectionKey).filter(Boolean));
   const first = BRIEF_SECTIONS.find(s => !confirmedKeys.has(s.key));
@@ -160,10 +113,7 @@ export default function AIDialog({ brief, sources = [], onBack, onContinue, user
 
     // What we're missing (based on BRIEF_SECTIONS)
     BRIEF_SECTIONS.forEach(section => {
-      const hasConfirmed = confirmedPoints.some(p => 
-        p.sectionKey === section.key || 
-        p.topic?.toLowerCase().includes(section.key.replace('_', ' '))
-      );
+      const hasConfirmed = confirmedPoints.some(p => p.sectionKey === section.key);
       if (!hasConfirmed) {
         missing.push(section.label);
       }
@@ -505,14 +455,11 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
                             : 'bg-[#002C6C]/5 border border-[#002C6C]/20 text-gray-900'
                         }`}
                       >
-                        {/* Section label + template placement for assistant messages */}
+                        {/* Section label for assistant messages */}
                         {entry.role === 'assistant' && currentSectionObj && (
                           <div className="mb-3">
                             <div className="text-xs font-semibold text-[#002C6C] uppercase tracking-wide">
                               {currentSectionObj.label}
-                            </div>
-                            <div className="text-xs text-[#002C6C]/60 mt-0.5">
-                              Plasseres i briefmal: {SECTION_TO_TEMPLATE_MAP[currentSectionObj.key] || 'Flere seksjoner'}
                             </div>
                           </div>
                         )}
