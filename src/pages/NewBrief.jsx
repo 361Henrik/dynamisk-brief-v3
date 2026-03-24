@@ -80,37 +80,37 @@ function NewBriefContent() {
           <p className="text-gray-500 mt-2">Velg hvordan du vil opprette briefen</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Fast Mode */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Fast Mode - visually dominant */}
           <Card
-            className="cursor-pointer hover:border-[#F26334] hover:shadow-md transition-all border-2"
+            className="cursor-pointer border-2 border-[#F26334] shadow-md hover:shadow-lg transition-all relative"
             onClick={() => setStep('fast_mode')}
           >
+            <div className="absolute top-3 right-3">
+              <Badge className="bg-[#F26334] text-white text-xs px-2 py-0.5 shadow-sm">⚡ Anbefalt</Badge>
+            </div>
             <CardContent className="p-6">
-              <div className="w-12 h-12 bg-[#F26334]/10 rounded-xl flex items-center justify-center mb-4">
-                <Zap className="h-6 w-6 text-[#F26334]" />
+              <div className="w-14 h-14 bg-[#F26334]/15 rounded-2xl flex items-center justify-center mb-4">
+                <Zap className="h-7 w-7 text-[#F26334]" />
               </div>
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-semibold text-[#454545] text-lg">Hurtigmodus</h3>
-                <Badge className="bg-[#F26334]/10 text-[#F26334] border-[#F26334]/20 text-xs">Anbefalt</Badge>
-              </div>
+              <h3 className="font-bold text-[#454545] text-xl mb-1">Hurtigmodus</h3>
               <p className="text-[#888B8D] text-sm mb-4">
-                Fyll inn det du vet på forhånd. AI stiller kun spørsmål om det som mangler. Raskere og mer presis.
+                Fyll inn det du vet. AI stiller kun spørsmål om det som mangler – raskere og mer presis.
               </p>
-              <ul className="text-xs text-[#888B8D] space-y-1">
-                <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-[#F26334] rounded-full" />Du styrer tempoet</li>
-                <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-[#F26334] rounded-full" />Hopper over seksjonene du allerede kan</li>
-                <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-[#F26334] rounded-full" />Færre spørsmål fra AI</li>
+              <ul className="text-xs text-[#888B8D] space-y-1.5 mb-5">
+                <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Du styrer tempoet</li>
+                <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Hopper over seksjonene du allerede kan</li>
+                <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Færre spørsmål fra AI</li>
               </ul>
-              <div className="mt-4 flex justify-end">
-                <ChevronRight className="h-5 w-5 text-[#F26334]" />
+              <div className="w-full flex items-center justify-center gap-2 bg-[#F26334] text-white rounded-lg py-2.5 text-sm font-medium">
+                Start hurtig <ChevronRight className="h-4 w-4" />
               </div>
             </CardContent>
           </Card>
 
           {/* Guided Mode */}
           <Card
-            className="cursor-pointer hover:border-[#002C6C] hover:shadow-md transition-all border-2"
+            className="cursor-pointer border-2 border-gray-200 hover:border-[#002C6C] hover:shadow-md transition-all"
             onClick={handleSelectGuided}
           >
             <CardContent className="p-6">
@@ -120,20 +120,20 @@ function NewBriefContent() {
                 </div>
               ) : (
                 <>
-                  <div className="w-12 h-12 bg-[#002C6C]/10 rounded-xl flex items-center justify-center mb-4">
-                    <MessageSquare className="h-6 w-6 text-[#002C6C]" />
+                  <div className="w-14 h-14 bg-[#002C6C]/10 rounded-2xl flex items-center justify-center mb-4">
+                    <MessageSquare className="h-7 w-7 text-[#002C6C]" />
                   </div>
-                  <h3 className="font-semibold text-[#454545] text-lg mb-2">Guidet modus</h3>
+                  <h3 className="font-bold text-[#454545] text-xl mb-1">Guidet modus</h3>
                   <p className="text-[#888B8D] text-sm mb-4">
-                    AI stiller deg spørsmål gjennom alle 9 seksjoner. Perfekt når du vil tenke høyt eller er usikker på hva som trengs.
+                    AI stiller deg spørsmål gjennom alle 9 seksjoner. Perfekt når du vil tenke høyt.
                   </p>
-                  <ul className="text-xs text-[#888B8D] space-y-1">
-                    <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-[#002C6C] rounded-full" />Strukturert intervju trinn for trinn</li>
-                    <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-[#002C6C] rounded-full" />AI hjelper deg å formulere svarene</li>
-                    <li className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-[#002C6C] rounded-full" />Laster opp kildemateriale underveis</li>
+                  <ul className="text-xs text-[#888B8D] space-y-1.5 mb-5">
+                    <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#002C6C] rounded-full flex-shrink-0" />Strukturert intervju trinn for trinn</li>
+                    <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#002C6C] rounded-full flex-shrink-0" />AI hjelper deg å formulere svarene</li>
+                    <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#002C6C] rounded-full flex-shrink-0" />Laster opp kildemateriale underveis</li>
                   </ul>
-                  <div className="mt-4 flex justify-end">
-                    <ChevronRight className="h-5 w-5 text-[#002C6C]" />
+                  <div className="w-full flex items-center justify-center gap-2 border border-[#002C6C] text-[#002C6C] rounded-lg py-2.5 text-sm font-medium">
+                    Start guidet <ChevronRight className="h-4 w-4" />
                   </div>
                 </>
               )}

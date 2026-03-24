@@ -8,10 +8,28 @@ const SLIDES = [
     title: 'Slik bruker du GS1 Norway Dynamisk Brief',
     bullets: [
       { icon: Sparkles,      text: 'En rask og strukturert flyt fra kildemateriale til ferdig kommunikasjonsbrief' },
-      { icon: Zap,           text: 'Tydelige rammer, strukturert intervju og redigerbart utkast' },
+      { icon: Zap,           text: 'Velg mellom Hurtigmodus (anbefalt) eller Guidet modus ved oppstart' },
       { icon: FileText,      text: 'Fem steg: Kildemateriale → Rammer → Intervju → Foreslått brief → Ferdig brief' },
     ],
-    proTip: 'Gi korte svar – du kan redigere alt senere.'
+    proTip: 'Usikker? Velg Hurtigmodus – du kan alltid redigere alt etterpå.'
+  },
+  {
+    title: '⚡ Hurtigmodus (Anbefalt)',
+    bullets: [
+      { icon: Zap,           text: 'Fyll inn det du allerede vet i et enkelt skjema – del for del' },
+      { icon: Zap,           text: 'AI stiller bare spørsmål om seksjonene du ikke har fylt ut' },
+      { icon: Rocket,        text: 'Raskere prosess: færre spørsmål, mer presis brief' },
+    ],
+    proTip: 'Jo mer du fyller inn på forhånd, jo kortere blir intervjuet.'
+  },
+  {
+    title: '💬 Guidet modus',
+    bullets: [
+      { icon: MessageSquare, text: 'AI stiller deg spørsmål gjennom alle 9 seksjoner, én om gangen' },
+      { icon: MessageSquare, text: 'Perfekt når du vil tenke høyt eller er usikker på hva som trengs' },
+      { icon: Pencil,        text: 'Alle svar lagres og brukes automatisk i utkastet i steg 4' },
+    ],
+    proTip: 'Stikkord holder – du trenger ikke fullstendige setninger.'
   },
   {
     title: 'Steg 1: Kildemateriale',
@@ -23,36 +41,19 @@ const SLIDES = [
     proTip: 'Lim inn bare de viktigste avsnittene for best resultat.'
   },
   {
-    title: 'Hva kildematerialet brukes til',
+    title: 'Steg 2–3: Rammer og intervju',
     bullets: [
-      { icon: MessageSquare, text: 'Gir applikasjonen bedre kontekst → mer treffsikre intervjuspørsmål' },
-      { icon: Zap,           text: 'Gjør det mulig å generere et raskere førsteutkast i steg 4' },
-      { icon: Pencil,        text: 'Du har full kontroll: alt kan redigeres i steg 4 uansett' },
-    ],
-    proTip: 'Jo mer presise kilder, jo mindre etterarbeid.'
-  },
-  {
-    title: 'Steg 2: Rammer',
-    bullets: [
-      { icon: Target,        text: 'Sett tema, målgruppe, kanaler og frist for prosjektet' },
-      { icon: Target,        text: 'Rammene strukturerer briefen og styrer intervjuet' },
+      { icon: Target,        text: 'Steg 2: Sett tema, målgruppe, kanaler og frist for prosjektet' },
+      { icon: MessageSquare, text: 'Steg 3: AI stiller spørsmål om det som mangler (færre i Hurtigmodus)' },
+      { icon: Pencil,        text: 'Alle svar lagres og brukes i utkastet i steg 4' },
     ],
     proTip: 'Hold deg til én tydelig målgruppe – det gir et mer presist resultat.'
   },
   {
-    title: 'Steg 3: Dynamisk intervju',
-    bullets: [
-      { icon: MessageSquare, text: 'Applikasjonen stiller ett spørsmål per seksjon og går automatisk videre' },
-      { icon: MessageSquare, text: 'Svar fritt – det finnes ingen "riktige" svar' },
-      { icon: Pencil,        text: 'Alle svar lagres og brukes i utkastet i steg 4' },
-    ],
-    proTip: 'Stikkord holder – du trenger ikke fullstendige setninger.'
-  },
-  {
     title: 'Steg 4: Foreslått brief',
     bullets: [
-      { icon: Zap,           text: 'Trykk "Generer utkast" for å lage et komplett briefutkast basert på intervjuet' },
-      { icon: Pencil,        text: 'Rediger hver seksjon direkte i redigeringsfeltet' },
+      { icon: Zap,           text: 'Trykk «Generer utkast» for å lage et komplett briefutkast basert på intervjuet' },
+      { icon: Pencil,        text: 'Rediger hver seksjon direkte – du ser hvilken kilde innholdet kommer fra' },
       { icon: Target,        text: 'Finjuster og fyll hull før du godkjenner' },
     ],
     proTip: 'Se etter hull i innholdet – fyll dem inn før du godkjenner.'
@@ -65,15 +66,6 @@ const SLIDES = [
       { icon: Rocket,        text: 'Gjenåpne og rediger ved behov – godkjenn på nytt for nytt Word-dokument' },
     ],
     proTip: 'Godkjenn først når det føles sendeklart.'
-  },
-  {
-    title: 'Briefmal: hva skjer når du laster opp ny?',
-    bullets: [
-      { icon: BookOpen,      text: 'Ny briefmal erstatter gjeldende mal for fremtidige briefs' },
-      { icon: BookOpen,      text: 'Malen påvirker struktur og overskrifter i det genererte utkastet' },
-      { icon: Target,        text: 'Eksisterende briefs påvirkes ikke – kun nye briefs bruker ny mal' },
-    ],
-    proTip: 'Oppdater malen før du starter nye briefer for best konsistens.'
   },
 ];
 
