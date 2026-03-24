@@ -17,7 +17,7 @@ const SLIDES = [
     title: '⚡ Hurtigmodus (Anbefalt)',
     bullets: [
       { icon: Zap,           text: 'Fyll inn det du allerede vet i et enkelt skjema – del for del' },
-      { icon: Zap,           text: 'AI stiller bare spørsmål om seksjonene du ikke har fylt ut' },
+      { icon: Zap,           text: 'Dynamisk Brief stiller bare spørsmål om seksjonene du ikke har fylt ut' }, om seksjonene du ikke har fylt ut' },
       { icon: Rocket,        text: 'Raskere prosess: færre spørsmål, mer presis brief' },
     ],
     proTip: 'Jo mer du fyller inn på forhånd, jo kortere blir intervjuet.'
@@ -25,7 +25,7 @@ const SLIDES = [
   {
     title: '💬 Guidet modus',
     bullets: [
-      { icon: MessageSquare, text: 'AI stiller deg spørsmål gjennom alle 9 seksjoner, én om gangen' },
+      { icon: MessageSquare, text: 'Dynamisk Brief stiller deg spørsmål gjennom alle 9 seksjoner, én om gangen' }, gjennom alle 9 seksjoner, én om gangen' },
       { icon: MessageSquare, text: 'Perfekt når du vil tenke høyt eller er usikker på hva som trengs' },
       { icon: Pencil,        text: 'Alle svar lagres og brukes automatisk i utkastet i steg 4' },
     ],
@@ -44,7 +44,7 @@ const SLIDES = [
     title: 'Steg 2–3: Rammer og intervju',
     bullets: [
       { icon: Target,        text: 'Steg 2: Sett tema, målgruppe, kanaler og frist for prosjektet' },
-      { icon: MessageSquare, text: 'Steg 3: AI stiller spørsmål om det som mangler (færre i Hurtigmodus)' },
+      { icon: MessageSquare, text: 'Steg 3: Dynamisk Brief stiller spørsmål om det som mangler (færre i Hurtigmodus)' }, om det som mangler (færre i Hurtigmodus)' },
       { icon: Pencil,        text: 'Alle svar lagres og brukes i utkastet i steg 4' },
     ],
     proTip: 'Hold deg til én tydelig målgruppe – det gir et mer presist resultat.'
