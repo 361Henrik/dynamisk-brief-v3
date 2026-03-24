@@ -3,7 +3,6 @@ import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import SourceBlock, { getContentText } from './SourceBlock';
 import { Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
-// Note: ChevronDown/Up above are from the SourceBlock import line's companion
 import { useAuth } from '@/components/auth/AuthProvider';
 import { 
   Loader2, 
