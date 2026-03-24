@@ -116,11 +116,11 @@ function BriefListContent() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mine briefs</h1>
-          <p className="text-gray-500 mt-1">Oversikt over alle dine briefs</p>
+          <h1 className="text-2xl font-bold text-gs1-dark-gray">Mine briefs</h1>
+          <p className="text-gs1-medium-gray mt-1">Oversikt over alle dine briefs</p>
         </div>
         <Link to={createPageUrl('NewBrief')}>
-          <Button className="bg-[#002C6C] hover:bg-[#001a45]">
+          <Button className="bg-gs1-blue hover:bg-gs1-blue/90">
             <PlusCircle className="h-4 w-4 mr-2" />
             Start ny brief
           </Button>
@@ -130,7 +130,7 @@ function BriefListContent() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gs1-medium-gray" />
           <Input
             placeholder="Søk i briefs..."
             value={searchQuery}
@@ -154,18 +154,18 @@ function BriefListContent() {
       {/* Brief List */}
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-gs1-medium-gray" />
         </div>
       ) : filteredBriefs.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+            <FileText className="h-16 w-16 mx-auto mb-4 text-gs1-border" />
             {briefs.length === 0 ? (
               <>
-                <h3 className="text-lg font-medium text-gray-900 mb-1">Ingen briefs ennå</h3>
-                <p className="text-gray-500 mb-4">Kom i gang ved å opprette din første brief.</p>
+                <h3 className="text-lg font-medium text-gs1-dark-gray mb-1">Ingen briefs ennå</h3>
+                <p className="text-gs1-medium-gray mb-4">Kom i gang ved å opprette din første brief.</p>
                 <Link to={createPageUrl('NewBrief')}>
-                  <Button className="bg-[#002C6C] hover:bg-[#001a45]">
+                  <Button className="bg-gs1-blue hover:bg-gs1-blue/90">
                     <PlusCircle className="h-4 w-4 mr-2" />
                     Start ny brief
                   </Button>
@@ -173,8 +173,8 @@ function BriefListContent() {
               </>
             ) : (
               <>
-                <h3 className="text-lg font-medium text-gray-900 mb-1">Ingen treff</h3>
-                <p className="text-gray-500">Prøv å endre søket eller filteret ditt.</p>
+                <h3 className="text-lg font-medium text-gs1-dark-gray mb-1">Ingen treff</h3>
+                <p className="text-gs1-medium-gray">Prøv å endre søket eller filteret ditt.</p>
               </>
             )}
           </CardContent>
@@ -192,16 +192,16 @@ function BriefListContent() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        brief.status === 'godkjent' ? 'bg-green-100' : 'bg-orange-100'
+                        brief.status === 'godkjent' ? 'bg-gs1-blue/10' : 'bg-gs1-orange/10'
                       }`}>
                         {brief.status === 'godkjent' 
-                          ? <CheckCircle2 className="h-5 w-5 text-green-600" />
-                          : <Clock className="h-5 w-5 text-orange-600" />
+                          ? <CheckCircle2 className="h-5 w-5 text-gs1-blue" />
+                          : <Clock className="h-5 w-5 text-gs1-orange" />
                         }
                       </div>
                       <div>
-                        <h3 className="font-medium text-gray-900 dark:text-white">{brief.title}</h3>
-                        <div className="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <h3 className="font-medium text-gs1-dark-gray">{brief.title}</h3>
+                        <div className="flex items-center space-x-3 text-sm text-gs1-medium-gray mt-1">
                           <span>{brief.themeName || 'Ukjent tema'}</span>
                           <span>•</span>
                           <span>Opprettet {formatDate(brief.created_date)}</span>
@@ -211,8 +211,8 @@ function BriefListContent() {
                     <div className="flex items-center space-x-2">
                       <span className={`text-xs px-3 py-1 rounded-full font-medium ${
                         brief.status === 'godkjent' 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-orange-100 text-orange-700'
+                          ? 'bg-gs1-blue/10 text-gs1-blue' 
+                          : 'bg-gs1-orange/10 text-gs1-orange'
                       }`}>
                         {brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}
                       </span>
@@ -232,14 +232,14 @@ function BriefListContent() {
                               Slett brief
                             </DropdownMenuItem>
                           ) : (
-                            <DropdownMenuItem disabled className="text-gray-400">
+                            <DropdownMenuItem disabled className="text-gs1-medium-gray">
                               <Trash2 className="h-4 w-4 mr-2" />
                               Kan ikke slette godkjent brief
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      <ArrowRight className="h-5 w-5 text-gray-400" />
+                      <ArrowRight className="h-5 w-5 text-gs1-medium-gray" />
                     </div>
                   </div>
                 </CardContent>
