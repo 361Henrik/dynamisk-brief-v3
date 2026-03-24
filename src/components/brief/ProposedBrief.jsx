@@ -564,7 +564,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
         </div>
         <div className="flex items-center space-x-2">
           {isApproved && (
-            <Badge className="bg-green-100 text-green-800">
+            <Badge className="bg-[#002C6C]/10 text-[#002C6C]">
               <CheckCircle2 className="h-3 w-3 mr-1" />
               Godkjent
             </Badge>
@@ -690,7 +690,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
             <Button 
               onClick={handleApprove} 
               disabled={saving || approving}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-[#002C6C] hover:bg-[#001a45] text-white"
             >
               {approving ? (
                 <>
