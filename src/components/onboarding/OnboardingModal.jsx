@@ -44,7 +44,7 @@ const SLIDES = [
     title: 'Steg 2–3: Rammer og intervju',
     bullets: [
       { icon: Target,        text: 'Steg 2: Sett tema, målgruppe, kanaler og frist for prosjektet' },
-      { icon: MessageSquare, text: 'Steg 3: Dynamisk Brief stiller spørsmål om det som mangler (færre i Hurtigmodus)' }, om det som mangler (færre i Hurtigmodus)' },
+      { icon: MessageSquare, text: 'Steg 3: Dynamisk Brief stiller spørsmål om det som mangler (færre i Hurtigmodus)' },
       { icon: Pencil,        text: 'Alle svar lagres og brukes i utkastet i steg 4' },
     ],
     proTip: 'Hold deg til én tydelig målgruppe – det gir et mer presist resultat.'
