@@ -25,7 +25,7 @@ const SLIDES = [
   {
     title: '💬 Guidet modus',
     bullets: [
-      { icon: MessageSquare, text: 'Dynamisk Brief stiller deg spørsmål gjennom alle 9 seksjoner, én om gangen' }, gjennom alle 9 seksjoner, én om gangen' },
+      { icon: MessageSquare, text: 'Dynamisk Brief stiller deg spørsmål gjennom alle 9 seksjoner, én om gangen' },
       { icon: MessageSquare, text: 'Perfekt når du vil tenke høyt eller er usikker på hva som trengs' },
       { icon: Pencil,        text: 'Alle svar lagres og brukes automatisk i utkastet i steg 4' },
     ],
