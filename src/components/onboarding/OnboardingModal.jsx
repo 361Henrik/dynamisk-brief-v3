@@ -17,7 +17,7 @@ const SLIDES = [
     title: '⚡ Hurtigmodus (Anbefalt)',
     bullets: [
       { icon: Zap,           text: 'Fyll inn det du allerede vet i et enkelt skjema – del for del' },
-      { icon: Zap,           text: 'Dynamisk Brief stiller bare spørsmål om seksjonene du ikke har fylt ut' }, om seksjonene du ikke har fylt ut' },
+      { icon: Zap,           text: 'Dynamisk Brief stiller bare spørsmål om seksjonene du ikke har fylt ut' },
       { icon: Rocket,        text: 'Raskere prosess: færre spørsmål, mer presis brief' },
     ],
     proTip: 'Jo mer du fyller inn på forhånd, jo kortere blir intervjuet.'
