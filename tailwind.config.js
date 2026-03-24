@@ -4,10 +4,13 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
   	extend: {
+  		fontFamily: {
+  			gs1: ['var(--font-gs1)']
+  		},
   		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			lg: '8px',
+  			md: '6px',
+  			sm: '4px'
   		},
   		colors: {
   			background: 'hsl(var(--background))',
@@ -59,7 +62,20 @@ module.exports = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+  			/* GS1 Norway brand tokens */
+  			'gs1-blue': 'hsl(var(--gs1-blue))',
+  			'gs1-orange': 'hsl(var(--gs1-orange))',
+  			'gs1-dark-gray': 'hsl(var(--gs1-dark-gray))',
+  			'gs1-medium-gray': 'hsl(var(--gs1-dark-medium-gray))',
+  			'gs1-light-gray': 'hsl(var(--gs1-light-gray))',
+  			'gs1-border': 'hsl(var(--gs1-light-medium-gray))',
+  			'gs1-raspberry': 'hsl(var(--gs1-raspberry))',
+  			'gs1-teal': 'hsl(var(--gs1-teal))',
+  			'gs1-sky': 'hsl(var(--gs1-sky))',
+  			'gs1-lime': 'hsl(var(--gs1-lime))',
+  			'gs1-tangerine': 'hsl(var(--gs1-tangerine))',
+  			'gs1-link': 'hsl(var(--gs1-link))'
   		},
   		keyframes: {
   			'accordion-down': {
