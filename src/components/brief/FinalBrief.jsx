@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import SourceBlock, { getContentText } from './SourceBlock';
+import { Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { 
   Loader2, 
@@ -47,9 +49,25 @@ export default function FinalBrief({ brief, sources = [], onBack }) {
   const { isAdmin } = useAuth();
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [showSources, setShowSources] = useState(false);
+  const [showSourceMaterials, setShowSourceMaterials] = useState(false);
+  const [showSourceTags, setShowSourceTags] = useState(true);
   const [reopening, setReopening] = useState(false);
   const [downloading, setDownloading] = useState(false);
+
+  const sections = brief?.proposedBrief?.sections || {};
+  const approvedAt = brief?.proposedBrief?.approvedAt || brief?.approvedAt;
+  const isApproved = brief?.status === 'godkjent';
+  const hasSections = Object.keys(sections).length > 0;
+  const hasDocument = !!brief?.generatedDocumentUrl;
+
+  const updateBriefMutation = useMutation({
+    mutationFn: async (data) => {
+      await base44.entities.Brief.update(brief.id, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['brief', brief.id] });
+    }
+  });
 
   const handleReopen = async () => {
     setReopening(true);
@@ -130,6 +148,7 @@ export default function FinalBrief({ brief, sources = [], onBack }) {
   const handleCopyAll = () => {
     if (!hasSections) return;
 
+    // Flatten block arrays to plain text for clipboard
     let fullText = `═══════════════════════════════════════
 KOMMUNIKASJONSBRIEF
 ═══════════════════════════════════════
@@ -151,10 +170,8 @@ Frist: ${brief.rammer?.deadline || 'Ikke spesifisert'}
     SECTION_CONFIG.forEach(section => {
       const content = sections[section.key]?.content;
       if (content) {
-        fullText += `${section.number}. ${section.label.toUpperCase()}
-${content}
-
-`;
+        const text = getContentText(content);
+        fullText += `${section.number}. ${section.label.toUpperCase()}\n${text}\n\n`;
       }
     });
 
@@ -165,7 +182,7 @@ ${content}
   };
 
   // No content available at all
-  if (!hasSections && !hasDocument && !isApproved) {
+  if (!hasSections && !isApproved) {
     return (
       <div className="space-y-6">
         <Card className="border-dashed">
@@ -199,6 +216,15 @@ ${content}
             </CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSourceTags(!showSourceTags)}
+              className="text-xs"
+            >
+              {showSourceTags ? <EyeOff className="h-3.5 w-3.5 mr-1" /> : <Eye className="h-3.5 w-3.5 mr-1" />}
+              {showSourceTags ? 'Skjul kilder' : 'Vis kilder'}
+            </Button>
             {hasDocument && (
               <Button variant="outline" size="sm" onClick={handleDownloadSignedUrl} disabled={downloading}>
                 {downloading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileDown className="h-4 w-4 mr-1" />}
@@ -214,8 +240,8 @@ ${content}
         <CardContent className="space-y-6">
           {SECTION_CONFIG.map(section => {
             const rawContent = sections[section.key]?.content;
-            const sectionContent = rawContent ? rawContent.replace(/\\n/g, '\n') : rawContent;
-            
+            const isBlocks = Array.isArray(rawContent);
+            const plainText = isBlocks ? null : (rawContent ? rawContent.replace(/\\n/g, '\n') : null);
             return (
               <section key={section.key}>
                 <h3 className="text-base font-semibold text-gs1-dark-gray mb-2 flex items-center gap-2">
@@ -224,8 +250,14 @@ ${content}
                   </span>
                   {section.label}
                 </h3>
-                <div className={`whitespace-pre-wrap pl-8 ${sectionContent ? 'text-gs1-dark-gray' : 'text-gs1-border italic'}`}>
-                  {sectionContent || 'Ingen informasjon lagt til.'}
+                <div className="pl-8">
+                  {isBlocks ? (
+                    rawContent.map((block, i) => <SourceBlock key={i} block={block} showTags={showSourceTags} />)
+                  ) : plainText ? (
+                    <p className="text-sm whitespace-pre-wrap text-gs1-dark-gray leading-relaxed">{plainText}</p>
+                  ) : (
+                    <p className="text-gs1-border italic text-sm">Ingen informasjon lagt til.</p>
+                  )}
                 </div>
               </section>
             );
@@ -319,7 +351,7 @@ ${content}
         <Card className="border-gs1-blue/20">
          <CardHeader
           className="py-3 cursor-pointer hover:bg-gs1-light-gray transition-colors"
-            onClick={() => setShowSources(!showSources)}
+            onClick={() => setShowSourceMaterials(!showSourceMaterials)}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -329,12 +361,12 @@ ${content}
                 </CardTitle>
                 <Badge variant="outline" className="text-xs">{sources.length}</Badge>
               </div>
-              {showSources
+              {showSourceMaterials
                 ? <ChevronUp className="h-4 w-4 text-gs1-medium-gray" />
                 : <ChevronDown className="h-4 w-4 text-gs1-medium-gray" />}
             </div>
           </CardHeader>
-          {showSources && (
+          {showSourceMaterials && (
             <CardContent className="pt-0">
               <p className="text-xs text-gs1-medium-gray mb-3">
                 Disse kildene ble lagt til grunn for briefen og kan brukes som referanse i produksjonen.

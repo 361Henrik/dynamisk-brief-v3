@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
+import SourceBlock, { getContentText, SOURCE_CONFIG } from './SourceBlock';
 import { 
   Loader2, 
   ArrowLeft, 
@@ -21,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,7 +63,8 @@ function ProposedSection({
   onContentChange, 
   onNotesChange,
   onUpdateWithFeedback,
-  isUpdating 
+  isUpdating,
+  showSources
 }) {
   const [expanded, setExpanded] = useState(true);
   const [showNotes, setShowNotes] = useState(!!notes);
@@ -132,7 +135,7 @@ function ProposedSection({
             {isEditing ? (
               <div className="space-y-2">
                 <Textarea
-                  value={localContent}
+                  value={typeof localContent === 'string' ? localContent : getContentText(localContent)}
                   onChange={(e) => setLocalContent(e.target.value)}
                   placeholder={`Skriv innhold for ${label.toLowerCase()}...`}
                   className="min-h-[150px] resize-y border-gs1-blue/30 focus:border-gs1-blue"
@@ -150,8 +153,14 @@ function ProposedSection({
               </div>
             ) : (
               <div className="relative group">
-                <div className="bg-gs1-light-gray rounded-lg p-4 min-h-[100px] whitespace-pre-wrap text-sm text-gs1-dark-gray">
-                  {content || <span className="text-gs1-border italic">Ingen innhold ennå...</span>}
+                <div className="bg-gs1-light-gray rounded-lg p-4 min-h-[100px]">
+                  {Array.isArray(content) ? (
+                    content.map((block, i) => <SourceBlock key={i} block={block} showTags={showSources} />)
+                  ) : content ? (
+                    <p className="text-sm whitespace-pre-wrap text-gs1-dark-gray leading-relaxed">{typeof content === 'string' ? content.replace(/\\n/g, '\n') : content}</p>
+                  ) : (
+                    <span className="text-gs1-border italic text-sm">Ingen innhold ennå...</span>
+                  )}
                 </div>
                 <Button
                   variant="outline"
@@ -224,6 +233,7 @@ export default function ProposedBrief({ brief, sources, dialogEntries, onBack, o
   const queryClient = useQueryClient();
   const [sections, setSections] = useState({});
   const [generating, setGenerating] = useState(false);
+  const [showSources, setShowSources] = useState(true);
   const [updatingSections, setUpdatingSections] = useState({});
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -287,51 +297,70 @@ Aktivering: ${brief.rammer.activationDate || 'Ikke spesifisert'}
 BRIEFMAL (følg denne strukturen nøyaktig):
 ${briefTemplate.extractedText}
 
-KILDEMATERIALE:
+KILDEMATERIALE (merket som "kildemateriale" i output):
 ${sourceContext || 'Ingen kilder lastet opp.'}
 
-INTERVJUET MED FAGPERSONEN:
+INTERVJUET MED FAGPERSONEN (brukerens egne svar, merket som "brukerinput" i output):
 ${dialogContext || 'Ingen dialog registrert.'}
 
-RAMMER OG BEGRENSNINGER:
+RAMMER OG BEGRENSNINGER (fra bruker, merket som "brukerinput"):
 ${rammerContext || 'Ingen rammer spesifisert.'}
 
-BEKREFTEDE PUNKTER:
+BEKREFTEDE PUNKTER FRA INTERVJUET (merket som "brukerinput"):
 ${brief.confirmedPoints?.map(p => `- ${p.topic}: ${p.summary}`).join('\n') || 'Ingen bekreftede punkter.'}
 
 ---
 
-Generer et fullstendig kommunikasjonsbrief basert på informasjonen over. 
+Generer et fullstendig kommunikasjonsbrief basert på informasjonen over.
 Følg GS1-briefmalen nøyaktig med de 9 seksjonene.
 Skriv profesjonelt, presist og på norsk.
 
-Returner et JSON-objekt med følgende struktur:
+KRITISK: Hver seksjon MÅ returnere en liste med kildetaggede blokker. Bruk ALLTID én av tre typer:
+- "brukerinput": informasjon eksplisitt gitt av brukeren i intervjuet eller rammene
+- "kildemateriale": informasjon hentet direkte fra opplastede dokumenter/URL-er
+- "forslag_fra_systemet": innhold systemet foreslår/utleder – aldri presentert som fakta
+
+Hvis du er usikker på kilden, bruk "forslag_fra_systemet". Ikke inkluder innhold uten kildemerking.
+
+Returner et JSON-objekt der hver seksjon er en ARRAY av blokker:
 {
-  "prosjektinformasjon": "innhold...",
-  "bakgrunn": "innhold...",
-  "maal": "innhold...",
-  "maalgrupper": "innhold...",
-  "verdiforslag": "innhold...",
-  "budskap": "innhold...",
-  "leveranser": "innhold...",
-  "rammer": "innhold...",
-  "kildemateriale": "innhold..."
+  "prosjektinformasjon": [{"type": "brukerinput", "content": "..."}, {"type": "forslag_fra_systemet", "content": "..."}],
+  "bakgrunn": [{"type": "kildemateriale", "content": "..."}, {"type": "forslag_fra_systemet", "content": "..."}],
+  "maal": [...],
+  "maalgrupper": [...],
+  "verdiforslag": [...],
+  "budskap": [...],
+  "leveranser": [...],
+  "rammer": [...],
+  "kildemateriale": [...]
 }`;
 
+      const blockSchema = {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            type: { type: 'string', enum: ['brukerinput', 'kildemateriale', 'forslag_fra_systemet'] },
+            content: { type: 'string' }
+          },
+          required: ['type', 'content']
+        }
+      };
       const response = await base44.integrations.Core.InvokeLLM({
         prompt,
+        model: 'claude_sonnet_4_6',
         response_json_schema: {
           type: 'object',
           properties: {
-            prosjektinformasjon: { type: 'string' },
-            bakgrunn: { type: 'string' },
-            maal: { type: 'string' },
-            maalgrupper: { type: 'string' },
-            verdiforslag: { type: 'string' },
-            budskap: { type: 'string' },
-            leveranser: { type: 'string' },
-            rammer: { type: 'string' },
-            kildemateriale: { type: 'string' }
+            prosjektinformasjon: blockSchema,
+            bakgrunn: blockSchema,
+            maal: blockSchema,
+            maalgrupper: blockSchema,
+            verdiforslag: blockSchema,
+            budskap: blockSchema,
+            leveranser: blockSchema,
+            rammer: blockSchema,
+            kildemateriale: blockSchema
           },
           required: ['prosjektinformasjon', 'bakgrunn', 'maal', 'maalgrupper', 'verdiforslag', 'budskap', 'leveranser', 'rammer', 'kildemateriale']
         }
@@ -420,10 +449,11 @@ Returner et JSON-objekt med følgende struktur:
       const sectionConfig = SECTION_CONFIG.find(s => s.key === sectionKey);
       const currentContent = sections[sectionKey]?.content || '';
 
+      const currentContentText = getContentText(currentContent);
       const prompt = `Du er en ekspert på GS1-kommunikasjonsbriefs.
 
 Gjeldende innhold i seksjonen "${sectionConfig.label}":
-${currentContent}
+${currentContentText}
 
 Tilbakemelding fra brukeren:
 ${feedback}
@@ -431,17 +461,39 @@ ${feedback}
 Oppdater seksjonsinnholdet basert på tilbakemeldingen. Behold det som fungerer, og juster eller utvid basert på kommentaren.
 Skriv profesjonelt, presist og på norsk.
 
-Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formatering.`;
+KRITISK: Returner en JSON-array med kildetaggede blokker. Bruk:
+- "brukerinput" for informasjon eksplisitt fra brukeren
+- "kildemateriale" for informasjon fra opplastede kilder
+- "forslag_fra_systemet" for systemets forslag/utledninger
+
+Eksempel: [{"type": "brukerinput", "content": "..."}, {"type": "forslag_fra_systemet", "content": "..."}]`;
 
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt
+        prompt,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            blocks: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string', enum: ['brukerinput', 'kildemateriale', 'forslag_fra_systemet'] },
+                  content: { type: 'string' }
+                },
+                required: ['type', 'content']
+              }
+            }
+          },
+          required: ['blocks']
+        }
       });
 
       const now = new Date().toISOString();
       setSections(prev => ({
         ...prev,
         [sectionKey]: {
-          content: response,
+          content: response.blocks || response,
           notes: '', // Clear notes after applying
           metadata: {
             lastEditedAt: now,
@@ -563,6 +615,15 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
           </p>
         </div>
         <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSources(!showSources)}
+            className="text-xs flex items-center gap-1.5"
+          >
+            {showSources ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            {showSources ? 'Skjul kilder' : 'Vis kilder'}
+          </Button>
           {isApproved && (
             <Badge className="bg-gs1-blue/10 text-gs1-blue">
               <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -661,6 +722,7 @@ Returner BARE det oppdaterte innholdet for denne seksjonen, uten ekstra formater
               onNotesChange={handleNotesChange}
               onUpdateWithFeedback={handleUpdateWithFeedback}
               isUpdating={updatingSections[section.key]}
+              showSources={showSources}
             />
           ))}
         </>
