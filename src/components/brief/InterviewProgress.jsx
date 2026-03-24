@@ -7,13 +7,17 @@ import {
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
-// Required sections for the brief - these must all be confirmed
+// Required sections for the brief - aligned 1:1 with the 9 ProposedBrief template sections
 export const BRIEF_SECTIONS = [
-  { key: 'hovedbudskap', label: 'Hovedbudskap', description: 'Hva er kjernen i det du vil formidle?' },
-  { key: 'malgruppe_innsikt', label: 'Målgruppeinnsikt', description: 'Hva vet vi om målgruppen og deres behov?' },
-  { key: 'nokkelpunkter', label: 'Nøkkelpunkter', description: 'Hvilke konkrete punkter skal kommuniseres?' },
-  { key: 'eksempler', label: 'Eksempler / Case', description: 'Har du konkrete eksempler som illustrerer budskapet?' },
-  { key: 'call_to_action', label: 'Call to Action', description: 'Hva ønsker du at målgruppen skal gjøre?' },
+  { key: 'prosjektinformasjon', label: 'Prosjektinformasjon', description: 'Hva er prosjektet, tittelen og hvem er avsender?' },
+  { key: 'bakgrunn', label: 'Bakgrunn', description: 'Hva er konteksten og bakgrunnen for kommunikasjonstiltaket?' },
+  { key: 'maal', label: 'Mål og suksesskriterier', description: 'Hva ønsker vi å oppnå, og hvordan måler vi suksess?' },
+  { key: 'maalgrupper', label: 'Målgrupper', description: 'Hvem prøver vi å nå, og hva vet vi om dem?' },
+  { key: 'verdiforslag', label: 'GS1-tilbudet og verdiforslag', description: 'Hva er det unike tilbudet fra GS1 og verdien for målgruppen?' },
+  { key: 'budskap', label: 'Budskap, tone og stil', description: 'Hva er hovedbudskapet, og hvordan skal det formidles?' },
+  { key: 'leveranser', label: 'Leveranser og kanaler', description: 'Hvilke leveranser skal produseres og hvor publiseres de?' },
+  { key: 'rammer', label: 'Praktiske rammer og godkjenning', description: 'Hva er tidsfrister, budsjett og hvem godkjenner?' },
+  { key: 'kildemateriale', label: 'Kildemateriale og referanser', description: 'Hvilket bakgrunnsmateriale er relevant for briefen?' }
 ];
 
 // Map confirmed topics to sections
