@@ -68,7 +68,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                 <Link
                   to={createPageUrl('HelpInstructions')}
                   className="flex items-center justify-center w-9 h-9 rounded-md border border-transparent text-[#888B8D] hover:text-[#002C6C] hover:bg-[#002C6C]/10 hover:border-[#002C6C]/20 transition-colors"
-                  title="Kom i gang – hjelp og veiledning"
+                  title="Kom i gang"
                 >
                   <HelpCircle className="h-5 w-5" />
                 </Link>
@@ -87,7 +87,7 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                     <div className="px-3 py-2">
                       <p className="text-sm font-medium text-gs1-dark-gray">{user?.full_name || 'Bruker'}</p>
                       <p className="text-xs text-gs1-medium-gray">{user?.email}</p>
-                      <p className="text-xs text-gs1-blue capitalize mt-1">{user?.role || 'fagperson'}</p>
+                      <p className="text-xs text-gs1-blue capitalize mt-1">{user?.role || 'Bruker'}</p>
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer">
