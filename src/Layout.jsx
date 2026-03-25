@@ -10,17 +10,8 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronDown,
   HelpCircle
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 function NavigationContent({ currentPageName, children, briefCurrentStep }) {
   const { user, isAdmin, logout } = useAuth();
@@ -72,29 +63,6 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                 >
                   <HelpCircle className="h-5 w-5" />
                 </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full p-0">
-                      <div className="w-8 h-8 bg-[#002C6C] rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-white">
-                          {user?.full_name?.charAt(0) || user?.email?.charAt(0) || '?'}
-                        </span>
-                      </div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <div className="px-3 py-2">
-                      <p className="text-sm font-medium text-gs1-dark-gray">{user?.full_name || 'Bruker'}</p>
-                      <p className="text-xs text-gs1-medium-gray">{user?.email}</p>
-                      <p className="text-xs text-gs1-blue capitalize mt-1">{user?.role || 'Bruker'}</p>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logg ut
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
 
                 {/* Mobile menu button */}
                 <Button
