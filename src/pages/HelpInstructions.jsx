@@ -1,6 +1,5 @@
 import React from 'react';
 import { RequireAuth } from '@/components/auth/RequireAuth';
-import WhatsNewCard from '@/components/release/WhatsNewCard';
 import { 
   FileText, 
   Link as LinkIcon, 
@@ -28,8 +27,6 @@ function HelpInstructionsContent() {
           Her finner du alt du trenger for å komme i gang med Dynamisk Brief – hvordan flyten fungerer, hva slags kildemateriale du kan bruke, og tips for best resultat.
         </p>
       </div>
-
-      <WhatsNewCard />
 
       {/* Guide CTA */}
       <div className="bg-[#002C6C]/5 border border-[#002C6C]/20 rounded-xl p-5 flex items-center justify-between gap-4">
