@@ -114,7 +114,7 @@ function ProposedSection({
             {isAiEdited && (
               <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
                 <Sparkles className="h-3 w-3 mr-1" />
-                AI-oppdatert
+                System-oppdatert
               </Badge>
             )}
           </div>
@@ -123,7 +123,7 @@ function ProposedSection({
         {/* Metadata line */}
         {metadata?.lastEditedAt && (
           <p className="text-xs text-gs1-medium-gray mt-1 ml-10">
-            Endret {metadata.lastEditedBy === 'user' ? 'av deg' : 'av AI'} · {formatTimestamp(metadata.lastEditedAt)}
+            Endret {metadata.lastEditedBy === 'user' ? 'av deg' : 'av systemet'} · {formatTimestamp(metadata.lastEditedAt)}
           </p>
         )}
       </CardHeader>
@@ -278,7 +278,7 @@ export default function ProposedBrief({ brief, sources, dialogEntries, onBack, o
 
       // Build dialog context
       const dialogContext = dialogEntries
-        .map(entry => `${entry.role === 'assistant' ? 'AI' : 'Bruker'}: ${entry.content}`)
+        .map(entry => `${entry.role === 'assistant' ? 'Systemet' : 'Bruker'}: ${entry.content}`)
         .join('\n\n');
 
       // Build rammer context
@@ -645,7 +645,7 @@ Eksempel: [{"type": "brukerinput", "content": "..."}, {"type": "forslag_fra_syst
               Generer foreslått brief
             </h3>
             <p className="text-gs1-medium-gray mb-6 max-w-md mx-auto">
-              Basert på kildematerialet, intervjuet og rammene vil AI generere et utkast til kommunikasjonsbriefet.
+              Basert på kildematerialet, intervjuet og rammene vil Dynamisk Brief generere et utkast til kommunikasjonsbriefet.
             </p>
             <Button onClick={generateProposedBrief} disabled={generating} className="bg-gs1-blue hover:bg-gs1-blue/90">
               {generating ? (
