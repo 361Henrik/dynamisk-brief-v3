@@ -23,9 +23,9 @@ function HelpInstructionsContent() {
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#454545]">Instruksjoner</h1>
+        <h1 className="text-2xl font-bold text-[#454545]">Kom i gang</h1>
         <p className="text-[#888B8D] mt-1">
-          Alt du trenger å vite om hvordan Dynamisk Brief fungerer
+          Her finner du alt du trenger for å komme i gang med Dynamisk Brief – hvordan flyten fungerer, hva slags kildemateriale du kan bruke, og tips for best resultat.
         </p>
       </div>
 
