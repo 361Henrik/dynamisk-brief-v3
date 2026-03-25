@@ -31,11 +31,10 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
 
   const mainNavItems = [
     { name: 'Mine briefer', page: 'Home', icon: LayoutDashboard },
-    { name: 'Briefoversikt', page: 'BriefList', icon: FolderOpen },
   ];
 
   const adminNavItems = isAdmin ? [
-    { name: 'Brieftemaer', page: 'AdminThemes', icon: Tags },
+    { name: 'Temaer', page: 'AdminThemes', icon: Tags },
   ] : [];
 
   const isCurrentPage = (pageName) => currentPageName === pageName;
@@ -82,28 +81,21 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
         ))}
 
         {/* Admin section */}
-        {adminNavItems.length > 0 && (
-          <>
-            <div className="pt-1 pb-0 px-3">
-              <div className="border-t border-[#B1B3B3]" />
-            </div>
-            {adminNavItems.map((item) => (
-              <Link
-                key={item.page}
-                to={createPageUrl(item.page)}
-                className={cn(
-                  "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                  isCurrentPage(item.page)
-                    ? "bg-[#002C6C]/10 text-[#002C6C] font-semibold"
-                    : "text-[#454545] hover:bg-[#F4F4F4]"
-                )}
-              >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
-                <span>{item.name}</span>
-              </Link>
-            ))}
-          </>
-        )}
+        {adminNavItems.map((item) => (
+          <Link
+            key={item.page}
+            to={createPageUrl(item.page)}
+            className={cn(
+              "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+              isCurrentPage(item.page)
+                ? "bg-[#002C6C]/10 text-[#002C6C] font-semibold"
+                : "text-[#454545] hover:bg-[#F4F4F4]"
+            )}
+          >
+            <item.icon className="h-5 w-5 flex-shrink-0" />
+            <span>{item.name}</span>
+          </Link>
+        ))}
       </nav>
 
       {/* Brief Progress (only when in editor) */}
