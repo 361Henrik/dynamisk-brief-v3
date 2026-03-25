@@ -49,7 +49,7 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
 
   const mainNavItems = [
     { name: 'Mine briefer', page: 'Home', icon: LayoutDashboard },
-    { name: 'Alle briefer', page: 'BriefList', icon: FolderOpen },
+    { name: 'Briefoversikt', page: 'BriefList', icon: FolderOpen },
     { name: 'Kom i gang', page: 'HelpInstructions', icon: Rocket },
     { name: 'Innstillinger', page: 'Settings', icon: Settings },
   ];
