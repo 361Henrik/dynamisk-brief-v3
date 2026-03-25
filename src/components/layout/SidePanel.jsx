@@ -235,6 +235,11 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
           </div>
         </div>
       )}
+
+      {/* Version footer */}
+      <div className="mt-auto px-4 py-3 border-t border-[#B1B3B3]">
+        <p className="text-xs text-[#B1B3B3] text-center">v1.2.0</p>
+      </div>
     </div>
   );
 }
