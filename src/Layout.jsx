@@ -9,6 +9,18 @@ import SidePanel from '@/components/layout/SidePanel';
 import { 
   LogOut,
   Menu,
+  import React from 'react'
+import { Outlet } from 'react-router-dom'
+
+// rebuild-trigger: no functional change
+
+export default function Layout() {
+  return (
+    <div>
+      <Outlet />
+    </div>
+  )
+}
   X,
   ChevronDown
 } from 'lucide-react';
