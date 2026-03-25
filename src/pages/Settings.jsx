@@ -54,7 +54,7 @@ function SettingsContent() {
               <div className="flex items-center gap-2 mt-1">
                 <Shield className="h-4 w-4 text-gray-400" />
                 <Badge variant="outline" className="capitalize">
-                  {user?.role || 'bruker'}
+                  {user?.role || 'Bruker'}
                 </Badge>
               </div>
             </div>
