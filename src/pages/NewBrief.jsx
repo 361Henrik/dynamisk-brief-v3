@@ -86,21 +86,19 @@ function NewBriefContent() {
             className="cursor-pointer border-2 border-[#F26334] shadow-md hover:shadow-lg transition-all relative"
             onClick={() => setStep('fast_mode')}
           >
-            <div className="absolute top-3 right-3">
-              <Badge className="bg-[#F26334] text-white text-xs px-2 py-0.5 shadow-sm">⚡ Anbefalt</Badge>
-            </div>
+
             <CardContent className="p-6">
               <div className="w-14 h-14 bg-[#F26334]/15 rounded-2xl flex items-center justify-center mb-4">
                 <Zap className="h-7 w-7 text-[#F26334]" />
               </div>
               <h3 className="font-bold text-[#454545] text-xl mb-1">Hurtigmodus</h3>
               <p className="text-[#888B8D] text-sm mb-4">
-                Fyll inn det du vet. AI stiller kun spørsmål om det som mangler – raskere og mer presis.
+                Fyll inn det du vet. Systemet følger opp det som mangler, så du kommer raskere i mål.
               </p>
               <ul className="text-xs text-[#888B8D] space-y-1.5 mb-5">
                 <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Du styrer tempoet</li>
                 <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Hopper over seksjonene du allerede kan</li>
-                <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Færre spørsmål fra AI</li>
+                <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Færre spørsmål fra systemet</li>
               </ul>
               <div className="w-full flex items-center justify-center gap-2 bg-[#F26334] text-white rounded-lg py-2.5 text-sm font-medium">
                 Start hurtig <ChevronRight className="h-4 w-4" />
@@ -123,17 +121,17 @@ function NewBriefContent() {
                   <div className="w-14 h-14 bg-[#002C6C]/10 rounded-2xl flex items-center justify-center mb-4">
                     <MessageSquare className="h-7 w-7 text-[#002C6C]" />
                   </div>
-                  <h3 className="font-bold text-[#454545] text-xl mb-1">Guidet modus</h3>
+                  <h3 className="font-bold text-[#454545] text-xl mb-1">Detaljert modus</h3>
                   <p className="text-[#888B8D] text-sm mb-4">
-                    AI stiller deg spørsmål gjennom alle 9 seksjoner. Perfekt når du vil tenke høyt.
+                    Systemet veileder deg gjennom alle 9 seksjoner. Perfekt når du vil tenke høyt.
                   </p>
                   <ul className="text-xs text-[#888B8D] space-y-1.5 mb-5">
                     <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#002C6C] rounded-full flex-shrink-0" />Strukturert intervju trinn for trinn</li>
-                    <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#002C6C] rounded-full flex-shrink-0" />AI hjelper deg å formulere svarene</li>
-                    <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#002C6C] rounded-full flex-shrink-0" />Laster opp kildemateriale underveis</li>
+                    <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#002C6C] rounded-full flex-shrink-0" />Du blir ledet gjennom spørsmålene steg for steg</li>
+                    <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#002C6C] rounded-full flex-shrink-0" />Du kan legge til kildemateriale underveis</li>
                   </ul>
                   <div className="w-full flex items-center justify-center gap-2 border border-[#002C6C] text-[#002C6C] rounded-lg py-2.5 text-sm font-medium">
-                    Start guidet <ChevronRight className="h-4 w-4" />
+                    Start detaljert <ChevronRight className="h-4 w-4" />
                   </div>
                 </>
               )}
