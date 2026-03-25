@@ -383,7 +383,7 @@ Skriv på norsk. Vær profesjonell, rolig og rådgivende.`;
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-gs1-dark-gray">
               <p>
-                Dette intervjuet veileder deg gjennom prosessen med å samle all nødvendig informasjon for en kommunikasjonsbrief. AI-en stiller spørsmål – dine svar blir grunnlaget for briefutkastet.
+                Dette intervjuet veileder deg gjennom prosessen med å samle all nødvendig informasjon for en kommunikasjonsbrief. Systemet stiller spørsmål – dine svar blir grunnlaget for briefutkastet.
               </p>
 
               <div>
