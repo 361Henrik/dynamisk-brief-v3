@@ -6,7 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { 
   Home, 
-  FileText, 
   FolderOpen, 
   Settings,
   BookOpen,
@@ -16,7 +15,9 @@ import {
   AlertCircle,
   Loader2,
   HelpCircle,
-  ShieldCheck,
+  LayoutDashboard,
+  Tags,
+  Rocket,
   BookMarked
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,17 +47,16 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
     }
   });
 
-  const navItems = [
-    { name: 'Slik fungerer det', icon: BookMarked, onClick: onOpenGuide },
-    { name: 'Oversikt Briefs', page: 'Home', icon: Home },
-    ...(isAdmin ? [{ name: 'Temaer', page: 'AdminThemes', icon: ShieldCheck }] : []),
-    { name: 'Dynamisk brief', page: 'NewBrief', icon: FileText },
-    { name: 'Mine briefs', page: 'BriefList', icon: FolderOpen },
-    { name: 'Instruksjoner', page: 'HelpInstructions', icon: HelpCircle },
+  const mainNavItems = [
+    { name: 'Mine briefer', page: 'Home', icon: LayoutDashboard },
+    { name: 'Alle briefer', page: 'BriefList', icon: FolderOpen },
+    { name: 'Kom i gang', page: 'HelpInstructions', icon: Rocket },
     { name: 'Innstillinger', page: 'Settings', icon: Settings },
   ];
 
-  const adminItems = [];
+  const adminNavItems = isAdmin ? [
+    { name: 'Brieftemaer', page: 'AdminThemes', icon: Tags },
+  ] : [];
 
   const isCurrentPage = (pageName) => currentPageName === pageName;
   const isInBriefEditor = currentPageName === 'BriefEditor';
@@ -84,31 +84,55 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
 
       {/* Navigation */}
       <nav className="p-3 space-y-1">
-        {navItems.map((item) =>
-          item.onClick ? (
-            <button
-              key={item.name}
-              onClick={item.onClick}
-              className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-[#002C6C] hover:bg-[#002C6C]/10"
-            >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
-              <span>{item.name}</span>
-            </button>
-          ) : (
-            <Link
-              key={item.page}
-              to={createPageUrl(item.page)}
-              className={cn(
-                "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                isCurrentPage(item.page)
-                  ? "bg-[#002C6C]/10 text-[#002C6C] font-semibold"
-                  : "text-[#454545] hover:bg-[#F4F4F4]"
-              )}
-            >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
-              <span>{item.name}</span>
-            </Link>
-          )
+        {/* Guide button */}
+        <button
+          onClick={onOpenGuide}
+          className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-[#002C6C] hover:bg-[#002C6C]/10"
+        >
+          <BookMarked className="h-5 w-5 flex-shrink-0" />
+          <span>Slik fungerer det</span>
+        </button>
+
+        {/* Main nav */}
+        {mainNavItems.map((item) => (
+          <Link
+            key={item.page}
+            to={createPageUrl(item.page)}
+            className={cn(
+              "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+              isCurrentPage(item.page)
+                ? "bg-[#002C6C]/10 text-[#002C6C] font-semibold"
+                : "text-[#454545] hover:bg-[#F4F4F4]"
+            )}
+          >
+            <item.icon className="h-5 w-5 flex-shrink-0" />
+            <span>{item.name}</span>
+          </Link>
+        ))}
+
+        {/* Admin section */}
+        {adminNavItems.length > 0 && (
+          <>
+            <div className="pt-2 pb-1 px-3">
+              <div className="border-t border-[#B1B3B3]" />
+              <p className="text-xs text-[#888B8D] font-medium uppercase tracking-wider mt-2">Administrasjon</p>
+            </div>
+            {adminNavItems.map((item) => (
+              <Link
+                key={item.page}
+                to={createPageUrl(item.page)}
+                className={cn(
+                  "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  isCurrentPage(item.page)
+                    ? "bg-[#002C6C]/10 text-[#002C6C] font-semibold"
+                    : "text-[#454545] hover:bg-[#F4F4F4]"
+                )}
+              >
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+                <span>{item.name}</span>
+              </Link>
+            ))}
+          </>
         )}
       </nav>
 
