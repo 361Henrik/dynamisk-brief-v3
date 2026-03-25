@@ -1,20 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { 
-  FolderOpen, 
+import {
+  FolderOpen,
   Settings,
   ChevronRight,
   CheckCircle2,
   LayoutDashboard,
   Tags,
-  LogOut
+  LogOut,
+  ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 const FLOW_STEPS = [
   { key: 'source_material', label: 'Kildemateriale' },
@@ -119,19 +125,26 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
       {/* Theme list for Mine briefer */}
       {!isInBriefEditor && themes.length > 0 && (
         <div className="px-3 pb-2">
-          <p className="text-xs font-semibold text-[#888B8D] uppercase tracking-wider px-3 mb-1">Mine temaer</p>
-          <div className="space-y-0.5">
-            {themes.map((theme) => (
-              <button
-                key={theme.id}
-                onClick={() => navigate(createPageUrl('BriefList') + `?themeId=${theme.id}`)}
-                className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm text-[#454545] hover:bg-[#F4F4F4] transition-colors text-left"
-              >
-                <span className="truncate">{theme.name}</span>
-                <span className="ml-2 text-xs text-[#888B8D] flex-shrink-0">{briefCountByTheme[theme.id] || 0}</span>
-              </button>
-            ))}
-          </div>
+          <Collapsible defaultOpen={false}>
+            <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-1.5 rounded-lg text-xs font-semibold text-[#888B8D] uppercase tracking-wider hover:bg-[#F4F4F4] transition-colors group">
+              <span>Temaer</span>
+              <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-1 space-y-0.5 max-h-60 overflow-y-auto">
+                {themes.map((theme) => (
+                  <button
+                    key={theme.id}
+                    onClick={() => navigate(createPageUrl('BriefList') + `?themeId=${theme.id}`)}
+                    className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm text-[#454545] hover:bg-[#F4F4F4] transition-colors text-left"
+                  >
+                    <span className="truncate">{theme.name}</span>
+                    <span className="ml-2 text-xs text-[#888B8D] flex-shrink-0">{briefCountByTheme[theme.id] || 0}</span>
+                  </button>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       )}
 

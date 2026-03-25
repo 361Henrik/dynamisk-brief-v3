@@ -74,13 +74,12 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center space-x-2 px-2">
+                    <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full p-0">
                       <div className="w-8 h-8 bg-[#002C6C] rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-white">
                           {user?.full_name?.charAt(0) || user?.email?.charAt(0) || '?'}
                         </span>
                       </div>
-                      <ChevronDown className="h-3 w-3 text-gs1-medium-gray" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
