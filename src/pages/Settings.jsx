@@ -5,7 +5,8 @@ import {
   User, 
   Mail, 
   Shield,
-  MessageSquare
+  MessageSquare,
+  Info
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -84,11 +85,29 @@ function SettingsContent() {
         </CardContent>
       </Card>
 
+      {/* Om Dynamisk Brief */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Info className="h-5 w-5" />
+            Om Dynamisk Brief
+          </CardTitle>
+          <CardDescription>
+            Hvordan løsningen fungerer
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-[#454545] leading-relaxed">
+            Dynamisk Brief bruker intelligent teknologi for å gjøre briefprosessen enklere, raskere og mer treffsikker. Løsningen benytter ulike språkmodeller og velger den som passer best til oppgaven, basert på kvalitet, relevans og effektiv bruk av ressurser. Det betyr at den ikke alltid bruker den nyeste eller mest omfattende modellen, dersom det ikke er nødvendig for å gi et godt resultat. Du vurderer og godkjenner alltid innholdet selv.
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Version Info */}
       <Card>
         <CardContent className="py-4">
           <p className="text-xs text-center text-[#888B8D]">
-            Dynamisk Brief V1.1
+            Dynamisk Brief v1.2.0
           </p>
         </CardContent>
       </Card>
