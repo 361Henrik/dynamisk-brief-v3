@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useQuery } from '@tanstack/react-query';
@@ -28,6 +28,24 @@ const STEP_ORDER = ['source_material', 'rammer', 'dialog', 'proposed', 'final'];
 
 export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGuide }) {
   const { isAdmin, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const { data: themes = [] } = useQuery({
+    queryKey: ['themes'],
+    queryFn: () => base44.entities.Theme.filter({ isActive: true }),
+    enabled: !!user
+  });
+
+  const { data: userBriefs = [] } = useQuery({
+    queryKey: ['briefs-for-counts', user?.email],
+    queryFn: () => base44.entities.Brief.filter({ created_by: user?.email }),
+    enabled: !!user?.email
+  });
+
+  const briefCountByTheme = themes.reduce((acc, theme) => {
+    acc[theme.id] = userBriefs.filter(b => b.themeId === theme.id).length;
+    return acc;
+  }, {});
 
   const mainNavItems = [
     { name: 'Mine briefer', page: 'Home', icon: LayoutDashboard },
@@ -97,6 +115,25 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
           </Link>
         ))}
       </nav>
+
+      {/* Theme list for Mine briefer */}
+      {!isInBriefEditor && themes.length > 0 && (
+        <div className="px-3 pb-2">
+          <p className="text-xs font-semibold text-[#888B8D] uppercase tracking-wider px-3 mb-1">Mine temaer</p>
+          <div className="space-y-0.5">
+            {themes.map((theme) => (
+              <button
+                key={theme.id}
+                onClick={() => navigate(createPageUrl('BriefList') + `?themeId=${theme.id}`)}
+                className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm text-[#454545] hover:bg-[#F4F4F4] transition-colors text-left"
+              >
+                <span className="truncate">{theme.name}</span>
+                <span className="ml-2 text-xs text-[#888B8D] flex-shrink-0">{briefCountByTheme[theme.id] || 0}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Brief Progress (only when in editor) */}
       {isInBriefEditor && briefCurrentStep && (
