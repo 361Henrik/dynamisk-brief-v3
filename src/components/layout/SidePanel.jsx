@@ -9,10 +9,9 @@ import {
   Settings,
   ChevronRight,
   CheckCircle2,
-  HelpCircle,
   LayoutDashboard,
   Tags,
-  User
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -28,12 +27,11 @@ const FLOW_STEPS = [
 const STEP_ORDER = ['source_material', 'rammer', 'dialog', 'proposed', 'final'];
 
 export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGuide }) {
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
 
   const mainNavItems = [
     { name: 'Mine briefer', page: 'Home', icon: LayoutDashboard },
     { name: 'Briefoversikt', page: 'BriefList', icon: FolderOpen },
-    { name: 'Innstillinger', page: 'Settings', icon: Settings },
   ];
 
   const adminNavItems = isAdmin ? [
@@ -152,21 +150,45 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
 
       {/* User + Settings footer */}
       <div className="mt-auto border-t border-[#B1B3B3]">
-        <Link
-          to={createPageUrl('Settings')}
-          className={`flex items-center space-x-3 px-4 py-3 transition-colors hover:bg-[#F4F4F4] ${isCurrentPage('Settings') ? 'bg-[#002C6C]/10' : ''}`}
-        >
-          <div className="w-8 h-8 rounded-full bg-[#002C6C] flex items-center justify-center flex-shrink-0">
-            <span className="text-xs font-semibold text-white">
-              {user?.full_name?.charAt(0) || user?.email?.charAt(0) || '?'}
-            </span>
+        <div className="px-4 py-3 space-y-3">
+          {/* User identity */}
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-full bg-[#002C6C] flex items-center justify-center flex-shrink-0">
+              <span className="text-xs font-semibold text-white">
+                {user?.full_name?.charAt(0) || user?.email?.charAt(0) || '?'}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-[#454545] truncate">{user?.full_name || user?.email || 'Bruker'}</p>
+              {user?.role && (
+                <p className="text-xs text-[#888B8D] capitalize">{user.role}</p>
+              )}
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[#454545] truncate">{user?.full_name || user?.email || 'Bruker'}</p>
-            <p className="text-xs text-[#888B8D]">Innstillinger</p>
-          </div>
-          <Settings className="h-4 w-4 text-[#888B8D] flex-shrink-0" />
-        </Link>
+
+          {/* Settings link */}
+          <Link
+            to={createPageUrl('Settings')}
+            className={cn(
+              "flex items-center space-x-2 px-2 py-1.5 rounded-lg text-sm transition-colors w-full",
+              isCurrentPage('Settings')
+                ? "bg-[#002C6C]/10 text-[#002C6C] font-semibold"
+                : "text-[#454545] hover:bg-[#F4F4F4]"
+            )}
+          >
+            <Settings className="h-4 w-4 flex-shrink-0" />
+            <span>Innstillinger</span>
+          </Link>
+
+          {/* Logout */}
+          <button
+            onClick={logout}
+            className="flex items-center space-x-2 px-2 py-1.5 rounded-lg text-sm text-[#888B8D] hover:bg-[#F4F4F4] hover:text-red-600 transition-colors w-full"
+          >
+            <LogOut className="h-4 w-4 flex-shrink-0" />
+            <span>Logg ut</span>
+          </button>
+        </div>
         <p className="text-xs text-[#B1B3B3] text-center pb-2">v1.2.0</p>
       </div>
     </div>
