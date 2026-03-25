@@ -67,20 +67,19 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
               <div className="flex items-center space-x-2">
                 <Link
                   to={createPageUrl('HelpInstructions')}
-                  className="flex items-center justify-center w-9 h-9 rounded-md text-[#888B8D] hover:text-[#002C6C] hover:bg-[#002C6C]/10 transition-colors"
+                  className="flex items-center justify-center w-9 h-9 rounded-md border border-transparent text-[#888B8D] hover:text-[#002C6C] hover:bg-[#002C6C]/10 hover:border-[#002C6C]/20 transition-colors"
                   title="Kom i gang – hjelp og veiledning"
                 >
                   <HelpCircle className="h-5 w-5" />
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center space-x-2">
+                    <Button variant="ghost" className="flex items-center space-x-2 px-2">
                       <div className="w-8 h-8 bg-[#002C6C] rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-white">
                           {user?.full_name?.charAt(0) || user?.email?.charAt(0) || '?'}
                         </span>
                       </div>
-                      <span className="hidden sm:block text-sm text-gs1-dark-gray">{user?.full_name || user?.email}</span>
                       <ChevronDown className="h-3 w-3 text-gs1-medium-gray" />
                     </Button>
                   </DropdownMenuTrigger>
