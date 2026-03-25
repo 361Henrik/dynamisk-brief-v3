@@ -10,7 +10,8 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronDown
+  ChevronDown,
+  HelpCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -64,6 +65,13 @@ function NavigationContent({ currentPageName, children, briefCurrentStep }) {
 
               {/* User Menu */}
               <div className="flex items-center space-x-2">
+                <Link
+                  to={createPageUrl('HelpInstructions')}
+                  className="flex items-center justify-center w-9 h-9 rounded-md text-[#888B8D] hover:text-[#002C6C] hover:bg-[#002C6C]/10 transition-colors"
+                  title="Kom i gang – hjelp og veiledning"
+                >
+                  <HelpCircle className="h-5 w-5" />
+                </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center space-x-2">
