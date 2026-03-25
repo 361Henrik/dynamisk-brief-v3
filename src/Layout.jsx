@@ -12,6 +12,7 @@ import {
   X,
   HelpCircle
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 function NavigationContent({ currentPageName, children, briefCurrentStep }) {
   const { user, isAdmin, logout } = useAuth();
