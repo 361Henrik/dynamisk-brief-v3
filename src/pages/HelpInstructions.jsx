@@ -80,7 +80,7 @@ function HelpInstructionsContent() {
               <div>
                 <h4 className="font-medium text-[#454545]">Dynamisk intervju</h4>
                 <p className="text-sm text-[#888B8D]">
-                  Applikasjonen stiller deg spørsmål for å fylle inn manglende informasjon – ett spørsmål per seksjon.
+                  Systemet stiller deg spørsmål for å fylle inn manglende informasjon – ett spørsmål per seksjon.
                 </p>
               </div>
             </div>
@@ -124,7 +124,7 @@ function HelpInstructionsContent() {
         <CardContent className="space-y-4">
           <p className="text-[#888B8D]">
             Kildemateriale er dokumenter og lenker du legger til som grunnlag for å lage en brief. 
-            Applikasjonen leser og analyserer dette innholdet for å forstå konteksten og hjelpe deg med å 
+            Dynamisk Brief leser og analyserer dette innholdet for å forstå konteksten og hjelpe deg med å 
             utforme kommunikasjonen.
           </p>
           <div className="bg-[#002C6C]/5 border border-[#002C6C]/20 rounded-lg p-4">
@@ -133,7 +133,7 @@ function HelpInstructionsContent() {
               <li>Du laster opp filer eller legger til URL-er</li>
               <li>Systemet henter ut tekst automatisk</li>
               <li>Teksten brukes som kontekst i intervjuet</li>
-              <li>Applikasjonen genererer briefen basert på dette</li>
+              <li>Systemet genererer briefen basert på dette</li>
             </ol>
           </div>
         </CardContent>
