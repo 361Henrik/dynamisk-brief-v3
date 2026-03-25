@@ -43,6 +43,9 @@ function BriefListContent() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const activeThemeId = urlParams.get('themeId');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [briefToDelete, setBriefToDelete] = useState(null);
 
@@ -95,12 +98,15 @@ function BriefListContent() {
     }
   };
 
+  const activeThemeName = activeThemeId ? themes.find(t => t.id === activeThemeId)?.name : null;
+
   const filteredBriefs = briefs.filter(brief => {
     const matchesSearch = !searchQuery || 
       brief.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       brief.themeName?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || brief.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesTheme = !activeThemeId || brief.themeId === activeThemeId;
+    return matchesSearch && matchesStatus && matchesTheme;
   });
 
   const formatDate = (dateString) => {
@@ -138,6 +144,17 @@ function BriefListContent() {
           </Button>
         </Link>
       </div>
+
+      {/* Active theme filter pill */}
+      {activeThemeName && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-[#454545]">Filtrert på tema:</span>
+          <span className="inline-flex items-center gap-1 bg-[#002C6C]/10 text-[#002C6C] text-sm px-3 py-1 rounded-full font-medium">
+            {activeThemeName}
+            <a href={createPageUrl('BriefList')} className="ml-1 text-[#002C6C]/60 hover:text-[#002C6C]">✕</a>
+          </span>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
