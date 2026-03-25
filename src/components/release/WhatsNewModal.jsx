@@ -34,12 +34,12 @@ export default function WhatsNewModal({ open, onClose }) {
         {/* Header */}
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="h-5 w-5 text-[#002C6C]" />
-          <h2 className="text-base font-semibold text-[#002C6C]">Nyheter i Dynamisk Brief – v1.2.0</h2>
+          <h2 className="text-base font-semibold text-[#002C6C]">Endringer og forbedringer siden siste versjon</h2>
         </div>
 
         {/* Content */}
         <p className="text-sm text-[#454545]">
-          Denne versjonen inneholder forbedringer i språk og brukeropplevelse. «Guidet modus» heter nå «Detaljert modus», og vi har fjernet anbefalinger slik at du selv velger den arbeidsflyten som passer best.
+          Denne versjonen gjør Dynamisk Brief enklere å bruke og lettere å forstå. Hurtigmodus er nå tilgjengelig for deg som vil komme raskere i gang. Vi har også gjort arbeidsflyten tydeligere og forbedret innsynet i kildemateriale og input, slik at det er enklere å forstå hva innholdet bygger på og hva som kan justeres.
         </p>
 
         {/* Dismiss button */}
@@ -48,7 +48,7 @@ export default function WhatsNewModal({ open, onClose }) {
             onClick={handleClose}
             className="px-4 py-2 bg-[#002C6C] text-white text-sm font-medium rounded-lg hover:bg-[#002C6C]/80 transition-colors"
           >
-            Forstått
+            Lukk
           </button>
         </div>
       </div>
