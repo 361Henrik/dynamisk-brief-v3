@@ -86,9 +86,8 @@ export default function SidePanel({ currentPageName, briefCurrentStep, onOpenGui
         {/* Admin section */}
         {adminNavItems.length > 0 && (
           <>
-            <div className="pt-2 pb-1 px-3">
+            <div className="pt-1 pb-0 px-3">
               <div className="border-t border-[#B1B3B3]" />
-              <p className="text-xs text-[#888B8D] font-medium uppercase tracking-wider mt-2">Administrasjon</p>
             </div>
             {adminNavItems.map((item) => (
               <Link
