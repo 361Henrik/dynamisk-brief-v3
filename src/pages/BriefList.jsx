@@ -49,27 +49,26 @@ function BriefListContent() {
   const { data: briefs = [], isLoading } = useQuery({
     queryKey: ['briefs', 'all'],
     queryFn: async () => {
-      const allBriefs = await base44.entities.Brief.filter({ created_by: user?.email }, '-created_date');
-      return allBriefs;
+      return base44.entities.Brief.filter({ created_by: user?.email }, '-created_date');
     },
     enabled: !!user?.email
   });
 
+  const { data: themes = [] } = useQuery({
+    queryKey: ['themes'],
+    queryFn: async () => base44.entities.Theme.list(),
+  });
+
   const deleteBriefMutation = useMutation({
     mutationFn: async (briefId) => {
-      // Delete related data first
       const [sources, dialogEntries] = await Promise.all([
         base44.entities.BriefSourceMaterial.filter({ briefId }),
         base44.entities.DialogEntry.filter({ briefId })
       ]);
-      
-      // Delete all related records
       await Promise.all([
         ...sources.map(s => base44.entities.BriefSourceMaterial.delete(s.id)),
         ...dialogEntries.map(d => base44.entities.DialogEntry.delete(d.id))
       ]);
-      
-      // Delete the brief itself
       await base44.entities.Brief.delete(briefId);
     },
     onSuccess: () => {
@@ -100,9 +99,7 @@ function BriefListContent() {
     const matchesSearch = !searchQuery || 
       brief.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       brief.themeName?.toLowerCase().includes(searchQuery.toLowerCase());
-    
     const matchesStatus = statusFilter === 'all' || brief.status === statusFilter;
-    
     return matchesSearch && matchesStatus;
   });
 
@@ -110,6 +107,21 @@ function BriefListContent() {
     if (!dateString) return '-';
     return format(new Date(dateString), 'd. MMM yyyy', { locale: nb });
   };
+
+  // Group filtered briefs by theme name
+  const grouped = {};
+  filteredBriefs.forEach((brief) => {
+    const key = brief.themeName || 'Ukategorisert';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(brief);
+  });
+
+  // Order: known themes first (in their defined order), then Ukategorisert last
+  const themeOrder = themes.map(t => t.name);
+  const sortedKeys = [
+    ...themeOrder.filter(name => grouped[name]),
+    ...Object.keys(grouped).filter(k => !themeOrder.includes(k))
+  ];
 
   return (
     <div className="space-y-6">
@@ -180,71 +192,78 @@ function BriefListContent() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {filteredBriefs.map((brief) => (
-            <Link
-              key={brief.id}
-              to={createPageUrl('BriefEditor') + `?id=${brief.id}`}
-              className="block"
-            >
-              <Card className="hover:border-[#002C6C]/30 hover:shadow-md transition-all">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        brief.status === 'godkjent' ? 'bg-gs1-blue/10' : 'bg-gs1-orange/10'
-                      }`}>
-                        {brief.status === 'godkjent' 
-                          ? <CheckCircle2 className="h-5 w-5 text-gs1-blue" />
-                          : <Clock className="h-5 w-5 text-gs1-orange" />
-                        }
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gs1-dark-gray">{brief.title}</h3>
-                        <div className="flex items-center space-x-3 text-sm text-gs1-medium-gray mt-1">
-                          <span>{brief.themeName || 'Ukjent tema'}</span>
-                          <span>•</span>
-                          <span>Opprettet {formatDate(brief.created_date)}</span>
+        <div className="space-y-8">
+          {sortedKeys.map((themeName) => (
+            <div key={themeName}>
+              <h2 className="text-xs font-semibold text-gs1-medium-gray uppercase tracking-wider mb-3 px-1">
+                {themeName}
+              </h2>
+              <div className="space-y-3">
+                {grouped[themeName].map((brief) => (
+                  <Link
+                    key={brief.id}
+                    to={createPageUrl('BriefEditor') + `?id=${brief.id}`}
+                    className="block"
+                  >
+                    <Card className="hover:border-[#002C6C]/30 hover:shadow-md transition-all">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                              brief.status === 'godkjent' ? 'bg-gs1-blue/10' : 'bg-gs1-orange/10'
+                            }`}>
+                              {brief.status === 'godkjent'
+                                ? <CheckCircle2 className="h-5 w-5 text-gs1-blue" />
+                                : <Clock className="h-5 w-5 text-gs1-orange" />
+                              }
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-gs1-dark-gray">{brief.title}</h3>
+                              <div className="flex items-center space-x-3 text-sm text-gs1-medium-gray mt-1">
+                                <span>Opprettet {formatDate(brief.created_date)}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className={`text-xs px-3 py-1 rounded-full font-medium ${
+                              brief.status === 'godkjent'
+                                ? 'bg-gs1-blue/10 text-gs1-blue'
+                                : 'bg-gs1-orange/10 text-gs1-orange'
+                            }`}>
+                              {brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}
+                            </span>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {brief.status !== 'godkjent' ? (
+                                  <DropdownMenuItem
+                                    onClick={(e) => handleDeleteClick(e, brief)}
+                                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Slett brief
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem disabled className="text-gs1-medium-gray">
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Kan ikke slette godkjent brief
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                            <ArrowRight className="h-5 w-5 text-gs1-medium-gray" />
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                        brief.status === 'godkjent' 
-                          ? 'bg-gs1-blue/10 text-gs1-blue' 
-                          : 'bg-gs1-orange/10 text-gs1-orange'
-                      }`}>
-                        {brief.status === 'godkjent' ? 'Godkjent' : 'Utkast'}
-                      </span>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {brief.status !== 'godkjent' ? (
-                            <DropdownMenuItem 
-                              onClick={(e) => handleDeleteClick(e, brief)}
-                              className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Slett brief
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem disabled className="text-gs1-medium-gray">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Kan ikke slette godkjent brief
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      <ArrowRight className="h-5 w-5 text-gs1-medium-gray" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
