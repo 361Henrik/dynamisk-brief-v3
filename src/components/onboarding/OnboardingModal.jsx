@@ -8,24 +8,24 @@ const SLIDES = [
     title: 'Slik bruker du GS1 Norway Dynamisk Brief',
     bullets: [
       { icon: Sparkles,      text: 'En rask og strukturert flyt fra kildemateriale til ferdig kommunikasjonsbrief' },
-      { icon: Zap,           text: 'Velg mellom Hurtigmodus (anbefalt) eller Guidet modus ved oppstart' },
+      { icon: Zap,           text: 'Velg mellom Hurtigmodus eller Detaljert modus ved oppstart' },
       { icon: FileText,      text: 'Fem steg: Kildemateriale → Rammer → Intervju → Foreslått brief → Ferdig brief' },
     ],
     proTip: 'Usikker? Velg Hurtigmodus – du kan alltid redigere alt etterpå.'
   },
   {
-    title: '⚡ Hurtigmodus (Anbefalt)',
+    title: '⚡ Hurtigmodus',
     bullets: [
       { icon: Zap,           text: 'Fyll inn det du allerede vet i et enkelt skjema – del for del' },
-      { icon: Zap,           text: 'Dynamisk Brief stiller bare spørsmål om seksjonene du ikke har fylt ut' },
+      { icon: Zap,           text: 'Systemet fokuserer kun på det som mangler (seksjonene du ikke har fylt ut)' },
       { icon: Rocket,        text: 'Raskere prosess: færre spørsmål, mer presis brief' },
     ],
     proTip: 'Jo mer du fyller inn på forhånd, jo kortere blir intervjuet.'
   },
   {
-    title: '💬 Guidet modus',
+    title: '💬 Detaljert modus',
     bullets: [
-      { icon: MessageSquare, text: 'Dynamisk Brief stiller deg spørsmål gjennom alle 9 seksjoner, én om gangen' },
+      { icon: MessageSquare, text: 'Systemet veileder deg gjennom alle 9 seksjoner, én om gangen' },
       { icon: MessageSquare, text: 'Perfekt når du vil tenke høyt eller er usikker på hva som trengs' },
       { icon: Pencil,        text: 'Alle svar lagres og brukes automatisk i utkastet i steg 4' },
     ],
@@ -44,7 +44,7 @@ const SLIDES = [
     title: 'Steg 2–3: Rammer og intervju',
     bullets: [
       { icon: Target,        text: 'Steg 2: Sett tema, målgruppe, kanaler og frist for prosjektet' },
-      { icon: MessageSquare, text: 'Steg 3: Dynamisk Brief stiller spørsmål om det som mangler (færre i Hurtigmodus)' },
+      { icon: MessageSquare, text: 'Steg 3: Systemet stiller spørsmål om det som mangler (færre i Hurtigmodus)' },
       { icon: Pencil,        text: 'Alle svar lagres og brukes i utkastet i steg 4' },
     ],
     proTip: 'Hold deg til én tydelig målgruppe – det gir et mer presist resultat.'
