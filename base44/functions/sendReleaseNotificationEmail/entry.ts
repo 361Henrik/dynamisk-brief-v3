@@ -38,8 +38,6 @@ Deno.serve(async (req) => {
 
   const body = `Hei,
 
-det er klart en ny versjon av Dynamisk Brief – ${release.version}.
-
 ${release.summary}
 
 Dynamisk Brief hjelper deg å lage komplette, kvalitetssikrede kommunikasjonsbriefs raskere og enklere enn før.
