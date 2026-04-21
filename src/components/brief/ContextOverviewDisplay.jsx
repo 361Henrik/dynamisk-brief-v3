@@ -32,7 +32,7 @@ function getSourceIcon(sourceType) {
   return Type;
 }
 
-export default function ContextOverviewDisplay({ brief, sources = [], onBack, onContinue }) {
+export default function ContextOverviewDisplay({ brief, sources = [], failedSources = [], onBack, onContinue }) {
   const contextSummary = brief?.contextSummary || {};
   const understoodItems = UNDERSTOOD_ITEMS.filter((item) => contextSummary[item.key]);
   const missingSummary = contextSummary.missingInformationSummary;
@@ -43,7 +43,7 @@ export default function ContextOverviewDisplay({ brief, sources = [], onBack, on
         <p className="text-xs text-[#888B8D] uppercase tracking-wider">Kontekstoversikt</p>
         <h1 className="text-2xl font-bold text-gray-900">Dette har systemet hentet ut fra kildematerialet</h1>
         <p className="text-gray-500 max-w-2xl mx-auto">
-          Denne oversikten er laget fra kildene du har lagt inn og brukes til å forhåndsutfylle og styre de neste stegene i briefen.
+          Denne oversikten er laget fra kildene du har lagt inn og brukes til å hjelpe Hurtigmodus, gi bedre retning i Detaljert modus og synliggjøre hva som fortsatt mangler.
         </p>
       </div>
 
@@ -52,8 +52,8 @@ export default function ContextOverviewDisplay({ brief, sources = [], onBack, on
           <Info className="h-5 w-5 text-[#002C6C] mt-0.5 flex-shrink-0" />
           <div className="space-y-1 text-sm">
             <p className="font-medium text-[#454545]">Slik brukes denne oversikten videre</p>
-            <p className="text-[#888B8D]">Forslagene her brukes til å prefill i Hurtigmodus og til å gi bedre retning i Detaljert modus.</p>
-            <p className="text-[#888B8D]">Manglende informasjon betyr ikke at noe er feil — bare at du trolig må fylle inn mer senere.</p>
+            <p className="text-[#888B8D]">Forslagene her brukes til å prefill i Hurtigmodus og til å gi bedre retning i Detaljert modus / Rammer.</p>
+            <p className="text-[#888B8D]">Manglende informasjon betyr ikke at noe er feil — bare at du trolig må fylle inn mer manuelt senere i briefprosessen.</p>
           </div>
         </CardContent>
       </Card>
@@ -103,10 +103,10 @@ export default function ContextOverviewDisplay({ brief, sources = [], onBack, on
         <CardHeader>
           <CardTitle className="text-[#454545]">Kilder brukt</CardTitle>
           <CardDescription>
-            Dette er kildene som ligger til grunn for oppsummeringen.
+            Dette er kildene som faktisk ble brukt i oppsummeringen.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           {sources.length > 0 ? (
             <div className="space-y-3">
               {sources.map((source) => {
@@ -125,6 +125,17 @@ export default function ContextOverviewDisplay({ brief, sources = [], onBack, on
             </div>
           ) : (
             <p className="text-sm text-[#888B8D]">Ingen kilder tilgjengelig.</p>
+          )}
+
+          {failedSources.length > 0 && (
+            <div className="rounded-lg border border-[#F26334]/20 bg-[#F26334]/5 p-4">
+              <p className="text-sm font-medium text-[#454545] mb-2">Ikke brukt i oppsummeringen</p>
+              <div className="space-y-2">
+                {failedSources.map((source) => (
+                  <p key={source.id} className="text-sm text-[#666] break-words">• {getSourceLabel(source)}</p>
+                ))}
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

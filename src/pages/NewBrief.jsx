@@ -14,7 +14,9 @@ import {
   Zap,
   MessageSquare,
   ChevronRight,
-  Upload
+  Upload,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,6 +34,9 @@ function NewBriefContent() {
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [briefId, setBriefId] = useState(null);
   const [refreshSourcesKey, setRefreshSourcesKey] = useState(0);
+  const [hasGeneratedSummary, setHasGeneratedSummary] = useState(false);
+  const [isSummaryStale, setIsSummaryStale] = useState(false);
+  const [summaryError, setSummaryError] = useState(false);
 
   const { data: brief } = useQuery({
     queryKey: ['new-brief', briefId],
@@ -74,19 +79,26 @@ function NewBriefContent() {
     onSuccess: (brief) => {
       setBriefId(brief.id);
       setStep('source_material');
+      setHasGeneratedSummary(false);
+      setIsSummaryStale(false);
+      setSummaryError(false);
     }
   });
 
   const summarizeContextMutation = useMutation({
     mutationFn: async () => {
+      setSummaryError(false);
       return base44.functions.invoke('summarizeBriefContext', { briefId });
     },
     onSuccess: async () => {
       setRefreshSourcesKey((value) => value + 1);
+      setHasGeneratedSummary(true);
+      setIsSummaryStale(false);
+      setSummaryError(false);
       setStep('context_overview');
     },
     onError: () => {
-      toast.error('Klarte ikke å oppsummere kildematerialet');
+      setSummaryError(true);
     }
   });
 
@@ -97,6 +109,14 @@ function NewBriefContent() {
 
   const handleContinueFromSources = () => {
     summarizeContextMutation.mutate();
+  };
+
+  const handleSourcesChange = () => {
+    setRefreshSourcesKey((value) => value + 1);
+    if (hasGeneratedSummary) {
+      setIsSummaryStale(true);
+    }
+    setSummaryError(false);
   };
 
   const handleContinueFromContextOverview = () => {
@@ -144,15 +164,52 @@ function NewBriefContent() {
           key={refreshSourcesKey}
           briefId={briefId}
           sources={briefSources}
-          onSourcesChange={() => setRefreshSourcesKey((value) => value + 1)}
+          onSourcesChange={handleSourcesChange}
           onContinue={handleContinueFromSources}
         />
 
+        {isSummaryStale && !summarizeContextMutation.isPending && !summaryError && (
+          <Card className="border-[#F26334]/20 bg-[#F26334]/5">
+            <CardContent className="p-4 flex items-start gap-3">
+              <RefreshCw className="h-5 w-5 text-[#F26334] mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-[#454545]">Kontekstoversikten må oppdateres</p>
+                <p className="text-sm text-[#888B8D] mt-1">Du har endret kildematerialet etter forrige oppsummering. Når du fortsetter, lager vi en ny kontekstoversikt før modusvalg.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {summarizeContextMutation.isPending && (
-          <div className="flex items-center justify-center gap-3 text-sm text-[#888B8D]">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Oppsummerer kildemateriale...
-          </div>
+          <Card className="border-[#002C6C]/10 bg-[#002C6C]/[0.03]">
+            <CardContent className="p-4 flex items-start gap-3">
+              <Loader2 className="h-5 w-5 text-[#002C6C] animate-spin mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-[#454545]">Forbereder kontekstoversikt</p>
+                <p className="text-sm text-[#888B8D] mt-1">Vi behandler kildematerialet ditt nå for å lage en oppdatert oppsummering som brukes videre i briefen.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {summaryError && !summarizeContextMutation.isPending && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="p-4 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-[#454545]">Vi klarte ikke å behandle kildematerialet fullt ut</p>
+                <p className="text-sm text-[#888B8D] mt-1">Prøv å oppsummere på nytt, eller gå tilbake og juster kildene før du fortsetter.</p>
+                <div className="flex flex-col sm:flex-row gap-2 mt-3">
+                  <Button onClick={handleContinueFromSources} className="bg-[#002C6C] hover:bg-[#001a45]" size="sm">
+                    Prøv igjen
+                  </Button>
+                  <Button variant="outline" onClick={() => setSummaryError(false)} size="sm">
+                    Juster kildemateriale
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     );
@@ -163,6 +220,7 @@ function NewBriefContent() {
       <ContextOverviewDisplay
         brief={brief}
         sources={briefSources.filter((source) => source.extractionStatus === 'success')}
+        failedSources={briefSources.filter((source) => source.extractionStatus === 'failed')}
         onBack={handleBackToSources}
         onContinue={handleContinueFromContextOverview}
       />
