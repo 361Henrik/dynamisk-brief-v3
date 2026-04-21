@@ -182,11 +182,10 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
     deleteSourceMutation.mutate(sourceId);
   };
 
-  const handleContinueClick = () => {
+  const handleContinueToContextOverview = () => {
     console.log('Continue clicked', {
-      sources,
-      extractionComplete: allSourcesReady,
-      briefId
+      briefId,
+      sourceCount: sources.length
     });
 
     if (!briefId) {
@@ -199,13 +198,7 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
       return;
     }
 
-    if (!allSourcesReady) {
-      toast.error('Vent til kildene er ferdig behandlet før du fortsetter.');
-      return;
-    }
-
-    console.log('Routing to context-overview');
-    onContinue?.();
+    onContinue?.('context-overview');
   };
 
   return (
@@ -404,8 +397,7 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
       <div className="flex justify-end">
         <Button
           type="button"
-          onClick={handleContinueClick}
-          disabled={!allSourcesReady}
+          onClick={handleContinueToContextOverview}
           className="bg-[#002C6C] hover:bg-[#001a45]"
         >
           {hasPendingSources ? (

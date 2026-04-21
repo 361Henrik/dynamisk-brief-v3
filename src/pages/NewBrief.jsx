@@ -142,10 +142,12 @@ function NewBriefContent() {
     createBriefMutation.mutate(theme);
   };
 
-  const handleContinueFromSources = () => {
+  const handleContinueFromSources = (nextStep) => {
+    if (nextStep !== 'context-overview') return;
+
     console.log('Routing to context-overview');
     setManualStepOverride(true);
-    summarizeContextMutation.mutate();
+    setStep('context_overview');
   };
 
   const handleSourcesChange = () => {
