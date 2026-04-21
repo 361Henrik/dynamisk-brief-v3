@@ -125,16 +125,15 @@ function NewBriefContent() {
   });
 
   const summarizeContextMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ briefId: targetBriefId }) => {
       setSummaryError(false);
-      return base44.functions.invoke('summarizeBriefContext', { briefId });
+      return base44.functions.invoke('summarizeBriefContext', { briefId: targetBriefId });
     },
     onSuccess: async () => {
       setRefreshSourcesKey((value) => value + 1);
       setHasGeneratedSummary(true);
       setIsSummaryStale(false);
       setSummaryError(false);
-      setStep('context_overview');
       setManualStepOverride(false);
     },
     onError: () => {
@@ -148,12 +147,21 @@ function NewBriefContent() {
     createBriefMutation.mutate(theme);
   };
 
-  const handleContinueFromSources = (nextStep) => {
-    if (nextStep !== 'context-overview') return;
+  const handleContinueWithSummary = () => {
+    if (!briefId) return;
 
-    console.log('Routing to context-overview');
+    console.log('Starting summary generation');
     setManualStepOverride(true);
-    setStep('context_overview');
+
+    summarizeContextMutation.mutate(
+      { briefId },
+      {
+        onSuccess: () => {
+          console.log('Summary generated, routing now');
+          setStep('context_overview');
+        }
+      }
+    );
   };
 
   const handleSourcesChange = () => {
@@ -223,7 +231,7 @@ function NewBriefContent() {
           briefId={briefId}
           sources={briefSources}
           onSourcesChange={handleSourcesChange}
-          onContinue={handleContinueFromSources}
+          onContinueWithSummary={handleContinueWithSummary}
         />
 
         <SharedReferenceSelector
@@ -263,7 +271,7 @@ function NewBriefContent() {
                 <p className="text-sm font-medium text-[#454545]">Vi klarte ikke å behandle kildematerialet fullt ut</p>
                 <p className="text-sm text-[#888B8D] mt-1">Prøv å oppsummere på nytt, eller gå tilbake og juster kildene før du fortsetter.</p>
                 <div className="flex flex-col sm:flex-row gap-2 mt-3">
-                  <Button onClick={() => summarizeContextMutation.mutate()} className="bg-[#002C6C] hover:bg-[#001a45]" size="sm">
+                  <Button onClick={() => summarizeContextMutation.mutate({ briefId })} className="bg-[#002C6C] hover:bg-[#001a45]" size="sm">
                     Prøv igjen
                   </Button>
                   <Button variant="outline" onClick={() => setSummaryError(false)} size="sm">
