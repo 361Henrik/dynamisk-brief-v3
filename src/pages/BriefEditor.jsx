@@ -246,7 +246,7 @@ function BriefEditorContent() {
             briefId={briefId}
             sources={sources}
             onSourcesChange={refetchSources}
-            onContinue={() => handleUpdateStep('rammer')}
+            mode="editor"
           />
           <FeedbackBox pageContext="BriefEditor" stepContext="source_material" briefId={briefId} />
         </>

@@ -25,7 +25,7 @@ const MAX_URLS = 5;
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-export default function SourceMaterialUpload({ briefId, sources = [], onSourcesChange, onContinueWithSummary, isSummarizing = false }) {
+export default function SourceMaterialUpload({ briefId, sources = [], onSourcesChange, onContinueWithSummary, isSummarizing = false, mode = 'creation' }) {
   const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
   const [urlInput, setUrlInput] = useState('');
@@ -398,25 +398,27 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
       </Card>
 
       {/* Continue Button */}
-      <div className="flex justify-end">
-        <Button
-          type="button"
-          onClick={handleContinueWithSummary}
-          disabled={hasPendingSources || !hasAtLeastOneSource || createSourceMutation.isPending || deleteSourceMutation.isPending || isSummarizing}
-          className="bg-[#002C6C] hover:bg-[#001a45]"
-        >
-          {hasPendingSources || isSummarizing ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Lager oppsummering...
-            </>
-          ) : (
-            'Fortsett til kontekstoversikt'
-          )}
-        </Button>
-      </div>
+      {mode === 'creation' && (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            onClick={handleContinueWithSummary}
+            disabled={hasPendingSources || !hasAtLeastOneSource || createSourceMutation.isPending || deleteSourceMutation.isPending || isSummarizing}
+            className="bg-[#002C6C] hover:bg-[#001a45]"
+          >
+            {hasPendingSources || isSummarizing ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Lager oppsummering...
+              </>
+            ) : (
+              'Fortsett til kontekstoversikt'
+            )}
+          </Button>
+        </div>
+      )}
 
-      {!hasAtLeastOneSource && (
+      {!hasAtLeastOneSource && mode === 'creation' && (
         <p className="text-center text-sm text-gray-500">
           Legg til minst én kilde for å fortsette
         </p>
