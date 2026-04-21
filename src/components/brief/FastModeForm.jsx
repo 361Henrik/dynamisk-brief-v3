@@ -117,7 +117,7 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
           </div>
           <h2 className="text-xl font-semibold text-gs1-dark-gray">Fyll inn det du vet</h2>
           <p className="text-sm text-gs1-medium-gray mt-1">
-            Skriv inn informasjon der du har den. AI vil automatisk stille spørsmål om det som mangler ({SECTIONS.length - filledCount} gjenstår).
+            Skriv inn informasjon der du har den. Systemet følger opp det som mangler senere i prosessen ({SECTIONS.length - filledCount} gjenstår).
           </p>
           {brief?.contextSummary && (
             <div className="mt-2 space-y-1">
@@ -182,7 +182,7 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
                 <div className="flex items-center gap-2">
                   {!isFilled && (
                     <span className="inline-flex items-center rounded-md border border-gs1-border px-2 py-0.5 text-xs text-gs1-medium-gray">
-                      Fylles i dialog
+                      Fylles ut senere
                     </span>
                   )}
                   {isExpanded ? <ChevronUp className="h-4 w-4 text-gs1-medium-gray" /> : <ChevronDown className="h-4 w-4 text-gs1-medium-gray" />}
@@ -209,7 +209,7 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
                   <p className="text-xs text-gs1-medium-gray mt-2">Denne seksjonen er startet med oppsummert bakgrunn og sentrale budskap fra kildene.</p>
                 )}
                 {['maal', 'maalgrupper', 'budskap'].includes(section.key) && brief?.contextSummary?.missingInformationSummary && !values[section.key]?.trim() && (
-                  <p className="text-xs text-gs1-medium-gray mt-2">Hvis dette ikke dekkes godt nok av kildene, vil AI følge opp det som mangler senere.</p>
+                  <p className="text-xs text-gs1-medium-gray mt-2">Hvis dette ikke dekkes godt nok av kildene, blir det fulgt opp senere i prosessen.</p>
                 )}
               </CardContent>
             )}
