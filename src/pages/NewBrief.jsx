@@ -297,11 +297,10 @@ function NewBriefContent() {
         <div className="text-center">
           <p className="text-xs text-[#888B8D] uppercase tracking-wider mb-1">Tema valgt</p>
           <h1 className="text-2xl font-bold text-gray-900">{selectedTheme?.name}</h1>
-          <p className="text-gray-500 mt-2">Kildematerialet er klart. Velg hvordan du vil opprette briefen</p>
+          <p className="text-gray-500 mt-2">Kildematerialet er analysert. Nå kan du fullføre og tilpasse briefen.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {/* Fast Mode - visually dominant */}
+        <div className="max-w-xl mx-auto">
           <Card
             className="cursor-pointer border-2 border-[#F26334] shadow-md hover:shadow-lg transition-all relative"
             onClick={() => {
@@ -310,55 +309,22 @@ function NewBriefContent() {
               setStep('fast_mode');
             }}
           >
-
             <CardContent className="p-6">
               <div className="w-14 h-14 bg-[#F26334]/15 rounded-2xl flex items-center justify-center mb-4">
                 <Zap className="h-7 w-7 text-[#F26334]" />
               </div>
-              <h3 className="font-bold text-[#454545] text-xl mb-1">Hurtigmodus</h3>
+              <h3 className="font-bold text-[#454545] text-xl mb-1">Fullfør briefen</h3>
               <p className="text-[#888B8D] text-sm mb-4">
-                Fyll inn det du vet. Systemet følger opp det som mangler, så du kommer raskere i mål.
+                Basert på kildematerialet har vi laget et første grunnlag. Nå kan du justere, prioritere og fylle inn det som mangler.
               </p>
               <ul className="text-xs text-[#888B8D] space-y-1.5 mb-5">
-                <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Du styrer tempoet</li>
-                <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Hopper over seksjonene du allerede kan</li>
-                <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Færre spørsmål fra systemet</li>
+                <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Juster og presiser det viktigste</li>
+                <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Fyll inn det som mangler</li>
+                <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#F26334] rounded-full flex-shrink-0" />Bygg videre på det systemet allerede har forstått</li>
               </ul>
               <div className="w-full flex items-center justify-center gap-2 bg-[#F26334] text-white rounded-lg py-2.5 text-sm font-medium">
-                Start hurtig <ChevronRight className="h-4 w-4" />
+                Fortsett <ChevronRight className="h-4 w-4" />
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Guided Mode */}
-          <Card
-            className="cursor-pointer border-2 border-gray-200 hover:border-[#002C6C] hover:shadow-md transition-all"
-            onClick={handleSelectGuided}
-          >
-            <CardContent className="p-6">
-              {createBriefMutation.isPending ? (
-                <div className="flex items-center justify-center h-full py-10">
-                  <Loader2 className="h-8 w-8 animate-spin text-[#002C6C]" />
-                </div>
-              ) : (
-                <>
-                  <div className="w-14 h-14 bg-[#002C6C]/10 rounded-2xl flex items-center justify-center mb-4">
-                    <MessageSquare className="h-7 w-7 text-[#002C6C]" />
-                  </div>
-                  <h3 className="font-bold text-[#454545] text-xl mb-1">Detaljert modus</h3>
-                  <p className="text-[#888B8D] text-sm mb-4">
-                    Systemet veileder deg gjennom alle 9 seksjoner. Perfekt når du vil tenke høyt.
-                  </p>
-                  <ul className="text-xs text-[#888B8D] space-y-1.5 mb-5">
-                    <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#002C6C] rounded-full flex-shrink-0" />Strukturert intervju trinn for trinn</li>
-                    <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#002C6C] rounded-full flex-shrink-0" />Du blir ledet gjennom spørsmålene steg for steg</li>
-                    <li className="flex items-center gap-2"><span className="w-2 h-2 bg-[#002C6C] rounded-full flex-shrink-0" />Du kan legge til kildemateriale underveis</li>
-                  </ul>
-                  <div className="w-full flex items-center justify-center gap-2 border border-[#002C6C] text-[#002C6C] rounded-lg py-2.5 text-sm font-medium">
-                    Start detaljert <ChevronRight className="h-4 w-4" />
-                  </div>
-                </>
-              )}
             </CardContent>
           </Card>
         </div>
