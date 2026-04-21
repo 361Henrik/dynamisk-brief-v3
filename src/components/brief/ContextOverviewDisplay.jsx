@@ -1,13 +1,13 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight, FileText, Link as LinkIcon, Type, Info, Sparkles, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, FileText, Link as LinkIcon, Type, Info, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-const UNDERSTOOD_ITEMS = [
+const OVERVIEW_SECTIONS = [
   { key: 'backgroundSummary', label: 'Bakgrunn' },
-  { key: 'targetAudienceSummary', label: 'Målgruppe' },
-  { key: 'objectivesSummary', label: 'Mål' },
-  { key: 'keyMessagesSummary', label: 'Hovedbudskap' },
+  { key: 'objectivesSummary', label: 'Mål og suksesskriterier' },
+  { key: 'targetAudienceSummary', label: 'Målgrupper' },
+  { key: 'keyMessagesSummary', label: 'Budskap og hovedpoenger' },
   { key: 'toneSummary', label: 'Tone' }
 ];
 
@@ -34,16 +34,15 @@ function getSourceIcon(sourceType) {
 
 export default function ContextOverviewDisplay({ brief, sources = [], failedSources = [], onBack, onContinue }) {
   const contextSummary = brief?.contextSummary || {};
-  const understoodItems = UNDERSTOOD_ITEMS.filter((item) => contextSummary[item.key]);
-  const missingSummary = contextSummary.missingInformationSummary;
+  const overviewSections = OVERVIEW_SECTIONS.filter((item) => contextSummary[item.key]?.trim());
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center space-y-2">
         <p className="text-xs text-[#888B8D] uppercase tracking-wider">Kontekstoversikt</p>
-        <h1 className="text-2xl font-bold text-gray-900">Dette har systemet hentet ut fra kildematerialet</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Dette har vi forstått så langt</h1>
         <p className="text-gray-500 max-w-2xl mx-auto">
-          Denne oversikten er laget fra kildene du har lagt inn og brukes til å hjelpe Hurtigmodus, gi bedre retning i Detaljert modus og synliggjøre hva som fortsatt mangler.
+          Her ser du systemets uttrukne forståelse av materialet du har lastet opp, strukturert som et første utgangspunkt for briefen.
         </p>
       </div>
 
@@ -62,14 +61,14 @@ export default function ContextOverviewDisplay({ brief, sources = [], failedSour
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-[#454545]">
             <Sparkles className="h-5 w-5 text-[#002C6C]" />
-            Hva vi har forstått
+            Dette har vi forstått så langt
           </CardTitle>
           <CardDescription>
-            Dette er de viktigste punktene systemet har hentet ut fra materialet ditt.
+            Dette er systemets uttrukne forståelse av kildematerialet ditt, organisert etter brief-relevante områder.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {understoodItems.length > 0 ? understoodItems.map((item) => (
+          {overviewSections.length > 0 ? overviewSections.map((item) => (
             <div key={item.key} className="rounded-lg border border-[#E5E7EB] p-4">
               <h3 className="text-sm font-semibold text-[#454545] mb-1">{item.label}</h3>
               <p className="text-sm text-[#666] whitespace-pre-wrap">{contextSummary[item.key]}</p>
@@ -77,25 +76,6 @@ export default function ContextOverviewDisplay({ brief, sources = [], failedSour
           )) : (
             <p className="text-sm text-[#888B8D]">Ingen oppsummering er tilgjengelig ennå.</p>
           )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-[#454545]">
-            <AlertCircle className="h-5 w-5 text-[#F26334]" />
-            Dette mangler fortsatt i kildematerialet
-          </CardTitle>
-          <CardDescription>
-            Her er det systemet ikke fant tydelig nok i kildene og som du kanskje må fylle inn senere.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-lg border border-[#F26334]/20 bg-[#F26334]/5 p-4">
-            <p className="text-sm text-[#666] whitespace-pre-wrap">
-              {missingSummary || 'Ingen tydelige mangler ble identifisert i kildematerialet.'}
-            </p>
-          </div>
         </CardContent>
       </Card>
 
