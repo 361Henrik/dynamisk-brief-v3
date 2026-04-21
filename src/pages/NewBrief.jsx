@@ -31,9 +31,10 @@ function NewBriefContent() {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const modeParam = urlParams.get('mode');
-  const [step, setStep] = useState(modeParam === 'fast' ? 'fast_mode' : 'select_theme');
+  const briefIdParam = urlParams.get('briefId');
+  const [step, setStep] = useState(briefIdParam ? 'source_material' : 'select_theme');
   const [selectedTheme, setSelectedTheme] = useState(null);
-  const [briefId, setBriefId] = useState(null);
+  const [briefId, setBriefId] = useState(briefIdParam || null);
   const [refreshSourcesKey, setRefreshSourcesKey] = useState(0);
   const [hasGeneratedSummary, setHasGeneratedSummary] = useState(false);
   const [isSummaryStale, setIsSummaryStale] = useState(false);
@@ -76,7 +77,7 @@ function NewBriefContent() {
     }
 
     if (!hasContextSummary) {
-      setStep('source_material');
+      setStep('context_overview');
       return;
     }
 
@@ -159,15 +160,18 @@ function NewBriefContent() {
   };
 
   const handleContinueFromContextOverview = () => {
+    setManualStepOverride(true);
     setStep('select_mode');
   };
 
   const handleBackToSources = () => {
+    setManualStepOverride(true);
     setStep('source_material');
   };
 
   const handleSelectGuided = async () => {
     setSelectedMode('fast');
+    setManualStepOverride(true);
     window.history.replaceState({}, '', createPageUrl('NewBrief') + `?briefId=${briefId}&mode=fast`);
     setStep('fast_mode');
   };
@@ -254,7 +258,7 @@ function NewBriefContent() {
                 <p className="text-sm font-medium text-[#454545]">Vi klarte ikke å behandle kildematerialet fullt ut</p>
                 <p className="text-sm text-[#888B8D] mt-1">Prøv å oppsummere på nytt, eller gå tilbake og juster kildene før du fortsetter.</p>
                 <div className="flex flex-col sm:flex-row gap-2 mt-3">
-                  <Button onClick={handleContinueFromSources} className="bg-[#002C6C] hover:bg-[#001a45]" size="sm">
+                  <Button onClick={() => summarizeContextMutation.mutate()} className="bg-[#002C6C] hover:bg-[#001a45]" size="sm">
                     Prøv igjen
                   </Button>
                   <Button variant="outline" onClick={() => setSummaryError(false)} size="sm">
