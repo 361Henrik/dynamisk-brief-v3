@@ -25,7 +25,7 @@ const MAX_URLS = 5;
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-export default function SourceMaterialUpload({ briefId, sources = [], onSourcesChange, onContinueWithSummary }) {
+export default function SourceMaterialUpload({ briefId, sources = [], onSourcesChange, onContinueWithSummary, isSummarizing = false }) {
   const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
   const [urlInput, setUrlInput] = useState('');
@@ -395,13 +395,13 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
         <Button
           type="button"
           onClick={handleContinueWithSummary}
-          disabled={hasPendingSources || !hasAtLeastOneSource || createSourceMutation.isPending || deleteSourceMutation.isPending}
+          disabled={hasPendingSources || !hasAtLeastOneSource || createSourceMutation.isPending || deleteSourceMutation.isPending || isSummarizing}
           className="bg-[#002C6C] hover:bg-[#001a45]"
         >
-          {hasPendingSources ? (
+          {hasPendingSources || isSummarizing ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Venter på behandling...
+              Lager oppsummering...
             </>
           ) : (
             'Fortsett til kontekstoversikt'

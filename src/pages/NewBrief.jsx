@@ -148,8 +148,23 @@ function NewBriefContent() {
   };
 
   const handleContinueWithSummary = () => {
-    setManualStepOverride(true);
-    setStep('context_overview');
+    if (!briefId) return;
+
+    console.log('Starting summary generation');
+
+    summarizeContextMutation.mutate(
+      { briefId },
+      {
+        onSuccess: () => {
+          console.log('Summary done - forcing navigation');
+          setManualStepOverride(true);
+          setStep('context_overview');
+        },
+        onError: () => {
+          setSummaryError(true);
+        }
+      }
+    );
   };
 
   const handleSourcesChange = () => {
@@ -220,6 +235,7 @@ function NewBriefContent() {
           sources={briefSources}
           onSourcesChange={handleSourcesChange}
           onContinueWithSummary={handleContinueWithSummary}
+          isSummarizing={summarizeContextMutation.isPending}
         />
 
         <SharedReferenceSelector
