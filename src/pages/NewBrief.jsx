@@ -24,6 +24,7 @@ import CreateThemeModal from '@/components/theme/CreateThemeModal';
 import FastModeForm from '@/components/brief/FastModeForm';
 import SourceMaterialUpload from '@/components/brief/SourceMaterialUpload';
 import ContextOverviewDisplay from '@/components/brief/ContextOverviewDisplay';
+import SharedReferenceSelector from '@/components/brief/SharedReferenceSelector';
 import { toast } from 'sonner';
 
 function NewBriefContent() {
@@ -49,6 +50,11 @@ function NewBriefContent() {
     queryFn: () => base44.entities.BriefSourceMaterial.filter({ briefId }),
     enabled: !!briefId
   });
+
+  const handleSharedReferencesChange = async (sharedReferenceDocIds) => {
+    if (!briefId) return;
+    await base44.entities.Brief.update(briefId, { sharedReferenceDocIds });
+  };
 
   useEffect(() => {
     if (modeParam === 'fast' && briefId) {
@@ -147,15 +153,15 @@ function NewBriefContent() {
         <div className="text-center">
           <p className="text-xs text-[#888B8D] uppercase tracking-wider mb-1">Tema valgt</p>
           <h1 className="text-2xl font-bold text-gray-900">{selectedTheme?.name}</h1>
-          <p className="text-gray-500 mt-2">Legg til delt kildemateriale før du velger modus</p>
+          <p className="text-gray-500 mt-2">Legg til brief-spesifikt kildemateriale før du velger modus</p>
         </div>
 
         <Card className="border-[#002C6C]/10 bg-[#002C6C]/[0.03]">
           <CardContent className="p-4 flex items-start gap-3">
             <Upload className="h-5 w-5 text-[#002C6C] mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-[#454545]">Dette materialet brukes i begge moduser</p>
-              <p className="text-sm text-[#888B8D] mt-1">Kildene kobles til briefen nå og oppsummeres én gang før du går videre.</p>
+              <p className="text-sm font-medium text-[#454545]">Dette brief-spesifikke materialet brukes i begge moduser</p>
+              <p className="text-sm text-[#888B8D] mt-1">Kildene kobles til briefen nå og oppsummeres én gang før du går videre. Delte referansedokumenter velges separat under som støttekontekst.</p>
             </div>
           </CardContent>
         </Card>
@@ -166,6 +172,11 @@ function NewBriefContent() {
           sources={briefSources}
           onSourcesChange={handleSourcesChange}
           onContinue={handleContinueFromSources}
+        />
+
+        <SharedReferenceSelector
+          selectedIds={brief?.sharedReferenceDocIds || []}
+          onChange={handleSharedReferencesChange}
         />
 
         {isSummaryStale && !summarizeContextMutation.isPending && !summaryError && (
