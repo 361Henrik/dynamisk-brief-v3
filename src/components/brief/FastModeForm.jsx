@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, Zap, ArrowLeft, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, ArrowLeft, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 const SECTIONS = [
@@ -114,10 +113,6 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Badge className="bg-gs1-orange/10 text-gs1-orange border-gs1-orange/20">
-              <Zap className="h-3 w-3 mr-1" />
-              Hurtigmodus
-            </Badge>
             <span className="text-sm text-gs1-medium-gray">Tema: <strong>{theme.name}</strong></span>
           </div>
           <h2 className="text-xl font-semibold text-gs1-dark-gray">Fyll inn det du vet</h2>
@@ -186,9 +181,9 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
                 </div>
                 <div className="flex items-center gap-2">
                   {!isFilled && (
-                    <Badge variant="outline" className="text-xs text-gs1-medium-gray">
+                    <span className="inline-flex items-center rounded-md border border-gs1-border px-2 py-0.5 text-xs text-gs1-medium-gray">
                       Fylles i dialog
-                    </Badge>
+                    </span>
                   )}
                   {isExpanded ? <ChevronUp className="h-4 w-4 text-gs1-medium-gray" /> : <ChevronDown className="h-4 w-4 text-gs1-medium-gray" />}
                 </div>
@@ -236,7 +231,7 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
           {submitting ? (
             <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Oppretter brief...</>
           ) : filledCount === SECTIONS.length ? (
-            <><Zap className="h-4 w-4 mr-2" />Generer brief direkte<ArrowRight className="h-4 w-4 ml-2" /></>
+            <>Generer brief direkte<ArrowRight className="h-4 w-4 ml-2" /></>
           ) : (
             <><ArrowRight className="h-4 w-4 mr-2" />Fortsett ({SECTIONS.length - filledCount} spørsmål)</>
           )}
