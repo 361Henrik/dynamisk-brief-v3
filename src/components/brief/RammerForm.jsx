@@ -55,17 +55,17 @@ export default function RammerForm({ brief, onBack, onContinue }) {
   });
 
   useEffect(() => {
-    if (brief?.rammer) {
-      setFormData({
-        targetAudience: brief.rammer.targetAudience || '',
-        objectives: brief.rammer.objectives || '',
-        channels: brief.rammer.channels || [],
-        tone: brief.rammer.tone || '',
-        deliverables: brief.rammer.deliverables || [],
-        deadline: brief.rammer.deadline || '',
-        activationDate: brief.rammer.activationDate || ''
-      });
-    }
+    if (!brief) return;
+
+    setFormData({
+      targetAudience: brief.rammer?.targetAudience || brief.contextSummary?.targetAudienceSummary || '',
+      objectives: brief.rammer?.objectives || brief.contextSummary?.objectivesSummary || '',
+      channels: brief.rammer?.channels || [],
+      tone: brief.rammer?.tone || brief.contextSummary?.toneSummary || '',
+      deliverables: brief.rammer?.deliverables || [],
+      deadline: brief.rammer?.deadline || '',
+      activationDate: brief.rammer?.activationDate || ''
+    });
   }, [brief]);
 
   const updateBriefMutation = useMutation({
@@ -107,6 +107,11 @@ export default function RammerForm({ brief, onBack, onContinue }) {
           <CardDescription>
             Fyll ut grunnleggende informasjon som vil styre AI-dialogen og den endelige briefen.
           </CardDescription>
+          {brief?.contextSummary && (
+            <p className="text-sm text-gs1-medium-gray px-6 pb-2">
+              Forslag fra delt kildemateriale er lagt inn der det finnes, og kan redigeres fritt.
+            </p>
+          )}
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Målgruppe */}
@@ -122,6 +127,9 @@ export default function RammerForm({ brief, onBack, onContinue }) {
               onChange={(e) => handleChange('targetAudience', e.target.value)}
               rows={3}
             />
+            {brief?.contextSummary?.targetAudienceSummary && !brief?.rammer?.targetAudience && (
+              <p className="text-xs text-gs1-medium-gray">Forhåndsutfylt fra targetAudienceSummary.</p>
+            )}
           </div>
 
           {/* Mål */}
@@ -137,6 +145,9 @@ export default function RammerForm({ brief, onBack, onContinue }) {
               onChange={(e) => handleChange('objectives', e.target.value)}
               rows={3}
             />
+            {brief?.contextSummary?.objectivesSummary && !brief?.rammer?.objectives && (
+              <p className="text-xs text-gs1-medium-gray">Forhåndsutfylt fra objectivesSummary.</p>
+            )}
           </div>
 
           {/* Kanaler */}
@@ -173,6 +184,9 @@ export default function RammerForm({ brief, onBack, onContinue }) {
               value={formData.tone}
               onChange={(e) => handleChange('tone', e.target.value)}
             />
+            {brief?.contextSummary?.toneSummary && !brief?.rammer?.tone && (
+              <p className="text-xs text-gs1-medium-gray">Forhåndsutfylt fra toneSummary.</p>
+            )}
           </div>
 
           {/* Leveranser */}
@@ -249,6 +263,12 @@ export default function RammerForm({ brief, onBack, onContinue }) {
       {!isValid && (
         <p className="text-center text-sm text-gs1-medium-gray">
           Fyll ut målgruppe, mål og velg minst én kanal for å fortsette
+        </p>
+      )}
+
+      {brief?.contextSummary?.missingInformationSummary && (
+        <p className="text-center text-xs text-gs1-medium-gray">
+          Mangler fra kildematerialet brukes ikke automatisk i Rammer i denne fasen.
         </p>
       )}
     </div>
