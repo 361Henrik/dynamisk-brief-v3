@@ -127,7 +127,7 @@ function BriefEditorContent() {
       return new Date(timestamp) > new Date(latest) ? timestamp : latest;
     }, null);
   }, [sources]);
-  const latestSummaryUpdate = brief.updated_date || brief.created_date;
+  const latestSummaryUpdate = brief?.updated_date || brief?.created_date || null;
   const isSummaryPotentiallyStale = Boolean(
     brief?.contextSummary &&
     hasSuccessfulSources &&
