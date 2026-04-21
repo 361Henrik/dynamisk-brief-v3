@@ -1,5 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
+function normalizeContextSummary(summary) {
+  return {
+    backgroundSummary: typeof summary?.backgroundSummary === 'string' ? summary.backgroundSummary.trim() : '',
+    objectivesSummary: typeof summary?.objectivesSummary === 'string' ? summary.objectivesSummary.trim() : '',
+    targetAudienceSummary: typeof summary?.targetAudienceSummary === 'string' ? summary.targetAudienceSummary.trim() : '',
+    keyMessagesSummary: typeof summary?.keyMessagesSummary === 'string' ? summary.keyMessagesSummary.trim() : '',
+    toneSummary: typeof summary?.toneSummary === 'string' ? summary.toneSummary.trim() : ''
+  };
+}
+
 function joinSourceText(sources) {
   return sources
     .filter((source) => source.extractionStatus === 'success' && source.extractedText)
@@ -44,22 +54,25 @@ Deno.serve(async (req) => {
 
     const sourceText = joinSourceText(successfulSources);
 
-    const contextSummary = await base44.integrations.Core.InvokeLLM({
+    const llmSummary = await base44.integrations.Core.InvokeLLM({
       prompt: `Du skal lage et kort, pålitelig og nøkternt sammendrag på norsk av kildemateriale for en kommunikasjonsbrief.
 
 Regler:
 - Bruk bare informasjon som faktisk finnes i kildene.
 - Ikke finn opp detaljer.
-- Hvis noe er uklart eller mangler, skriv det kort i missingInformationSummary.
+- Du må alltid returnere KUN ett JSON-objekt, uten forklaring eller tekst utenfor JSON.
+- Du må alltid returnere ALLE disse nøklene, selv hvis grunnlaget er svakt.
+- Hvis en nøkkel mangler tydelig grunnlag i kildene, sett verdien til en tom streng "".
 - Hold hvert felt kort, konkret og redigerbart.
 
-Returner JSON med disse feltene:
-- backgroundSummary
-- targetAudienceSummary
-- objectivesSummary
-- keyMessagesSummary
-- toneSummary
-- missingInformationSummary
+Returner nøyaktig dette JSON-formatet:
+{
+  "backgroundSummary": "",
+  "objectivesSummary": "",
+  "targetAudienceSummary": "",
+  "keyMessagesSummary": "",
+  "toneSummary": ""
+}
 
 KILDEMATERIALE:
 ${sourceText.substring(0, 40000)}`,
@@ -67,22 +80,22 @@ ${sourceText.substring(0, 40000)}`,
         type: 'object',
         properties: {
           backgroundSummary: { type: 'string' },
-          targetAudienceSummary: { type: 'string' },
           objectivesSummary: { type: 'string' },
+          targetAudienceSummary: { type: 'string' },
           keyMessagesSummary: { type: 'string' },
-          toneSummary: { type: 'string' },
-          missingInformationSummary: { type: 'string' }
+          toneSummary: { type: 'string' }
         },
         required: [
           'backgroundSummary',
-          'targetAudienceSummary',
           'objectivesSummary',
+          'targetAudienceSummary',
           'keyMessagesSummary',
-          'toneSummary',
-          'missingInformationSummary'
+          'toneSummary'
         ]
       }
     });
+
+    const contextSummary = normalizeContextSummary(llmSummary);
 
     await base44.entities.Brief.update(briefId, {
       contextSummary
