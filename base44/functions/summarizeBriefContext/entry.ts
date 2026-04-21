@@ -85,8 +85,7 @@ ${sourceText.substring(0, 40000)}`,
     });
 
     await base44.entities.Brief.update(briefId, {
-      contextSummary,
-      currentStep: 'source_material'
+      contextSummary
     });
 
     return Response.json({ success: true, contextSummary });
