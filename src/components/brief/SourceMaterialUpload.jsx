@@ -25,7 +25,7 @@ const MAX_URLS = 5;
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-export default function SourceMaterialUpload({ briefId, sources = [], onSourcesChange, onContinueWithSummary, onCompleteBrief, isSummarizing = false, mode = 'creation' }) {
+export default function SourceMaterialUpload({ briefId, sources = [], onSourcesChange, onContinueWithSummary, onCompleteBrief, onEditorClose, isSummarizing = false, mode = 'creation' }) {
   const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
   const [urlInput, setUrlInput] = useState('');
@@ -190,6 +190,11 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
 
     if (!hasAtLeastOneSource) {
       toast.error('Legg til minst én kilde før du fortsetter.');
+      return;
+    }
+
+    if (mode === 're_edit') {
+      onEditorClose?.();
       return;
     }
 

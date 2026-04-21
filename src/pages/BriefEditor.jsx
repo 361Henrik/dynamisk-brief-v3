@@ -33,6 +33,7 @@ function BriefEditorContent() {
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showSourceMaterialEditor, setShowSourceMaterialEditor] = useState(false);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -74,6 +75,14 @@ function BriefEditorContent() {
 
   const handleCompleteBriefFromSources = async () => {
     await handleUpdateStep('rammer');
+  };
+
+  const handleOpenSourceMaterialEditor = () => {
+    setShowSourceMaterialEditor(true);
+  };
+
+  const handleCloseSourceMaterialEditor = () => {
+    setShowSourceMaterialEditor(false);
   };
 
   const handleSaveTitle = async () => {
@@ -234,9 +243,9 @@ function BriefEditorContent() {
         </div>
       )}
 
-      {currentStep !== 'source_material' && sources.length > 0 && (
+      {currentStep !== 'source_material' && sources.length > 0 && !showSourceMaterialEditor && (
         <div className="flex justify-end">
-          <Button variant="outline" size="sm" onClick={() => handleUpdateStep('source_material')}>
+          <Button variant="outline" size="sm" onClick={handleOpenSourceMaterialEditor}>
             <Upload className="h-4 w-4 mr-2" />
             Se og rediger kildemateriale
           </Button>
@@ -244,14 +253,15 @@ function BriefEditorContent() {
       )}
 
       {/* Step Content */}
-      {currentStep === 'source_material' && (
+      {(currentStep === 'source_material' || showSourceMaterialEditor) && (
         <>
           <SourceMaterialUpload
             briefId={briefId}
             sources={sources}
             onSourcesChange={refetchSources}
-            onCompleteBrief={handleCompleteBriefFromSources}
-            mode="editor"
+            onCompleteBrief={showSourceMaterialEditor ? undefined : handleCompleteBriefFromSources}
+            onEditorClose={showSourceMaterialEditor ? handleCloseSourceMaterialEditor : undefined}
+            mode={showSourceMaterialEditor ? 're_edit' : 'editor'}
           />
           <FeedbackBox pageContext="BriefEditor" stepContext="source_material" briefId={briefId} />
         </>
