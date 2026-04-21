@@ -198,14 +198,36 @@ function NewBriefContent() {
     const updatePayload = { currentStep: 'proposed' };
     const targetUrl = createPageUrl('BriefEditor') + `?id=${briefId}`;
 
-    console.log('Structured brief CTA: entering handler', { briefId, nextStep, updatePayload });
+    console.log('Structured brief CTA: entering handler', { briefId, nextStep });
+    console.log('Structured brief CTA: payload sent', updatePayload);
 
     try {
       await base44.entities.Brief.update(briefId, updatePayload);
-      console.log('Structured brief CTA: Brief.update succeeded', { briefId, updatePayload });
-      navigate(targetUrl);
+      console.log('Structured brief CTA: successful update', { briefId, updatePayload });
+      console.log('Structured brief CTA: exact target route', targetUrl);
+
+      try {
+        navigate(targetUrl);
+        console.log('Structured brief CTA: navigation call', { targetUrl });
+
+        setTimeout(() => {
+          const currentPath = window.location.pathname + window.location.search;
+          if (!currentPath.includes('/BriefEditor') || !currentPath.includes(`id=${briefId}`)) {
+            console.error('Structured brief CTA: navigation did not leave NewBrief as expected', {
+              targetUrl,
+              currentPath,
+              briefId,
+            });
+            toast.error(`Navigasjon feilet. Prøv å åpne briefen manuelt: ${targetUrl}`);
+          }
+        }, 250);
+      } catch (navigationError) {
+        console.error('Structured brief CTA: navigation call failed', navigationError);
+        const navigationMessage = navigationError?.message || 'Ukjent navigasjonsfeil';
+        toast.error(`Kunne ikke navigere til Brief Editor: ${navigationMessage}`);
+      }
     } catch (error) {
-      console.error('Structured brief CTA: Brief.update failed before navigation', error);
+      console.error('Structured brief CTA: caught error', error);
       const errorMessage = error?.response?.data?.error || error?.response?.data?.details || error?.message || 'Ukjent feil';
       toast.error(`Kunne ikke åpne Brief Editor: ${errorMessage}`);
     }
