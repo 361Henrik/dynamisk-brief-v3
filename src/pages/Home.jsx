@@ -20,10 +20,9 @@ function HomeContent() {
   const { user } = useAuth();
 
   const { data: briefs = [], isLoading } = useQuery({
-    queryKey: ['briefs', 'recent'],
+    queryKey: ['briefs', 'all'],
     queryFn: async () => {
-      const allBriefs = await base44.entities.Brief.filter({ created_by: user?.email }, '-created_date', 5);
-      return allBriefs;
+      return base44.entities.Brief.filter({ created_by: user?.email }, '-created_date');
     },
     enabled: !!user?.email
   });
