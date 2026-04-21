@@ -85,7 +85,8 @@ function NewBriefContent() {
     summarizeContextMutation.mutate();
   };
 
-  const handleSelectGuided = () => {
+  const handleSelectGuided = async () => {
+    await base44.entities.Brief.update(briefId, { currentStep: 'rammer' });
     navigate(createPageUrl('BriefEditor') + `?id=${briefId}`);
   };
 

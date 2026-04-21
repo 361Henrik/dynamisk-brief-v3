@@ -11,13 +11,14 @@ const STEPS = [
 
 export default function BriefStepper({ currentStep }) {
   const currentIndex = STEPS.findIndex(s => s.key === currentStep);
+  const normalizedCurrentIndex = currentStep === 'rammer' ? 1 : currentIndex;
 
   return (
     <div className="w-full mb-8">
       <div className="flex items-center justify-between">
         {STEPS.map((step, index) => {
-          const isCompleted = index < currentIndex;
-          const isCurrent = index === currentIndex;
+          const isCompleted = index < normalizedCurrentIndex;
+          const isCurrent = index === normalizedCurrentIndex;
           
           return (
             <React.Fragment key={step.key}>
@@ -45,7 +46,7 @@ export default function BriefStepper({ currentStep }) {
               {index < STEPS.length - 1 && (
                 <div className={`
                   flex-1 h-0.5 mx-2
-                  ${index < currentIndex ? 'bg-gs1-blue' : 'bg-gs1-border'}
+                  ${index < normalizedCurrentIndex ? 'bg-gs1-blue' : 'bg-gs1-border'}
                 `} />
               )}
             </React.Fragment>

@@ -10,7 +10,8 @@ import {
   FileText,
   Pencil,
   Check,
-  Trash2
+  Trash2,
+  Upload
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -201,6 +202,15 @@ function BriefEditorContent() {
 
       {/* Stepper */}
       <BriefStepper currentStep={currentStep} />
+
+      {currentStep !== 'source_material' && sources.length > 0 && (
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={() => handleUpdateStep('source_material')}>
+            <Upload className="h-4 w-4 mr-2" />
+            Se og rediger kildemateriale
+          </Button>
+        </div>
+      )}
 
       {/* Step Content */}
       {currentStep === 'source_material' && (
