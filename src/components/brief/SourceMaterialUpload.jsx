@@ -195,7 +195,14 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
       return;
     }
 
-    onContinueWithSummary?.();
+    onContinueWithSummary?.({
+      onSuccess: () => {
+        console.log('Summary done - navigating');
+      },
+      onError: () => {
+        toast.error('Vi klarte ikke å lage kontekstoversikten. Prøv igjen.');
+      }
+    });
   };
 
   return (

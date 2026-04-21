@@ -147,21 +147,21 @@ function NewBriefContent() {
     createBriefMutation.mutate(theme);
   };
 
-  const handleContinueWithSummary = () => {
+  const handleContinueWithSummary = ({ onSuccess, onError } = {}) => {
     if (!briefId) return;
 
     console.log('Starting summary generation');
+    setManualStepOverride(true);
 
     summarizeContextMutation.mutate(
       { briefId },
       {
         onSuccess: () => {
-          console.log('Summary done - forcing navigation');
-          setManualStepOverride(true);
-          setStep('context_overview');
+          console.log('Summary generated, routing now');
+          onSuccess?.();
         },
         onError: () => {
-          setSummaryError(true);
+          onError?.();
         }
       }
     );
