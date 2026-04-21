@@ -39,6 +39,7 @@ function NewBriefContent() {
   const [isSummaryStale, setIsSummaryStale] = useState(false);
   const [summaryError, setSummaryError] = useState(false);
   const [selectedMode, setSelectedMode] = useState(null);
+  const [manualStepOverride, setManualStepOverride] = useState(false);
 
   const { data: brief } = useQuery({
     queryKey: ['new-brief', briefId],
@@ -58,6 +59,7 @@ function NewBriefContent() {
   };
 
   useEffect(() => {
+    if (manualStepOverride) return;
     if (!briefId || !brief) return;
 
     if (brief.currentStep === 'proposed' || brief.currentStep === 'final' || brief.currentStep === 'godkjent') {
@@ -85,7 +87,7 @@ function NewBriefContent() {
     }
 
     setStep('select_mode');
-  }, [briefId, brief, briefSources.length, selectedMode, modeParam, navigate]);
+  }, [manualStepOverride, briefId, brief, briefSources.length, selectedMode, modeParam, navigate]);
 
   const { data: themes = [], isLoading: themesLoading } = useQuery({
     queryKey: ['themes', 'active'],
@@ -127,9 +129,11 @@ function NewBriefContent() {
       setIsSummaryStale(false);
       setSummaryError(false);
       setStep('context_overview');
+      setManualStepOverride(false);
     },
     onError: () => {
       setSummaryError(true);
+      setManualStepOverride(false);
     }
   });
 
@@ -139,6 +143,8 @@ function NewBriefContent() {
   };
 
   const handleContinueFromSources = () => {
+    console.log('Routing to context-overview');
+    setManualStepOverride(true);
     summarizeContextMutation.mutate();
   };
 

@@ -182,6 +182,32 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
     deleteSourceMutation.mutate(sourceId);
   };
 
+  const handleContinueClick = () => {
+    console.log('Continue clicked', {
+      sources,
+      extractionComplete: allSourcesReady,
+      briefId
+    });
+
+    if (!briefId) {
+      toast.error('Mangler brief før du kan fortsette.');
+      return;
+    }
+
+    if (!hasAtLeastOneSource) {
+      toast.error('Legg til minst én kilde før du fortsetter.');
+      return;
+    }
+
+    if (!allSourcesReady) {
+      toast.error('Vent til kildene er ferdig behandlet før du fortsetter.');
+      return;
+    }
+
+    console.log('Routing to context-overview');
+    onContinue?.();
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -377,7 +403,8 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
       {/* Continue Button */}
       <div className="flex justify-end">
         <Button
-          onClick={onContinue}
+          type="button"
+          onClick={handleContinueClick}
           disabled={!allSourcesReady}
           className="bg-[#002C6C] hover:bg-[#001a45]"
         >
