@@ -147,7 +147,7 @@ function NewBriefContent() {
     createBriefMutation.mutate(theme);
   };
 
-  const handleContinueWithSummary = () => {
+  const handleContinueWithSummary = ({ onSuccess, onError } = {}) => {
     if (!briefId) return;
 
     console.log('Starting summary generation');
@@ -158,7 +158,10 @@ function NewBriefContent() {
       {
         onSuccess: () => {
           console.log('Summary generated, routing now');
-          setStep('context_overview');
+          onSuccess?.();
+        },
+        onError: () => {
+          onError?.();
         }
       }
     );
@@ -232,6 +235,7 @@ function NewBriefContent() {
           sources={briefSources}
           onSourcesChange={handleSourcesChange}
           onContinueWithSummary={handleContinueWithSummary}
+          isSummarizing={summarizeContextMutation.isPending}
         />
 
         <SharedReferenceSelector

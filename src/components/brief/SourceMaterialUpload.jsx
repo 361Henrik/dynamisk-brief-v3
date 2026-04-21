@@ -25,7 +25,7 @@ const MAX_URLS = 5;
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-export default function SourceMaterialUpload({ briefId, sources = [], onSourcesChange, onContinueWithSummary }) {
+export default function SourceMaterialUpload({ briefId, sources = [], onSourcesChange, onContinueWithSummary, isSummarizing = false }) {
   const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
   const [urlInput, setUrlInput] = useState('');
@@ -182,11 +182,8 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
     deleteSourceMutation.mutate(sourceId);
   };
 
-  const handleContinueToContextOverview = () => {
-    console.log('Continue clicked', {
-      briefId,
-      sourceCount: sources.length
-    });
+  const handleContinueWithSummary = () => {
+    console.log('Continue clicked - forcing summary');
 
     if (!briefId) {
       toast.error('Mangler brief før du kan fortsette.');
@@ -198,7 +195,14 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
       return;
     }
 
-    onContinueWithSummary?.();
+    onContinueWithSummary?.({
+      onSuccess: () => {
+        console.log('Summary done - navigating');
+      },
+      onError: () => {
+        toast.error('Vi klarte ikke å lage kontekstoversikten. Prøv igjen.');
+      }
+    });
   };
 
   return (
@@ -397,14 +401,14 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
       <div className="flex justify-end">
         <Button
           type="button"
-          onClick={handleContinueToContextOverview}
-          disabled={hasPendingSources || !hasAtLeastOneSource || createSourceMutation.isPending || deleteSourceMutation.isPending}
+          onClick={handleContinueWithSummary}
+          disabled={hasPendingSources || !hasAtLeastOneSource || createSourceMutation.isPending || deleteSourceMutation.isPending || isSummarizing}
           className="bg-[#002C6C] hover:bg-[#001a45]"
         >
-          {hasPendingSources ? (
+          {hasPendingSources || isSummarizing ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Venter på behandling...
+              Lager oppsummering...
             </>
           ) : (
             'Fortsett til kontekstoversikt'
