@@ -69,19 +69,13 @@ function NewBriefContent() {
     }
 
     const hasSources = briefSources.length > 0;
-    const hasContextSummary = !!brief.contextSummary;
 
     if (!hasSources) {
       setStep('source_material');
       return;
     }
 
-    if (!hasContextSummary) {
-      setStep('source_material');
-      return;
-    }
-
-    if (step !== 'context_overview' && step !== 'select_mode' && step !== 'fast_mode') {
+    if (step !== 'select_mode' && step !== 'fast_mode') {
       setStep('source_material');
       return;
     }
@@ -151,15 +145,12 @@ function NewBriefContent() {
     if (!briefId) return;
 
     console.log('Starting summary generation');
+    setManualStepOverride(true);
+    setStep('select_mode');
 
     summarizeContextMutation.mutate(
       { briefId },
       {
-        onSuccess: () => {
-          console.log('Summary done - forcing navigation');
-          setManualStepOverride(true);
-          setStep('context_overview');
-        },
         onError: () => {
           setSummaryError(true);
         }
@@ -173,11 +164,6 @@ function NewBriefContent() {
       setIsSummaryStale(true);
     }
     setSummaryError(false);
-  };
-
-  const handleContinueFromContextOverview = () => {
-    setManualStepOverride(true);
-    setStep('select_mode');
   };
 
   const handleBackToSources = () => {
@@ -287,18 +273,6 @@ function NewBriefContent() {
           </Card>
         )}
       </div>
-    );
-  }
-
-  if (step === 'context_overview') {
-    return (
-      <ContextOverviewDisplay
-        brief={brief}
-        sources={briefSources.filter((source) => source.extractionStatus === 'success')}
-        failedSources={briefSources.filter((source) => source.extractionStatus === 'failed')}
-        onBack={handleBackToSources}
-        onContinue={handleContinueFromContextOverview}
-      />
     );
   }
 
