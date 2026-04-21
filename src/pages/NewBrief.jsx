@@ -77,7 +77,12 @@ function NewBriefContent() {
     }
 
     if (!hasContextSummary) {
-      setStep('context_overview');
+      setStep('source_material');
+      return;
+    }
+
+    if (step !== 'context_overview' && step !== 'select_mode' && step !== 'fast_mode') {
+      setStep('source_material');
       return;
     }
 
