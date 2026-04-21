@@ -158,6 +158,8 @@ function NewBriefContent() {
       {
         onSuccess: () => {
           console.log('Summary generated, routing now');
+          setManualStepOverride(true);
+          setStep('context_overview');
           onSuccess?.();
         },
         onError: () => {
