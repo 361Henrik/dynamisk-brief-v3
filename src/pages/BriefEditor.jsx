@@ -184,6 +184,17 @@ function BriefEditorContent() {
   }
 
   const currentStep = brief.currentStep || 'source_material';
+  const renderStep = (() => {
+    if (brief.status === 'godkjent') {
+      return currentStep;
+    }
+
+    if (currentStep === 'rammer' || currentStep === 'dialog') {
+      return 'proposed';
+    }
+
+    return currentStep;
+  })();
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -232,7 +243,7 @@ function BriefEditorContent() {
       </div>
 
       {/* Stepper */}
-      <BriefStepper currentStep={currentStep} />
+      <BriefStepper currentStep={renderStep} />
 
       {isSummaryPotentiallyStale && currentStep !== 'source_material' && (
         <div className="rounded-lg border border-[#F26334]/20 bg-[#F26334]/5 p-4">
@@ -267,7 +278,7 @@ function BriefEditorContent() {
         </>
       )}
 
-      {currentStep === 'rammer' && (
+      {renderStep === 'rammer' && (
         <>
           <RammerForm
             brief={brief}
@@ -278,7 +289,7 @@ function BriefEditorContent() {
         </>
       )}
 
-      {currentStep === 'dialog' && (
+      {renderStep === 'dialog' && (
         <>
           <AIDialog
             brief={brief}
@@ -291,7 +302,7 @@ function BriefEditorContent() {
         </>
       )}
 
-      {currentStep === 'proposed' && (
+      {renderStep === 'proposed' && (
         <>
           <ProposedBrief
             brief={brief}
@@ -304,7 +315,7 @@ function BriefEditorContent() {
         </>
       )}
 
-      {currentStep === 'final' && (
+      {renderStep === 'final' && (
         <>
           <FinalBrief
             brief={brief}
