@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { RequireAuth } from '@/components/auth/RequireAuth';
@@ -117,6 +117,24 @@ function BriefEditorContent() {
   };
 
   const canDelete = brief && brief.status !== 'godkjent';
+  const hasSuccessfulSources = sources.some((source) => source.extractionStatus === 'success');
+  const latestSourceUpdate = useMemo(() => {
+    if (sources.length === 0) return null;
+    return sources.reduce((latest, source) => {
+      const timestamp = source.updated_date || source.created_date;
+      if (!timestamp) return latest;
+      if (!latest) return timestamp;
+      return new Date(timestamp) > new Date(latest) ? timestamp : latest;
+    }, null);
+  }, [sources]);
+  const latestSummaryUpdate = brief.updated_date || brief.created_date;
+  const isSummaryPotentiallyStale = Boolean(
+    brief?.contextSummary &&
+    hasSuccessfulSources &&
+    latestSourceUpdate &&
+    latestSummaryUpdate &&
+    new Date(latestSourceUpdate) > new Date(latestSummaryUpdate)
+  );
 
   if (!briefId) {
     return (
@@ -202,6 +220,15 @@ function BriefEditorContent() {
 
       {/* Stepper */}
       <BriefStepper currentStep={currentStep} />
+
+      {isSummaryPotentiallyStale && currentStep !== 'source_material' && (
+        <div className="rounded-lg border border-[#F26334]/20 bg-[#F26334]/5 p-4">
+          <p className="text-sm font-medium text-[#454545]">Kildematerialet er endret etter siste oppsummering</p>
+          <p className="text-sm text-[#888B8D] mt-1">
+            AI-støttede forslag og oppsummeringer lenger ut i flyten kan derfor være utdaterte. Gå tilbake til kildemateriale og behandle/les gjennom på nytt før du stoler på dem.
+          </p>
+        </div>
+      )}
 
       {currentStep !== 'source_material' && sources.length > 0 && (
         <div className="flex justify-end">

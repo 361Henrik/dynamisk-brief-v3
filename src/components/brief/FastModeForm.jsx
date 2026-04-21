@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
@@ -29,6 +29,7 @@ export default function FastModeForm({ theme, onBack }) {
   const [values, setValues] = useState({});
   const [expanded, setExpanded] = useState({ prosjektinformasjon: true });
   const [submitting, setSubmitting] = useState(false);
+  const userOwnedFieldsRef = useRef(new Set());
 
   const { data: brief, isLoading: briefLoading } = useQuery({
     queryKey: ['brief-fast-mode', briefId],
@@ -39,15 +40,29 @@ export default function FastModeForm({ theme, onBack }) {
   useEffect(() => {
     if (!brief?.contextSummary) return;
 
-    setValues((prev) => ({
-      ...prev,
-      bakgrunn: prev.bakgrunn || brief.contextSummary.backgroundSummary || '',
-      maal: prev.maal || brief.contextSummary.objectivesSummary || '',
-      maalgrupper: prev.maalgrupper || brief.contextSummary.targetAudienceSummary || '',
-      budskap: prev.budskap || [brief.contextSummary.keyMessagesSummary, brief.contextSummary.toneSummary].filter(Boolean).join('\n\n'),
-      prosjektinformasjon: prev.prosjektinformasjon || '',
-      kildemateriale: prev.kildemateriale || [brief.contextSummary.backgroundSummary, brief.contextSummary.keyMessagesSummary].filter(Boolean).join('\n\n')
-    }));
+    const prefillValues = {
+      bakgrunn: brief.contextSummary.backgroundSummary || '',
+      maal: brief.contextSummary.objectivesSummary || '',
+      maalgrupper: brief.contextSummary.targetAudienceSummary || '',
+      budskap: [brief.contextSummary.keyMessagesSummary, brief.contextSummary.toneSummary].filter(Boolean).join('\n\n'),
+      prosjektinformasjon: '',
+      kildemateriale: [brief.contextSummary.backgroundSummary, brief.contextSummary.keyMessagesSummary].filter(Boolean).join('\n\n')
+    };
+
+    setValues((prev) => {
+      const next = { ...prev };
+
+      Object.entries(prefillValues).forEach(([key, value]) => {
+        const isUserOwned = userOwnedFieldsRef.current.has(key);
+        const isEmpty = !prev[key]?.trim();
+
+        if (!isUserOwned && isEmpty && value) {
+          next[key] = value;
+        }
+      });
+
+      return next;
+    });
   }, [brief]);
 
   const filledCount = SECTIONS.filter(s => values[s.key]?.trim()).length;
@@ -175,7 +190,10 @@ export default function FastModeForm({ theme, onBack }) {
               <CardContent className="pt-0">
                 <Textarea
                   value={values[section.key] || ''}
-                  onChange={(e) => setValues(prev => ({ ...prev, [section.key]: e.target.value }))}
+                  onChange={(e) => {
+                    userOwnedFieldsRef.current.add(section.key);
+                    setValues(prev => ({ ...prev, [section.key]: e.target.value }));
+                  }}
                   placeholder={`Valgfritt – skriv hva du vet om ${section.label.toLowerCase()}...`}
                   className="min-h-[100px] resize-y text-sm"
                   autoFocus={section.key === 'prosjektinformasjon' && !values[section.key]}

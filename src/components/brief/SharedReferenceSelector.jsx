@@ -91,7 +91,7 @@ export default function SharedReferenceSelector({ selectedIds = [], onChange }) 
               <p className="text-sm font-medium text-gs1-dark-gray">Delte referansedokumenter</p>
             </div>
             <p className="text-sm text-gs1-medium-gray mt-1">
-              Dette er felles bakgrunnsmateriale som kan støtte briefen, men ikke erstatter brief-spesifikke kilder.
+              Dette er supplerende referansemateriale som lagres på briefen. Det erstatter ikke brief-spesifikke kilder, og brukes ikke i den nåværende AI-oppsummeringen.
             </p>
           </div>
           <Dialog>
@@ -102,7 +102,7 @@ export default function SharedReferenceSelector({ selectedIds = [], onChange }) 
               <DialogHeader>
                 <DialogTitle>Velg delte referansedokumenter</DialogTitle>
                 <DialogDescription>
-                  Marker dokumenter som er relevante for denne briefen. De behandles som støttekontekst, ikke som primærkilde.
+                  Marker dokumenter som er relevante for denne briefen. De lagres som supplerende referanser for briefen, men inngår ikke i den nåværende AI-oppsummeringen av kildematerialet.
                 </DialogDescription>
               </DialogHeader>
               {isLoading ? (
@@ -138,7 +138,7 @@ export default function SharedReferenceSelector({ selectedIds = [], onChange }) 
           <div className="rounded-lg border border-dashed border-gs1-border p-4 flex items-start gap-2">
             <Info className="h-4 w-4 text-gs1-medium-gray mt-0.5" />
             <p className="text-sm text-gs1-medium-gray">
-              Ingen delte referansedokumenter er valgt for denne briefen ennå.
+              Ingen supplerende referansedokumenter er valgt for denne briefen ennå.
             </p>
           </div>
         )}
