@@ -69,6 +69,8 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
       return;
     }
 
+    console.log('Structured brief CTA: button submit received', { briefId, filledCount });
+
     setSubmitting(true);
     try {
       const confirmedPoints = SECTIONS
@@ -95,14 +97,14 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
         }
       };
 
-      await base44.entities.Brief.update(briefId, updatePayload);
-
-      onComplete?.({ nextStep });
+      onComplete?.({ nextStep, updatePayload });
     } catch (err) {
-      console.error(err);
-      toast.error('Kunne ikke oppdatere briefen. Prøv igjen.');
+      console.error('Structured brief CTA: caught error before parent handoff', err);
+      const errorMessage = err?.response?.data?.error || err?.response?.data?.details || err?.message || 'Ukjent feil';
+      toast.error(`Kunne ikke fortsette: ${errorMessage}`);
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   const toggle = (key) => setExpanded(prev => ({ ...prev, [key]: !prev[key] }));

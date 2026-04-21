@@ -174,26 +174,29 @@ function NewBriefContent() {
     setStep('fast_mode');
   };
 
-  const handleFastModeComplete = async ({ nextStep }) => {
-    const updatePayload = { currentStep: 'proposed' };
+  const handleFastModeComplete = async ({ nextStep, updatePayload }) => {
     const targetUrl = createPageUrl('BriefEditor') + `?id=${briefId}`;
+    const finalPayload = {
+      ...updatePayload,
+      currentStep: 'proposed'
+    };
 
     console.log('Structured brief CTA: entering handler', { briefId, nextStep });
-    console.log('Structured brief CTA: payload sent', updatePayload);
+    console.log('Structured brief CTA: payload sent to Brief.update', finalPayload);
 
     try {
-      await base44.entities.Brief.update(briefId, updatePayload);
-      console.log('Structured brief CTA: successful update', { briefId, updatePayload });
+      const updateResponse = await base44.entities.Brief.update(briefId, finalPayload);
+      console.log('Structured brief CTA: successful Brief.update', { briefId, updateResponse });
       console.log('Structured brief CTA: exact target route', targetUrl);
 
       try {
-        navigate(targetUrl);
         console.log('Structured brief CTA: navigation call', { targetUrl });
+        navigate(targetUrl);
 
         setTimeout(() => {
           const currentPath = window.location.pathname + window.location.search;
           if (!currentPath.includes('/BriefEditor') || !currentPath.includes(`id=${briefId}`)) {
-            console.error('Structured brief CTA: navigation did not leave NewBrief as expected', {
+            console.error('Structured brief CTA: navigation did not leave /NewBrief', {
               targetUrl,
               currentPath,
               briefId,
@@ -202,14 +205,14 @@ function NewBriefContent() {
           }
         }, 250);
       } catch (navigationError) {
-        console.error('Structured brief CTA: navigation call failed', navigationError);
+        console.error('Structured brief CTA: caught error', navigationError);
         const navigationMessage = navigationError?.message || 'Ukjent navigasjonsfeil';
         toast.error(`Kunne ikke navigere til Brief Editor: ${navigationMessage}`);
       }
     } catch (error) {
       console.error('Structured brief CTA: caught error', error);
       const errorMessage = error?.response?.data?.error || error?.response?.data?.details || error?.message || 'Ukjent feil';
-      toast.error(`Kunne ikke åpne Brief Editor: ${errorMessage}`);
+      toast.error(`Brief.update feilet: ${errorMessage}`);
     }
   };
 
