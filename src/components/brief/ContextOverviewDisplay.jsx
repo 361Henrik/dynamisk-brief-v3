@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { ArrowLeft, ArrowRight, FileText, Link as LinkIcon, Type, Info, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,9 +33,14 @@ function getSourceIcon(sourceType) {
   return Type;
 }
 
+function getSourceReferenceList(sources) {
+  return sources.map((source) => getSourceLabel(source)).join(', ');
+}
+
 export default function ContextOverviewDisplay({ brief, sources = [], failedSources = [], onBack, onContinue }) {
   const contextSummary = brief?.contextSummary || {};
   const overviewSections = OVERVIEW_SECTIONS.filter((item) => contextSummary[item.key]?.trim());
+  const sourceReferenceList = getSourceReferenceList(sources);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -70,8 +76,22 @@ export default function ContextOverviewDisplay({ brief, sources = [], failedSour
         <CardContent className="space-y-4">
           {overviewSections.length > 0 ? overviewSections.map((item) => (
             <div key={item.key} className="rounded-lg border border-[#E5E7EB] p-4">
-              <h3 className="text-sm font-semibold text-[#454545] mb-1">{item.label}</h3>
-              <p className="text-sm text-[#666] whitespace-pre-wrap">{contextSummary[item.key]}</p>
+              <h3 className="text-sm font-semibold text-[#454545] mb-2">{item.label}</h3>
+              <ReactMarkdown
+                className="text-sm text-[#666] prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_ul]:my-2 [&_ul]:pl-5 [&_li]:my-1 [&_p]:my-2"
+                components={{
+                  p: ({ children }) => <p className="my-2 leading-relaxed">{children}</p>,
+                  ul: ({ children }) => <ul className="my-2 list-disc pl-5">{children}</ul>,
+                  li: ({ children }) => <li className="my-1">{children}</li>
+                }}
+              >
+                {contextSummary[item.key]}
+              </ReactMarkdown>
+              {sourceReferenceList && (
+                <p className="mt-3 text-xs text-[#888B8D]">
+                  <span className="font-medium">Basert på kilder:</span> {sourceReferenceList}
+                </p>
+              )}
             </div>
           )) : (
             <p className="text-sm text-[#888B8D]">Ingen oppsummering er tilgjengelig ennå.</p>

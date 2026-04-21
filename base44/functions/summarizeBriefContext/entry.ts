@@ -63,6 +63,8 @@ Regler:
 - Du må alltid returnere KUN ett JSON-objekt, uten forklaring eller tekst utenfor JSON.
 - Du må alltid returnere ALLE disse nøklene, selv hvis grunnlaget er svakt.
 - Hvis en nøkkel mangler tydelig grunnlag i kildene, sett verdien til en tom streng "".
+- Skriv hvert felt som korte markdown-punkter eller korte markdown-takeaways der det er relevant.
+- Unngå lange avsnitt hvis punktliste fungerer bedre.
 - Hold hvert felt kort, konkret og redigerbart.
 
 Returner nøyaktig dette JSON-formatet:
