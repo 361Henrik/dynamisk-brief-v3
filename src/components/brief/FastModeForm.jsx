@@ -84,10 +84,33 @@ export default function FastModeForm({ theme, onBack }) {
           confirmedAt: new Date().toISOString()
         }));
 
-      await base44.entities.Brief.update(briefId, {
-        currentStep: confirmedPoints.length === SECTIONS.length ? 'proposed' : 'dialog',
+      const nextStep = confirmedPoints.length === SECTIONS.length ? 'proposed' : 'dialog';
+      const updatePayload = {
+        currentStep: nextStep,
         confirmedPoints
-      });
+      };
+
+      if (nextStep === 'proposed') {
+        const sections = SECTIONS.reduce((acc, section) => {
+          const content = values[section.key]?.trim();
+          if (!content) return acc;
+
+          acc[section.key] = {
+            content,
+            notes: ''
+          };
+
+          return acc;
+        }, {});
+
+        updatePayload.proposedBrief = {
+          sections,
+          status: 'draft',
+          updatedAt: new Date().toISOString()
+        };
+      }
+
+      await base44.entities.Brief.update(briefId, updatePayload);
 
       navigate(createPageUrl('BriefEditor') + `?id=${briefId}`);
     } catch (err) {
@@ -178,7 +201,7 @@ export default function FastModeForm({ theme, onBack }) {
                 <div className="flex items-center gap-2">
                   {!isFilled && (
                     <Badge variant="outline" className="text-xs text-gs1-medium-gray">
-                      AI fyller inn
+                      Fylles i dialog
                     </Badge>
                   )}
                   {isExpanded ? <ChevronUp className="h-4 w-4 text-gs1-medium-gray" /> : <ChevronDown className="h-4 w-4 text-gs1-medium-gray" />}
