@@ -83,11 +83,7 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
 
       const nextStep = confirmedPoints.length === SECTIONS.length ? 'proposed' : 'dialog';
       const sections = SECTIONS.reduce((acc, section) => {
-        acc[section.key] = {
-          content: values[section.key]?.trim() || '',
-          notes: ''
-        };
-
+        acc[section.key] = values[section.key]?.trim() || '';
         return acc;
       }, {});
 
