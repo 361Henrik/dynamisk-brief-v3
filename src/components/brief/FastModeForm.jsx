@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
-import { format } from 'date-fns';
-import { nb } from 'date-fns/locale';
+import { useQuery } from '@tanstack/react-query';
 import { Loader2, Zap, ArrowLeft, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,19 +24,42 @@ const SECTIONS = [
 
 export default function FastModeForm({ theme, onBack }) {
   const navigate = useNavigate();
+  const urlParams = new URLSearchParams(window.location.search);
+  const briefId = urlParams.get('briefId');
   const [values, setValues] = useState({});
   const [expanded, setExpanded] = useState({ prosjektinformasjon: true });
   const [submitting, setSubmitting] = useState(false);
 
+  const { data: brief, isLoading: briefLoading } = useQuery({
+    queryKey: ['brief-fast-mode', briefId],
+    queryFn: () => base44.entities.Brief.get(briefId),
+    enabled: !!briefId
+  });
+
+  useEffect(() => {
+    if (!brief?.contextSummary) return;
+
+    setValues((prev) => ({
+      ...prev,
+      bakgrunn: prev.bakgrunn || brief.contextSummary.backgroundSummary || '',
+      maal: prev.maal || brief.contextSummary.objectivesSummary || '',
+      maalgrupper: prev.maalgrupper || brief.contextSummary.targetAudienceSummary || '',
+      budskap: prev.budskap || [brief.contextSummary.keyMessagesSummary, brief.contextSummary.toneSummary].filter(Boolean).join('\n\n'),
+      prosjektinformasjon: prev.prosjektinformasjon || brief.contextSummary.missingInformationSummary || '',
+      kildemateriale: prev.kildemateriale || brief.contextSummary.backgroundSummary || ''
+    }));
+  }, [brief]);
+
   const filledCount = SECTIONS.filter(s => values[s.key]?.trim()).length;
 
   const handleSubmit = async () => {
+    if (!briefId) {
+      toast.error('Mangler brief-ID for hurtigmodus');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const today = format(new Date(), 'dd.MM.yyyy', { locale: nb });
-      const title = `${theme.name} – ${today}`;
-
-      // Build confirmedPoints from whatever the user filled in
       const confirmedPoints = SECTIONS
         .filter(s => values[s.key]?.trim())
         .map(s => ({
@@ -47,19 +69,15 @@ export default function FastModeForm({ theme, onBack }) {
           confirmedAt: new Date().toISOString()
         }));
 
-      const brief = await base44.entities.Brief.create({
-        title,
-        themeId: theme.id,
-        themeName: theme.name,
-        status: 'utkast',
+      await base44.entities.Brief.update(briefId, {
         currentStep: confirmedPoints.length === SECTIONS.length ? 'proposed' : 'dialog',
         confirmedPoints
       });
 
-      navigate(createPageUrl('BriefEditor') + `?id=${brief.id}`);
+      navigate(createPageUrl('BriefEditor') + `?id=${briefId}`);
     } catch (err) {
       console.error(err);
-      toast.error('Kunne ikke opprette briefen. Prøv igjen.');
+      toast.error('Kunne ikke oppdatere briefen. Prøv igjen.');
     }
     setSubmitting(false);
   };
@@ -82,12 +100,24 @@ export default function FastModeForm({ theme, onBack }) {
           <p className="text-sm text-gs1-medium-gray mt-1">
             Skriv inn informasjon der du har den. AI vil automatisk stille spørsmål om det som mangler ({SECTIONS.length - filledCount} gjenstår).
           </p>
+          {brief?.contextSummary && (
+            <p className="text-xs text-gs1-medium-gray mt-2">
+              Felter er forhåndsutfylt fra delt kildemateriale der det finnes forslag.
+            </p>
+          )}
         </div>
         <div className="text-right">
           <div className="text-2xl font-bold text-gs1-blue">{filledCount}/{SECTIONS.length}</div>
           <div className="text-xs text-gs1-medium-gray">seksjoner fylt</div>
         </div>
       </div>
+
+      {briefLoading && (
+        <div className="flex items-center gap-2 text-sm text-gs1-medium-gray">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Laster delt kildesammendrag...
+        </div>
+      )}
 
       {/* Progress bar */}
       <div className="w-full bg-gs1-light-gray rounded-full h-2">
@@ -143,6 +173,9 @@ export default function FastModeForm({ theme, onBack }) {
                   className="min-h-[100px] resize-y text-sm"
                   autoFocus={section.key === 'prosjektinformasjon' && !values[section.key]}
                 />
+                {section.key === 'prosjektinformasjon' && brief?.contextSummary?.missingInformationSummary && (
+                  <p className="text-xs text-gs1-medium-gray mt-2">Manglende informasjon fra kildene er lagt inn som utgangspunkt og kan redigeres.</p>
+                )}
               </CardContent>
             )}
           </Card>

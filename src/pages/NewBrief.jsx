@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { RequireAuth } from '@/components/auth/RequireAuth';
@@ -25,10 +25,18 @@ import { toast } from 'sonner';
 
 function NewBriefContent() {
   const navigate = useNavigate();
-  const [step, setStep] = useState('select_theme');
+  const urlParams = new URLSearchParams(window.location.search);
+  const modeParam = urlParams.get('mode');
+  const [step, setStep] = useState(modeParam === 'fast' ? 'fast_mode' : 'select_theme');
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [briefId, setBriefId] = useState(null);
   const [refreshSourcesKey, setRefreshSourcesKey] = useState(0);
+
+  useEffect(() => {
+    if (modeParam === 'fast' && briefId) {
+      setStep('fast_mode');
+    }
+  }, [modeParam, briefId]);
 
   const { data: themes = [], isLoading: themesLoading } = useQuery({
     queryKey: ['themes', 'active'],
@@ -140,7 +148,10 @@ function NewBriefContent() {
           {/* Fast Mode - visually dominant */}
           <Card
             className="cursor-pointer border-2 border-[#F26334] shadow-md hover:shadow-lg transition-all relative"
-            onClick={() => setStep('fast_mode')}
+            onClick={() => {
+              window.history.replaceState({}, '', createPageUrl('NewBrief') + `?briefId=${briefId}&mode=fast`);
+              setStep('fast_mode');
+            }}
           >
 
             <CardContent className="p-6">
