@@ -25,7 +25,7 @@ const MAX_URLS = 5;
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
-export default function SourceMaterialUpload({ briefId, sources = [], onSourcesChange, onContinueWithSummary, isSummarizing = false, mode = 'creation' }) {
+export default function SourceMaterialUpload({ briefId, sources = [], onSourcesChange, onContinueWithSummary, onCompleteBrief, isSummarizing = false, mode = 'creation' }) {
   const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
   const [urlInput, setUrlInput] = useState('');
@@ -182,9 +182,7 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
     deleteSourceMutation.mutate(sourceId);
   };
 
-  const handleContinueWithSummary = () => {
-    console.log('Continue clicked - forcing summary');
-
+  const handlePrimaryAction = () => {
     if (!briefId) {
       toast.error('Mangler brief før du kan fortsette.');
       return;
@@ -195,12 +193,15 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
       return;
     }
 
+    if (mode === 'editor') {
+      onCompleteBrief?.();
+      return;
+    }
+
     onContinueWithSummary?.({
-      onSuccess: () => {
-        console.log('Summary done - navigating');
-      },
+      onSuccess: () => {},
       onError: () => {
-        toast.error('Vi klarte ikke å lage kontekstoversikten. Prøv igjen.');
+        toast.error('Vi klarte ikke å gå videre. Prøv igjen.');
       }
     });
   };
@@ -398,27 +399,27 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
       </Card>
 
       {/* Continue Button */}
-      {mode === 'creation' && (
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            onClick={handleContinueWithSummary}
-            disabled={hasPendingSources || !hasAtLeastOneSource || createSourceMutation.isPending || deleteSourceMutation.isPending || isSummarizing}
-            className="bg-[#002C6C] hover:bg-[#001a45]"
-          >
-            {hasPendingSources || isSummarizing ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Lager oppsummering...
-              </>
-            ) : (
-              'Fortsett til kontekstoversikt'
-            )}
-          </Button>
-        </div>
-      )}
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          onClick={handlePrimaryAction}
+          disabled={hasPendingSources || !hasAtLeastOneSource || createSourceMutation.isPending || deleteSourceMutation.isPending || isSummarizing}
+          className="bg-[#002C6C] hover:bg-[#001a45]"
+        >
+          {hasPendingSources || isSummarizing ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Behandler kildemateriale...
+            </>
+          ) : mode === 'editor' ? (
+            'Fullfør briefen'
+          ) : (
+            'Gå videre'
+          )}
+        </Button>
+      </div>
 
-      {!hasAtLeastOneSource && mode === 'creation' && (
+      {!hasAtLeastOneSource && (
         <p className="text-center text-sm text-gray-500">
           Legg til minst én kilde for å fortsette
         </p>

@@ -72,6 +72,10 @@ function BriefEditorContent() {
     refetchBrief();
   };
 
+  const handleCompleteBriefFromSources = async () => {
+    await handleUpdateStep('rammer');
+  };
+
   const handleSaveTitle = async () => {
     if (titleInput.trim() && titleInput !== brief.title) {
       await base44.entities.Brief.update(briefId, { title: titleInput.trim() });
@@ -246,6 +250,7 @@ function BriefEditorContent() {
             briefId={briefId}
             sources={sources}
             onSourcesChange={refetchSources}
+            onCompleteBrief={handleCompleteBriefFromSources}
             mode="editor"
           />
           <FeedbackBox pageContext="BriefEditor" stepContext="source_material" briefId={briefId} />
