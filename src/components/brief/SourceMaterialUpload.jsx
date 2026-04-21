@@ -387,7 +387,7 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
               Venter på behandling...
             </>
           ) : (
-            'Fortsett til rammer'
+'Fortsett til modusvalg'
           )}
         </Button>
       </div>

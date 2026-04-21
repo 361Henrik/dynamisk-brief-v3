@@ -1,0 +1,292 @@
+{
+  "name": "Brief",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Brief title (editable, auto-generated default)"
+    },
+    "themeId": {
+      "type": "string",
+      "description": "ID of the selected Theme"
+    },
+    "themeName": {
+      "type": "string",
+      "description": "Denormalized theme name for display"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "utkast",
+        "godkjent"
+      ],
+      "default": "utkast",
+      "description": "Brief status: utkast (draft) or godkjent (approved)"
+    },
+    "currentStep": {
+      "type": "string",
+      "enum": [
+        "source_material",
+        "rammer",
+        "dialog",
+        "proposed",
+        "final"
+      ],
+      "default": "source_material",
+      "description": "Current step in the brief creation flow"
+    },
+    "contextSummary": {
+      "type": "object",
+      "properties": {
+        "backgroundSummary": {
+          "type": "string",
+          "description": "General summary of background context from source materials"
+        },
+        "targetAudienceSummary": {
+          "type": "string",
+          "description": "Summary of likely target audience from source materials"
+        },
+        "objectivesSummary": {
+          "type": "string",
+          "description": "Summary of likely objectives from source materials"
+        },
+        "keyMessagesSummary": {
+          "type": "string",
+          "description": "Summary of key messages from source materials"
+        },
+        "toneSummary": {
+          "type": "string",
+          "description": "Summary of likely tone from source materials"
+        },
+        "missingInformationSummary": {
+          "type": "string",
+          "description": "Summary of missing information or open gaps in the source materials"
+        }
+      },
+      "description": "Shared reusable summary generated once from source materials"
+    },
+    "rammer": {
+      "type": "object",
+      "properties": {
+        "targetAudience": {
+          "type": "string",
+          "description": "M\u00e5lgruppe"
+        },
+        "objectives": {
+          "type": "string",
+          "description": "M\u00e5l"
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Kanaler"
+        },
+        "tone": {
+          "type": "string",
+          "description": "Tone"
+        },
+        "deliverables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u00d8nskede kommunikasjonsleveranser"
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date",
+          "description": "Tidsfrist for leveranse"
+        },
+        "activationDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Aktiveringstidspunkt"
+        }
+      },
+      "description": "Brief frames/constraints"
+    },
+    "confirmedPoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Points confirmed via Clarify & Confirm pattern"
+    },
+    "proposedBrief": {
+      "type": "object",
+      "properties": {
+        "sections": {
+          "type": "object",
+          "properties": {
+            "prosjektinformasjon": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            },
+            "bakgrunn": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            },
+            "maal": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            },
+            "maalgrupper": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            },
+            "verdiforslag": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            },
+            "budskap": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            },
+            "leveranser": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            },
+            "rammer": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            },
+            "kildemateriale": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "description": "The 9 GS1 template sections"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "approved"
+          ],
+          "default": "draft"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approvedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "Proposed brief with editable sections"
+    },
+    "finalBrief": {
+      "type": "object",
+      "properties": {
+        "background": {
+          "type": "string"
+        },
+        "keyPoints": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "examples": {
+          "type": "string"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "Generated final brief content"
+    },
+    "generatedDocumentUrl": {
+      "type": "string",
+      "description": "file_uri of the generated .docx document (from UploadPrivateFile)"
+    },
+    "approvedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the brief was marked as godkjent"
+    }
+  },
+  "required": [
+    "title",
+    "themeId"
+  ]
+}

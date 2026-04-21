@@ -6,25 +6,29 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale';
-import { 
-  FileText, 
+import {
+  FileText,
   ArrowRight,
   Loader2,
   Tags,
   Zap,
   MessageSquare,
-  ChevronRight
+  ChevronRight,
+  Upload
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import CreateThemeModal from '@/components/theme/CreateThemeModal';
 import FastModeForm from '@/components/brief/FastModeForm';
+import SourceMaterialUpload from '@/components/brief/SourceMaterialUpload';
+import { toast } from 'sonner';
 
 function NewBriefContent() {
   const navigate = useNavigate();
   const [step, setStep] = useState('select_theme');
   const [selectedTheme, setSelectedTheme] = useState(null);
+  const [briefId, setBriefId] = useState(null);
+  const [refreshSourcesKey, setRefreshSourcesKey] = useState(0);
 
   const { data: themes = [], isLoading: themesLoading } = useQuery({
     queryKey: ['themes', 'active'],
@@ -38,27 +42,43 @@ function NewBriefContent() {
     mutationFn: async (theme) => {
       const today = format(new Date(), 'dd.MM.yyyy', { locale: nb });
       const title = `${theme.name} – ${today}`;
-      const brief = await base44.entities.Brief.create({
+      return base44.entities.Brief.create({
         title,
         themeId: theme.id,
         themeName: theme.name,
         status: 'utkast',
         currentStep: 'source_material'
       });
-      return brief;
     },
     onSuccess: (brief) => {
-      navigate(createPageUrl('BriefEditor') + `?id=${brief.id}`);
+      setBriefId(brief.id);
+      setStep('source_material');
+    }
+  });
+
+  const summarizeContextMutation = useMutation({
+    mutationFn: async () => {
+      return base44.functions.invoke('summarizeBriefContext', { briefId });
+    },
+    onSuccess: () => {
+      setStep('select_mode');
+    },
+    onError: () => {
+      toast.error('Klarte ikke å oppsummere kildematerialet');
     }
   });
 
   const handleSelectTheme = (theme) => {
     setSelectedTheme(theme);
-    setStep('select_mode');
+    createBriefMutation.mutate(theme);
+  };
+
+  const handleContinueFromSources = () => {
+    summarizeContextMutation.mutate();
   };
 
   const handleSelectGuided = () => {
-    createBriefMutation.mutate(selectedTheme);
+    navigate(createPageUrl('BriefEditor') + `?id=${briefId}`);
   };
 
   // Fast mode form
@@ -70,6 +90,42 @@ function NewBriefContent() {
     );
   }
 
+  if (step === 'source_material') {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="text-center">
+          <p className="text-xs text-[#888B8D] uppercase tracking-wider mb-1">Tema valgt</p>
+          <h1 className="text-2xl font-bold text-gray-900">{selectedTheme?.name}</h1>
+          <p className="text-gray-500 mt-2">Legg til delt kildemateriale før du velger modus</p>
+        </div>
+
+        <Card className="border-[#002C6C]/10 bg-[#002C6C]/[0.03]">
+          <CardContent className="p-4 flex items-start gap-3">
+            <Upload className="h-5 w-5 text-[#002C6C] mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-[#454545]">Dette materialet brukes i begge moduser</p>
+              <p className="text-sm text-[#888B8D] mt-1">Kildene kobles til briefen nå og oppsummeres én gang før du går videre.</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <SourceMaterialUpload
+          key={refreshSourcesKey}
+          briefId={briefId}
+          onSourcesChange={() => setRefreshSourcesKey((value) => value + 1)}
+          onContinue={handleContinueFromSources}
+        />
+
+        {summarizeContextMutation.isPending && (
+          <div className="flex items-center justify-center gap-3 text-sm text-[#888B8D]">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Oppsummerer kildemateriale...
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // Mode selection
   if (step === 'select_mode') {
     return (
@@ -77,7 +133,7 @@ function NewBriefContent() {
         <div className="text-center">
           <p className="text-xs text-[#888B8D] uppercase tracking-wider mb-1">Tema valgt</p>
           <h1 className="text-2xl font-bold text-gray-900">{selectedTheme?.name}</h1>
-          <p className="text-gray-500 mt-2">Velg hvordan du vil opprette briefen</p>
+          <p className="text-gray-500 mt-2">Kildematerialet er klart. Velg hvordan du vil opprette briefen</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
