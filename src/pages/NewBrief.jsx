@@ -138,11 +138,20 @@ function NewBriefContent() {
     navigate(createPageUrl('BriefEditor') + `?id=${briefId}`);
   };
 
+  const handleFastModeComplete = async ({ nextStep }) => {
+    await base44.entities.Brief.update(briefId, { currentStep: nextStep });
+    navigate(createPageUrl('BriefEditor') + `?id=${briefId}`);
+  };
+
   // Fast mode form
   if (step === 'fast_mode') {
     return (
       <div className="max-w-3xl mx-auto">
-        <FastModeForm theme={selectedTheme} onBack={() => setStep('select_mode')} />
+        <FastModeForm
+          theme={selectedTheme}
+          onBack={() => setStep('select_mode')}
+          onComplete={handleFastModeComplete}
+        />
       </div>
     );
   }

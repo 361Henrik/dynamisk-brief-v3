@@ -1,6 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Zap, ArrowLeft, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
@@ -22,8 +20,7 @@ const SECTIONS = [
   { key: 'kildemateriale', label: 'Kildemateriale og referanser', description: 'Hvilket bakgrunnsmateriale er relevant for briefen?' },
 ];
 
-export default function FastModeForm({ theme, onBack }) {
-  const navigate = useNavigate();
+export default function FastModeForm({ theme, onBack, onComplete }) {
   const urlParams = new URLSearchParams(window.location.search);
   const briefId = urlParams.get('briefId');
   const [values, setValues] = useState({});
@@ -86,7 +83,6 @@ export default function FastModeForm({ theme, onBack }) {
 
       const nextStep = confirmedPoints.length === SECTIONS.length ? 'proposed' : 'dialog';
       const updatePayload = {
-        currentStep: nextStep,
         confirmedPoints
       };
 
@@ -112,7 +108,7 @@ export default function FastModeForm({ theme, onBack }) {
 
       await base44.entities.Brief.update(briefId, updatePayload);
 
-      navigate(createPageUrl('BriefEditor') + `?id=${briefId}`);
+      onComplete?.({ nextStep });
     } catch (err) {
       console.error(err);
       toast.error('Kunne ikke oppdatere briefen. Prøv igjen.');
