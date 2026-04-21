@@ -195,8 +195,13 @@ function NewBriefContent() {
   };
 
   const handleFastModeComplete = async ({ nextStep }) => {
-    await base44.entities.Brief.update(briefId, { currentStep: nextStep });
-    navigate(createPageUrl('BriefEditor') + `?id=${briefId}`);
+    try {
+      await base44.entities.Brief.update(briefId, { currentStep: nextStep });
+      navigate(createPageUrl('BriefEditor') + `?id=${briefId}`);
+    } catch (error) {
+      console.error('Failed to continue from structured brief CTA:', error);
+      toast.error('Kunne ikke fortsette til neste steg. Prøv igjen.');
+    }
   };
 
   // Fast mode form

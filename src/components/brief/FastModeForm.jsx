@@ -238,7 +238,7 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
           ) : filledCount === SECTIONS.length ? (
             <><Zap className="h-4 w-4 mr-2" />Generer brief direkte<ArrowRight className="h-4 w-4 ml-2" /></>
           ) : (
-            <><ArrowRight className="h-4 w-4 mr-2" />Start – AI fullfører resten ({SECTIONS.length - filledCount} spørsmål)</>
+            <><ArrowRight className="h-4 w-4 mr-2" />Fortsett ({SECTIONS.length - filledCount} spørsmål)</>
           )}
         </Button>
       </div>
