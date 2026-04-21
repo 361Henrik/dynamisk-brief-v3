@@ -21,6 +21,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import CreateThemeModal from '@/components/theme/CreateThemeModal';
 import FastModeForm from '@/components/brief/FastModeForm';
 import SourceMaterialUpload from '@/components/brief/SourceMaterialUpload';
+import ContextOverviewDisplay from '@/components/brief/ContextOverviewDisplay';
 import { toast } from 'sonner';
 
 function NewBriefContent() {
@@ -31,6 +32,18 @@ function NewBriefContent() {
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [briefId, setBriefId] = useState(null);
   const [refreshSourcesKey, setRefreshSourcesKey] = useState(0);
+
+  const { data: brief } = useQuery({
+    queryKey: ['new-brief', briefId],
+    queryFn: () => base44.entities.Brief.get(briefId),
+    enabled: !!briefId
+  });
+
+  const { data: briefSources = [] } = useQuery({
+    queryKey: ['briefSources', briefId, refreshSourcesKey],
+    queryFn: () => base44.entities.BriefSourceMaterial.filter({ briefId }),
+    enabled: !!briefId
+  });
 
   useEffect(() => {
     if (modeParam === 'fast' && briefId) {
@@ -68,8 +81,9 @@ function NewBriefContent() {
     mutationFn: async () => {
       return base44.functions.invoke('summarizeBriefContext', { briefId });
     },
-    onSuccess: () => {
-      setStep('select_mode');
+    onSuccess: async () => {
+      setRefreshSourcesKey((value) => value + 1);
+      setStep('context_overview');
     },
     onError: () => {
       toast.error('Klarte ikke å oppsummere kildematerialet');
@@ -83,6 +97,14 @@ function NewBriefContent() {
 
   const handleContinueFromSources = () => {
     summarizeContextMutation.mutate();
+  };
+
+  const handleContinueFromContextOverview = () => {
+    setStep('select_mode');
+  };
+
+  const handleBackToSources = () => {
+    setStep('source_material');
   };
 
   const handleSelectGuided = async () => {
@@ -121,6 +143,7 @@ function NewBriefContent() {
         <SourceMaterialUpload
           key={refreshSourcesKey}
           briefId={briefId}
+          sources={briefSources}
           onSourcesChange={() => setRefreshSourcesKey((value) => value + 1)}
           onContinue={handleContinueFromSources}
         />
@@ -132,6 +155,17 @@ function NewBriefContent() {
           </div>
         )}
       </div>
+    );
+  }
+
+  if (step === 'context_overview') {
+    return (
+      <ContextOverviewDisplay
+        brief={brief}
+        sources={briefSources.filter((source) => source.extractionStatus === 'success')}
+        onBack={handleBackToSources}
+        onContinue={handleContinueFromContextOverview}
+      />
     );
   }
 
