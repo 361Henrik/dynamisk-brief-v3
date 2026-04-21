@@ -387,7 +387,7 @@ export default function SourceMaterialUpload({ briefId, sources = [], onSourcesC
               Venter på behandling...
             </>
           ) : (
-'Fortsett til modusvalg'
+'Fortsett til kontekstoversikt'
           )}
         </Button>
       </div>

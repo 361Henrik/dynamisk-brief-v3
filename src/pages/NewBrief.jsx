@@ -38,6 +38,7 @@ function NewBriefContent() {
   const [hasGeneratedSummary, setHasGeneratedSummary] = useState(false);
   const [isSummaryStale, setIsSummaryStale] = useState(false);
   const [summaryError, setSummaryError] = useState(false);
+  const [selectedMode, setSelectedMode] = useState(null);
 
   const { data: brief } = useQuery({
     queryKey: ['new-brief', briefId],
@@ -57,10 +58,34 @@ function NewBriefContent() {
   };
 
   useEffect(() => {
-    if (modeParam === 'fast' && briefId) {
-      setStep('fast_mode');
+    if (!briefId || !brief) return;
+
+    if (brief.currentStep === 'proposed' || brief.currentStep === 'final' || brief.currentStep === 'godkjent') {
+      navigate(createPageUrl('BriefEditor') + `?id=${briefId}`);
+      return;
     }
-  }, [modeParam, briefId]);
+
+    const hasSources = briefSources.length > 0;
+    const hasContextSummary = !!brief.contextSummary;
+
+    if (!hasSources) {
+      setStep('source_material');
+      return;
+    }
+
+    if (!hasContextSummary) {
+      setStep('source_material');
+      return;
+    }
+
+    if (selectedMode === 'fast' || modeParam === 'fast') {
+      setSelectedMode('fast');
+      setStep('fast_mode');
+      return;
+    }
+
+    setStep('select_mode');
+  }, [briefId, brief, briefSources.length, selectedMode, modeParam, navigate]);
 
   const { data: themes = [], isLoading: themesLoading } = useQuery({
     queryKey: ['themes', 'active'],
@@ -134,8 +159,9 @@ function NewBriefContent() {
   };
 
   const handleSelectGuided = async () => {
-    await base44.entities.Brief.update(briefId, { currentStep: 'rammer' });
-    navigate(createPageUrl('BriefEditor') + `?id=${briefId}`);
+    setSelectedMode('fast');
+    window.history.replaceState({}, '', createPageUrl('NewBrief') + `?briefId=${briefId}&mode=fast`);
+    setStep('fast_mode');
   };
 
   const handleFastModeComplete = async ({ nextStep }) => {
@@ -262,6 +288,7 @@ function NewBriefContent() {
           <Card
             className="cursor-pointer border-2 border-[#F26334] shadow-md hover:shadow-lg transition-all relative"
             onClick={() => {
+              setSelectedMode('fast');
               window.history.replaceState({}, '', createPageUrl('NewBrief') + `?briefId=${briefId}&mode=fast`);
               setStep('fast_mode');
             }}
