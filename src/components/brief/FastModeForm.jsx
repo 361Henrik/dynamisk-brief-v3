@@ -45,8 +45,8 @@ export default function FastModeForm({ theme, onBack }) {
       maal: prev.maal || brief.contextSummary.objectivesSummary || '',
       maalgrupper: prev.maalgrupper || brief.contextSummary.targetAudienceSummary || '',
       budskap: prev.budskap || [brief.contextSummary.keyMessagesSummary, brief.contextSummary.toneSummary].filter(Boolean).join('\n\n'),
-      prosjektinformasjon: prev.prosjektinformasjon || brief.contextSummary.missingInformationSummary || '',
-      kildemateriale: prev.kildemateriale || brief.contextSummary.backgroundSummary || ''
+      prosjektinformasjon: prev.prosjektinformasjon || '',
+      kildemateriale: prev.kildemateriale || [brief.contextSummary.backgroundSummary, brief.contextSummary.keyMessagesSummary].filter(Boolean).join('\n\n')
     }));
   }, [brief]);
 
@@ -101,9 +101,16 @@ export default function FastModeForm({ theme, onBack }) {
             Skriv inn informasjon der du har den. AI vil automatisk stille spørsmål om det som mangler ({SECTIONS.length - filledCount} gjenstår).
           </p>
           {brief?.contextSummary && (
-            <p className="text-xs text-gs1-medium-gray mt-2">
-              Felter er forhåndsutfylt fra delt kildemateriale der det finnes forslag.
-            </p>
+            <div className="mt-2 space-y-1">
+              <p className="text-xs text-gs1-medium-gray">
+                Felter er forhåndsutfylt fra delt kildemateriale der det finnes relevante forslag.
+              </p>
+              {brief.contextSummary.missingInformationSummary && (
+                <p className="text-xs text-gs1-medium-gray">
+                  Det som fortsatt mangler fra kildene blir fulgt opp senere i flyten hvis du ikke fyller det inn her.
+                </p>
+              )}
+            </div>
           )}
         </div>
         <div className="text-right">
@@ -174,7 +181,13 @@ export default function FastModeForm({ theme, onBack }) {
                   autoFocus={section.key === 'prosjektinformasjon' && !values[section.key]}
                 />
                 {section.key === 'prosjektinformasjon' && brief?.contextSummary?.missingInformationSummary && (
-                  <p className="text-xs text-gs1-medium-gray mt-2">Manglende informasjon fra kildene er lagt inn som utgangspunkt og kan redigeres.</p>
+                  <p className="text-xs text-gs1-medium-gray mt-2">Bruk dette feltet til prosjektspesifikke detaljer som ikke kom tydelig frem i kildematerialet.</p>
+                )}
+                {section.key === 'kildemateriale' && brief?.contextSummary && (
+                  <p className="text-xs text-gs1-medium-gray mt-2">Denne seksjonen er startet med oppsummert bakgrunn og sentrale budskap fra kildene.</p>
+                )}
+                {['maal', 'maalgrupper', 'budskap'].includes(section.key) && brief?.contextSummary?.missingInformationSummary && !values[section.key]?.trim() && (
+                  <p className="text-xs text-gs1-medium-gray mt-2">Hvis dette ikke dekkes godt nok av kildene, vil AI følge opp det som mangler senere.</p>
                 )}
               </CardContent>
             )}

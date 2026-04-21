@@ -10,7 +10,8 @@ import {
   Calendar,
   Loader2,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -108,12 +109,30 @@ export default function RammerForm({ brief, onBack, onContinue }) {
             Fyll ut grunnleggende informasjon som vil styre AI-dialogen og den endelige briefen.
           </CardDescription>
           {brief?.contextSummary && (
-            <p className="text-sm text-gs1-medium-gray px-6 pb-2">
-              Forslag fra delt kildemateriale er lagt inn der det finnes, og kan redigeres fritt.
-            </p>
+            <div className="px-6 pb-2 space-y-1">
+              <p className="text-sm text-gs1-medium-gray">
+                Forslag fra delt kildemateriale er lagt inn der det finnes, og kan redigeres fritt.
+              </p>
+              <p className="text-xs text-gs1-medium-gray">
+                Dette bygger videre på konteksten du nettopp gjennomgikk i kontekstoversikten.
+              </p>
+            </div>
           )}
         </CardHeader>
         <CardContent className="space-y-6">
+          {brief?.contextSummary?.missingInformationSummary && (
+            <div className="rounded-lg border border-gs1-orange/20 bg-gs1-orange/5 p-4">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-gs1-orange mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-gs1-dark-gray">Mangler fortsatt fra kildematerialet</p>
+                  <p className="text-sm text-gs1-medium-gray mt-1 whitespace-pre-wrap">{brief.contextSummary.missingInformationSummary}</p>
+                  <p className="text-xs text-gs1-medium-gray mt-2">Bruk dette som støtte for hva du bør fylle inn manuelt i Rammer.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Målgruppe */}
           <div className="space-y-2">
             <Label htmlFor="targetAudience" className="flex items-center space-x-2">
@@ -188,6 +207,19 @@ export default function RammerForm({ brief, onBack, onContinue }) {
               <p className="text-xs text-gs1-medium-gray">Forhåndsutfylt fra toneSummary.</p>
             )}
           </div>
+
+          {brief?.contextSummary?.keyMessagesSummary && (
+            <div className="space-y-2">
+              <Label className="flex items-center space-x-2">
+                <MessageSquare className="h-4 w-4 text-gs1-medium-gray" />
+                <span>Støtte fra kildematerialet</span>
+              </Label>
+              <div className="rounded-lg border border-gs1-border bg-gs1-light-gray/50 p-4">
+                <p className="text-sm text-gs1-dark-gray whitespace-pre-wrap">{brief.contextSummary.keyMessagesSummary}</p>
+                <p className="text-xs text-gs1-medium-gray mt-2">Dette brukes ikke som et eget Rammer-felt, men kan hjelpe deg med å spisse mål, tone og prioriteringer.</p>
+              </div>
+            </div>
+          )}
 
           {/* Leveranser */}
           <div className="space-y-2">
@@ -266,11 +298,6 @@ export default function RammerForm({ brief, onBack, onContinue }) {
         </p>
       )}
 
-      {brief?.contextSummary?.missingInformationSummary && (
-        <p className="text-center text-xs text-gs1-medium-gray">
-          Mangler fra kildematerialet brukes ikke automatisk i Rammer i denne fasen.
-        </p>
-      )}
     </div>
   );
 }
