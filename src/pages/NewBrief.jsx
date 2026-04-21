@@ -195,23 +195,19 @@ function NewBriefContent() {
   };
 
   const handleFastModeComplete = async ({ nextStep }) => {
-    const normalizedNextStep = nextStep === 'dialog' ? 'proposed' : nextStep;
-    const updatePayload = { currentStep: normalizedNextStep };
+    const updatePayload = { currentStep: 'proposed' };
     const targetUrl = createPageUrl('BriefEditor') + `?id=${briefId}`;
 
-    console.log('Structured brief CTA: entering handler', { briefId, nextStep, normalizedNextStep });
-    console.log('Structured brief CTA: update payload', updatePayload);
+    console.log('Structured brief CTA: entering handler', { briefId, nextStep, updatePayload });
 
     try {
       await base44.entities.Brief.update(briefId, updatePayload);
-      console.log('Structured brief CTA: Brief.update succeeded', { briefId, normalizedNextStep });
-      console.log('Structured brief CTA: attempting navigation', { targetUrl });
+      console.log('Structured brief CTA: Brief.update succeeded', { briefId, updatePayload });
       navigate(targetUrl);
-      console.log('Structured brief CTA: navigate called', { targetUrl });
     } catch (error) {
       console.error('Structured brief CTA: Brief.update failed before navigation', error);
       const errorMessage = error?.response?.data?.error || error?.response?.data?.details || error?.message || 'Ukjent feil';
-      toast.error(`Brief.update feilet før navigasjon: ${errorMessage}`);
+      toast.error(`Kunne ikke åpne Brief Editor: ${errorMessage}`);
     }
   };
 

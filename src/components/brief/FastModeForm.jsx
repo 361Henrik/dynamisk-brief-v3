@@ -231,7 +231,7 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
           {submitting ? (
             <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Oppretter brief...</>
           ) : filledCount === SECTIONS.length ? (
-            <>Generer brief direkte<ArrowRight className="h-4 w-4 ml-2" /></>
+            <>Åpne Brief Editor<ArrowRight className="h-4 w-4 ml-2" /></>
           ) : (
             <><ArrowRight className="h-4 w-4 mr-2" />Fortsett ({SECTIONS.length - filledCount} spørsmål)</>
           )}
