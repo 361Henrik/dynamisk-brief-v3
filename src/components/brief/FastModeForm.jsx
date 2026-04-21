@@ -82,29 +82,23 @@ export default function FastModeForm({ theme, onBack, onComplete }) {
         }));
 
       const nextStep = confirmedPoints.length === SECTIONS.length ? 'proposed' : 'dialog';
+      const sections = SECTIONS.reduce((acc, section) => {
+        acc[section.key] = {
+          content: values[section.key]?.trim() || '',
+          notes: ''
+        };
+
+        return acc;
+      }, {});
+
       const updatePayload = {
-        confirmedPoints
-      };
-
-      if (nextStep === 'proposed') {
-        const sections = SECTIONS.reduce((acc, section) => {
-          const content = values[section.key]?.trim();
-          if (!content) return acc;
-
-          acc[section.key] = {
-            content,
-            notes: ''
-          };
-
-          return acc;
-        }, {});
-
-        updatePayload.proposedBrief = {
+        confirmedPoints,
+        proposedBrief: {
           sections,
           status: 'draft',
           updatedAt: new Date().toISOString()
-        };
-      }
+        }
+      };
 
       await base44.entities.Brief.update(briefId, updatePayload);
 
